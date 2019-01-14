@@ -4,9 +4,15 @@ var fs = require("fs");
 var shell = require('shelljs');
 
 module.exports = {
-  downloadFile(req, inputProps) {
+  downloadFile() {
     log.debug("Started Artifactory Download File Plugin");
 
+    //Destructure and get properties ready.
+    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    log.debug(taskProps);
+    const { } = taskProps;
+
+    //TODO update to use params
     fetch(
       "https://tools.boomerangplatform.net/artifactory/boomerang/test/hello",
       {
@@ -41,7 +47,13 @@ module.exports = {
   uploadFile(req, inputProps) {
     log.debug("Started Artifactory Upload File Plugin");
 
-    shell.exec('curl -T ' + req.filePath + ' https://tools.boomerangplatform.net/artifactory/boomerang/test' + req.filePath + ' --insecure -u admin:WwwWulaWwHH!');
+    //Destructure and get properties ready.
+    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    log.debug(taskProps);
+    const { path: path } = taskProps;
+
+    //TODO use more parameters
+    shell.exec('curl -T ' + path + ' https://tools.boomerangplatform.net/artifactory/boomerang/test' + path + ' --insecure -u admin:WwwWulaWwHH!');
 
     log.debug("Finished Artifactory Upload File Plugin");
   }
