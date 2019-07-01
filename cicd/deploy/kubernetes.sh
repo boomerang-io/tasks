@@ -4,6 +4,9 @@ KUBE_HOME=/opt/bin
 KUBE_CLI=$KUBE_HOME/kubectl
 KUBE_FILE=$1
 DEPLOY_KUBE_NAMESPACE=$2
+DEPLOY_KUBE_HOST=$3
+DEPLOY_KUBE_IP=$4
+DEPLOY_KUBE_TOKEN=$5s
 
 echo "Configuring Kubernetes..."
 KUBE_HOME=/opt/bin
@@ -15,10 +18,10 @@ KUBE_CLI_VERSION=v1.10.2
 curl -L https://storage.googleapis.com/kubernetes-release/release/$KUBE_CLI_VERSION/bin/linux/amd64/kubectl -o $KUBE_CLI && chmod +x $KUBE_CLI
 
 KUBE_NAMESPACE=$DEPLOY_KUBE_NAMESPACE
-export KUBE_CLUSTER_HOST=wdc3.cloud.boomerangplatform.net #needed for deploy step
-KUBE_CLUSTER_IP=10.190.20.176
+KUBE_CLUSTER_HOST=$DEPLOY_KUBE_HOST
+KUBE_CLUSTER_IP=$DEPLOY_KUBE_IP
 KUBE_CLUSTER_PORT=8001
-KUBE_TOKEN=***REMOVED***
+KUBE_TOKEN=$DEPLOY_KUBE_TOKEN
 
 $KUBE_CLI config set-cluster $KUBE_CLUSTER_HOST --server=https://$KUBE_CLUSTER_IP:$KUBE_CLUSTER_PORT --insecure-skip-tls-verify=true
 $KUBE_CLI config set-context $KUBE_CLUSTER_HOST-context --cluster=$KUBE_CLUSTER_HOST
