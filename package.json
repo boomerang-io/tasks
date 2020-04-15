@@ -22,7 +22,8 @@
     "lint": "eslint packages",
     "prettier": "prettier --write \"**/*.{js,json,md,yml}\"",
     "coverage": "jest --coverage",
-    "test": "cross-env NODE_ENV=test jest"
+    "test": "cross-env NODE_ENV=test jest",
+    "bootstrap": "yarn && lerna exec yarn"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
@@ -86,7 +87,8 @@
           ":bug:",
           ":fire:",
           ":sparkles:",
-          ":memo:"
+          ":memo:",
+          ":wrench:"
         ]
       ]
     }
