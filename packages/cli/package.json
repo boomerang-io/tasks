@@ -18,24 +18,11 @@
   },
   "dependencies": {
     "@boomerang-worker/core": "^0.1.2",
-    "@octokit/rest": "^16.28.2",
-    "@slack/web-api": "^5.7.0",
-    "@slack/webhook": "^5.0.2",
-    "app-root-path": "^3.0.0",
-    "axios": "^0.18.0",
     "commander": "^2.19.0",
     "dotenv": "^6.2.0",
-    "https": "^1.0.0",
-    "https-proxy-agent": "^2.2.1",
-    "inquirer": "^6.2.0",
     "node-datetime": "^2.1.2",
-    "node-fetch": "^2.3.0",
-    "properties": "^1.2.1",
     "require-all": "^3.0.0",
-    "shelljs": "^0.8.2",
-    "system-sleep": "^1.3.6",
-    "url": "^0.11.0",
-    "wait-on": "^3.3.0"
+    "shelljs": "^0.8.2"
   },
   "preferGlobal": true,
   "devDependencies": {
