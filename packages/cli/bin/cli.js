@@ -13,8 +13,8 @@ const major = semver[0];
 if (major < 8) {
   log.err(
     `You are running Node ${currentNodeVersion}.\n` +
-      `carbon-upgrade requires Node 8 or higher, please update your ` +
-      `version of Node.`
+    `carbon-upgrade requires Node 8 or higher, please update your ` +
+    `version of Node.`
   );
   process.exit(1);
 }
