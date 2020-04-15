@@ -6,64 +6,35 @@ The purpose of this image is to provide a base foundation for Boomerang Flow wit
 
 The CLI has a main cli.js which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the flow_task_template mongodb collection. A command and sub command are required for all runs.
 
-### utils.js
+### Project Structure
 
-Collection of utility functions to help plugin authors retrieve, resolve, and set properties.
+Uses yarn workspaces and lerna to manage the monorepo
 
-### log.js
+### CLI
 
-Collection of logging utilities using chalk to output nice values in the log for the user
+The CLI is a main execution script that offers task developers the ease of just having to write a js file to do a specific command.
 
-### Failure
+### Core
+
+The core module containers the following main methods
+
+| Method | Purpose |
+| --- | --- |
+| common | Collection of common methods that can be used by task developers to enhance and speed the ease of their development |
+| log | Collection of logging utilities using chalk to output nice values in the log for the user |
+| utils | Collection of utility functions to help plugin authors retrieve, resolve, and set properties. |
+
+In addition the following files are used: config.js and index.js
+
+### Handling Failure
 
 When a method fails, we need to set or return (depending on the type of method) by catching the error to log and then return process.exit(1). This allows the container to fail the Kubernetes Pod which will in turn eventually bubble up the failure to the UI.
 
-## How to Build and Push Flow
+## Packaging
 
-`VERSION=1.2.1 && docker build -t tools.boomerangplatform.net:8500/ise/bmrg-worker-flow:$VERSION . && docker push tools.boomerangplatform.net:8500/ise/bmrg-worker-flow:$VERSION`
+The following command will use lerna to release new versions of the modules. It determines minor and iteration release numbers and the changelog based on git commit messages.
 
-## How to Build and Push Flow Lifecycle
-
-`VERSION=1.0.0 && docker build -t tools.boomerangplatform.net:8500/ise/bmrg-worker-lifecycle:$VERSION -f Dockerfile.lifecycle . && docker push tools.boomerangplatform.net:8500/ise/bmrg-worker-lifecycle:$VERSION`
-
-## How to Build and Push CICD
-
-`VERSION=4.1.1 && docker build -t tools.boomerangplatform.net:8500/ise/bmrg-worker-cicd:$VERSION -f Dockerfile.cicd . && docker push tools.boomerangplatform.net:8500/ise/bmrg-worker-cicd:$VERSION`
-
-## Update Version of CLI
-
-In the cli.js there is a version string for printing out. If you update the tag of the worker, please update this version string.
-
-_TODO:_ update how this works.
-
-## Testing
-
-### How to Test locally with Docker
-
-1. Build with the Dockerfile-test by passing in `-f Dockerfile.test` to the docker build command
-2. Run and pass in required commander parameters `docker run -i -t tools.boomerangplatform.net:8500/ise/bmrg-worker-flow:test -- slack sendWebhook`
-
-Example: `docker build -t tools.boomerangplatform.net:8500/ise/bmrg-worker-flow:test -f Dockerfile.test . && docker run -i -t tools.boomerangplatform.net:8500/ise/bmrg-worker-flow:test -- slack sendWebhook`
-
-_Note 1:_ This requires developers to have kept this dockerfile up to date
-_Note 2:_ The test Dockerfile will try to immitate the peices that Kubernetes Controller takes care of such as mounting a `/data` directory and `/props/*.properties`
-
-### How to Test locally with Node.js
-
-1. Ensure that you have the package cross-env installed
-2. Run the node:cli script and pass in arguments
-
-```
-npm run node:cli slack sendWebhook
-```
-
-### Setting input Variables for Testing
-
-Under the `props` folder, you can set input variables:
-`task.input.properties` -> set variables that will be the input for a task plugin
-`workflow.input.properties` -> these variables will be available across tasks
-
-These files are designed to replicate the properties that would be mounted in confimaps by the controller service.
+`npm run-script release`
 
 ## Clean up
 
@@ -73,12 +44,4 @@ When running against the non production cluster. You will need to clean up your 
 
 ## References
 
-- _Docker_
-  URL: https://github.com/docker-library/docker/blob/master/Dockerfile.template
-
-This is the base FROM image and itself is based off Alpine.
-
-- _Initial Starter_
-  URL: https://scotch.io/tutorials/build-an-interactive-command-line-application-with-nodejs
-
-Tutorial on creating a Node CLI
+- [Node Initial Starter Tutorial](https://scotch.io/tutorials/build-an-interactive-command-line-application-with-nodejs)
