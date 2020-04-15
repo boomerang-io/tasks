@@ -1,14 +1,32 @@
-# Boomerang Flow Worker
+# Boomerang Flow Worker Template
 
-The purpose of this image is to provide a base foundation for Boomerang Flow with the ability to execute the workflow steps
+Starter template for creating worker templates
+
+## Folder Structure
+
+    |-- .npmrc
+    |-- .gitignore
+    |-- .github
+        |-- PULL_REQUEST_TEMPLATE.md
+    |-- README.md
+    |-- package.json
+    |-- Dockerfile
+    |-- command.js
+    |-- command.spec.js
+    |-- commands
+        |-- index.js
 
 ## Design
 
+## Local Development
+
+## Testing
+
+## Learn More
+
+## Troubleshooting
+
 The CLI has a main cli.js which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the flow_task_template mongodb collection. A command and sub command are required for all runs.
-
-### Project Structure
-
-Uses yarn workspaces and lerna to manage the monorepo
 
 ### CLI
 
@@ -45,17 +63,3 @@ When running against the non production cluster. You will need to clean up your 
 ## References
 
 - [Node Initial Starter Tutorial](https://scotch.io/tutorials/build-an-interactive-command-line-application-with-nodejs)
-
-## Troubleshooting
-
-**ESLint not working in VSCode**
-
-Try adding the following to your VSCode `settings.json` file
-
-```json
-"eslint.workingDirectories": [
-        {
-            "mode": "auto"
-        }
-    ],
-```
