@@ -9,7 +9,13 @@ const { workflowProps, PROPS_FILES_CONFIG } = require("./config");
  */
 module.exports = (function () {
   // Read in property files
-  const files = fs.readdirSync(workflowProps.WF_PROPS_PATH);
+  let files = [];
+  try {
+    files = fs.readdirSync(workflowProps.WF_PROPS_PATH);
+  } catch (err) {
+    log.warn("Error getting properties", err);
+  }
+
   log.debug("Property Files Found:", files);
   log.debug("Environment Variables\n", process.env);
 
@@ -30,7 +36,7 @@ module.exports = (function () {
         comments: "#",
         separators: "=",
         strict: true,
-        reviver: function (key, value, section) {
+        reviver: function (key, value) {
           if (key != null && value == null) {
             return '""';
           } else {
@@ -79,10 +85,10 @@ module.exports = (function () {
               replacementStr = "";
               protectedProperty = true;
             } else if (property.includes("workflow/")) {
-              const [key, prop] = propertyKey.split("/");
+              const prop = propertyKey.split("/")[1];
               replacementStr = props[`workflow.system.properties`][prop];
             } else if (property.includes("task/")) {
-              const [key, prop] = propertyKey.split("/");
+              const prop = propertyKey.split("/")[1];
               replacementStr = props[`task.system.properties`][prop];
             } else if (property.includes("/")) {
               const [key, prop] = propertyKey.split("/");
@@ -179,7 +185,7 @@ module.exports = (function () {
         comments: "#",
         separators: "=",
         strict: true,
-        reviver: function (key, value, section) {
+        reviver: function (key, value) {
           if (key != null && value == null) {
             return '""';
           } else {
