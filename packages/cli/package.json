@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-worker/cli",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Boomerang Worker CLI",
   "bin": {
     "boomerang-worker-cli": "./bin/cli.js"
@@ -17,7 +17,7 @@
     "cli:local:nodebug": "cross-env NODE_ENV=local node ./bin/cli.js"
   },
   "dependencies": {
-    "@boomerang-worker/core": "^0.1.2",
+    "@boomerang-worker/core": "^0.2.0",
     "commander": "^2.19.0",
     "dotenv": "^6.2.0",
     "node-datetime": "^2.1.2",
