@@ -3,24 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.1.2...@boomerang-worker/core@0.2.0) (2020-04-15)
+
+### Bug Fixes
+
+- updated dependent packages ([ba96434](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/ba964341d1d833cafdd18573af8afd3f1ff40a79))
+
+### Features
+
+- add common ([ed80d4f](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/ed80d4f5b467e0d73ecb9cefcb287ad7aad21539))
+
 ## [0.1.2](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.1.1...@boomerang-worker/core@0.1.2) (2020-04-14)
 
 **Note:** Version bump only for package @boomerang-worker/core
 
-
-
-
-
 ## [0.1.1](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.1.0...@boomerang-worker/core@0.1.1) (2020-04-14)
-
 
 ### Bug Fixes
 
-* remove node_modules, gitignore, readme typo ([4986a8a](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/4986a8a51c76b4d1da9387e4fa3d9b7f91571d80))
-
-
-
-
+- remove node_modules, gitignore, readme typo ([4986a8a](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/4986a8a51c76b4d1da9387e4fa3d9b7f91571d80))
 
 # 0.1.0 (2020-04-13)
 
