@@ -10,7 +10,7 @@ const { log } = require("@boomerang-worker/core");
 /**
  * Prompt user to input name for command
  */
-const askNameOfCommand = async () => {
+const askInitQuestions = async () => {
   const question = [
     {
       name: "workerName",
@@ -29,6 +29,7 @@ const askNameOfCommand = async () => {
       name: "commmandName",
       type: "input",
       message: `Enter command (used to name the module and to invoke its methods)`,
+      default: "command",
       validate: (input) => {
         if (!input) {
           return "Command is required";
@@ -46,19 +47,6 @@ const askNameOfCommand = async () => {
 };
 
 async function cli(process) {
-  //Import all Command Modules
-  let commands = {};
-  try {
-    commands = requireAll({
-      // dirname: __dirname + "/commands",
-      dirname: `${process.cwd()}/commands`,
-      filter: /(.+)\.js$/,
-      excludeDirs: /^\.(git|svn)$/,
-      recursive: true,
-    });
-  } catch (err) {
-    log.warn("Error getting commands", err);
-  }
   //CLI Commands
   program.version("2.0.0").description("Boomerang Worker CLI");
   log.sys(program.description(), program.version());
@@ -71,7 +59,7 @@ async function cli(process) {
     .description("Initialize a Boomerang Worker project")
 
     .action(async () => {
-      const { workerName, commmandName } = await askNameOfCommand();
+      const { workerName, commmandName } = await askInitQuestions();
       init(workerName, commmandName);
     });
 
@@ -79,13 +67,35 @@ async function cli(process) {
    * Run command methods
    */
   program.arguments("<cmd> <method>").action((cmd, method) => {
-    const command = commands[cmd] && commands[cmd][method];
+    // Import all Command Modules
+    let commands = {};
+    try {
+      commands = requireAll({
+        dirname: `${process.cwd()}/commands`,
+        filter: /(.+)\.js$/,
+        excludeDirs: /^\.(git|svn|test|tests|__tests__)$/,
+        recursive: true,
+      });
+    } catch (err) {
+      log.err("Failed to register commands", err);
+      return;
+    }
 
-    if (typeof command === "function") {
+    // Check that command exists
+    const registeredCommand = commands[cmd];
+    if (!registeredCommand || typeof registeredCommand !== "object") {
+      log.err(`Could not find method ${method}`);
+      return;
+    }
+
+    // Look for method on command and call it
+    const registeredMethod = registeredCommand[method];
+    if (typeof registeredMethod === "function") {
       log.sys("Executing", cmd, method);
-      command();
+      registeredMethod();
     } else {
       log.err(`Could not find method ${method} for command ${cmd}`);
+      return;
     }
   });
 
