@@ -100,20 +100,21 @@ function createDirectoryContents(templatePath, projectName, commandName) {
     if (stats.isFile()) {
       let fileContent = fs.readFileSync(origFilePath, "utf8");
 
-      // Rename for command
+      // rename to command passed by user
       if (file === "command.js") {
         file = `${commandName}.js`;
       }
 
-      // Rename for command as well
+      // rename to command passed by user
       if (file === "command.spec.js") {
         file = `${commandName}.spec.js`;
       }
-      // Rename to account for .gitignore being renamed by npm
+      
+      // rename to account for .gitignore being renamed by npm
       if (file === "gitignore") {
         file = ".gitignore";
       }
-
+      
       if (file === "package.json") {
         fileContent = updatePackageJson(fileContent, projectName);
       }
@@ -162,7 +163,6 @@ function init(projectName, commandName) {
     tryGitCommit(fullProjectPath);
     log.sys(`Made initial commit`);
 
-    //Finished message
     log.good(`All done! Your project has been initialized with Boomerang Worker CLI at ${fullProjectName}`);
   } catch (err) {
     log.err("Something went wrong", err);
