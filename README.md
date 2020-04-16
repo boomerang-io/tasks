@@ -2,6 +2,10 @@
 
 The purpose of this image is to provide a base foundation for Boomerang Flow with the ability to execute the workflow steps
 
+## Contributing
+
+We welcome all contributions. Please read the [Contributing Guidelines](./README.md).
+
 ## Design
 
 The CLI has a main cli.js which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the flow_task_template mongodb collection. A command and sub command are required for all runs.
@@ -18,11 +22,11 @@ The CLI is a main execution script that offers task developers the ease of just 
 
 The core module containers the following main methods
 
-| Method | Purpose |
-| --- | --- |
+| Method | Purpose                                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------------------- |
 | common | Collection of common methods that can be used by task developers to enhance and speed the ease of their development |
-| log | Collection of logging utilities using chalk to output nice values in the log for the user |
-| utils | Collection of utility functions to help plugin authors retrieve, resolve, and set properties. |
+| log    | Collection of logging utilities using chalk to output nice values in the log for the user                           |
+| utils  | Collection of utility functions to help plugin authors retrieve, resolve, and set properties.                       |
 
 In addition the following files are used: config.js and index.js
 
