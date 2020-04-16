@@ -3,12 +3,13 @@
 const program = require("commander");
 const inquirer = require("inquirer");
 const requireAll = require("require-all");
+const { log } = require("@boomerang-worker/core");
 const { init } = require("./scripts");
 require("dotenv").config();
-const { log } = require("@boomerang-worker/core");
+
 
 /**
- * Prompt user to input name for command
+ * Prompt user for questions to initialize a project
  */
 const askInitQuestions = async () => {
   const question = [
@@ -46,13 +47,17 @@ const askInitQuestions = async () => {
   return await inquirer.prompt(question);
 };
 
+/**
+ * Boomerang Worker CLI
+ * @param {EventEmitter} process - global Node.js process object for the current process
+ */
 async function cli(process) {
-  //CLI Commands
+  
   program.version("2.0.0").description("Boomerang Worker CLI");
   log.sys(program.description(), program.version());
 
   /**
-   * Initialize a project
+   * Command to initialize a project
    */
   program
     .command("init")
@@ -64,12 +69,13 @@ async function cli(process) {
     });
 
   /**
-   * Run command methods
+   * Command to run user command methods
    */
   program.arguments("<cmd> <method>").action((cmd, method) => {
     // Import all Command Modules
     let commands = {};
     try {
+      // TODO: filter out test and other non-compliant .js files
       commands = requireAll({
         dirname: `${process.cwd()}/commands`,
         filter: /(.+)\.js$/,
@@ -84,7 +90,7 @@ async function cli(process) {
     // Check that command exists
     const registeredCommand = commands[cmd];
     if (!registeredCommand || typeof registeredCommand !== "object") {
-      log.err(`Could not find method ${method}`);
+      log.err(`Could not find command ${cmd}`);
       return;
     }
 
