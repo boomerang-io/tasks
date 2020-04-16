@@ -1,6 +1,6 @@
 # Contributing Guidelines
 
-The Helm project accepts contributions via GitHub pull requests. This document outlines the process to help get your contribution accepted.
+The Boomerang Worker project accepts contributions via GitHub pull requests. This document outlines the process to help get your contribution accepted.
 
 ## Issue Types
 
