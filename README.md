@@ -2,6 +2,10 @@
 
 The purpose of this image is to provide a base foundation for Boomerang Flow with the ability to execute the workflow steps
 
+## Contributing
+
+We welcome all contributions. Please read the [Contributing Guidelines](./README.md).
+
 ## Design
 
 The CLI has a main cli.js which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the flow_task_template mongodb collection. A command and sub command are required for all runs.
