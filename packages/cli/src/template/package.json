@@ -6,7 +6,7 @@
   "author": "Boomerang Joe <boomrng@us.ibm.com>",
   "type": "commonjs",
   "engines": {
-    "node": ">=8.10.0"
+    "node": ">=10"
   },
   "publishConfig": {
     "registry": "https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/"
