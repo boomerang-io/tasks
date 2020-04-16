@@ -19,12 +19,11 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=local boomerang-worker-cli",
     "dev:debug": "cross-env NODE_ENV=local DEBUG=true boomerang-worker-cli",
+    "format": "prettier --write \"**/*.{js,json,md,yml}\"",
     "lint": "eslint",
-    "prettier": "prettier --write \"**/*.{js,json,md,yml}\"",
     "start": "boomerang-worker-cli",
     "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test:coverage": "jest --coverage"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
@@ -39,7 +38,6 @@
   },
   "husky": {
     "hooks": {
-      "commit-msg": "commitlint -e $HUSKY_GIT_PARAMS",
       "pre-commit": "lint-staged"
     }
   },
@@ -71,5 +69,30 @@
         ]
       ]
     }
+  },
+  "eslintConfig": {
+    "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+      "ecmaVersion": 2020
+    },
+    "env": {
+      "browser": true,
+      "node": true,
+      "commonjs": true,
+      "jest": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:node/recommended"
+    ],
+    "rules": {
+      "no-process-exit": "off"
+    },
+    "ignorePatterns": [
+      "node_modules"
+    ]
   }
 }
