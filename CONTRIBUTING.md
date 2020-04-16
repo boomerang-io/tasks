@@ -24,4 +24,4 @@ Depending on the access there are two ways to contribute
 
 ## Commit Messages
 
-The commit message should state the change in 50 characters or less. Additionally we recommend, and require in some repositories, the usage of a commit lint and conventional commit so that we can map these to Release Notes.
+The commit message should state the change in 72 characters or less. Additionally we recommend, and require in some repositories, the usage of a commit lint and conventional commit so that we can map these to Release Notes.
