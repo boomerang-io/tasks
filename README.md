@@ -16,7 +16,7 @@ Uses yarn workspaces and lerna to manage the monorepo
 
 ### CLI
 
-The CLI is a main execution script that offers task developers the ease of just having to write a js file to do a specific command.
+The CLI is a main execution script that offers task developers the ease of just having to write a `.js` file to do a specific command.
 
 ### Core
 
@@ -49,3 +49,39 @@ When running against the non production cluster. You will need to clean up your 
 ## References
 
 - [Node Initial Starter Tutorial](https://scotch.io/tutorials/build-an-interactive-command-line-application-with-nodejs)
+
+## Local Development
+
+Go to CLI package and install it globally for use outside of project. Link for use inside another project that has it as a dependency.
+
+```sh
+cd packages/cli
+yarn install -g
+yarn link
+```
+
+Open shell and run command to execute CLI
+
+```sh
+boomerang-worker-cli
+```
+
+If you want to test changes in another projectd that uses the CLI, in the root of the project run the following command:
+
+```sh
+yarn link "@boomerang-worker/cli"
+```
+
+## Troubleshooting
+
+**ESLint not working in VSCode**
+
+Try adding the following to your VSCode `settings.json` file
+
+```json
+"eslint.workingDirectories": [
+        {
+            "mode": "auto"
+        }
+    ],
+```

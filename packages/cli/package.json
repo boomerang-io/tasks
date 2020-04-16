@@ -13,20 +13,25 @@
     "node": ">=8.10.0"
   },
   "scripts": {
-    "cli:local": "cross-env NODE_ENV=local DEBUG=true node ./bin/cli.js",
-    "cli:local:nodebug": "cross-env NODE_ENV=local node ./bin/cli.js"
+    "dev:debug": "cross-env NODE_ENV=local DEBUG=true node ./bin/cli.js",
+    "dev": "cross-env NODE_ENV=local node ./bin/cli.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@boomerang-worker/core": "^0.2.0",
     "commander": "^2.19.0",
+    "cross-spawn": "^7.0.2",
     "dotenv": "^6.2.0",
+    "inquirer": "^7.1.0",
     "node-datetime": "^2.1.2",
     "require-all": "^3.0.0",
     "shelljs": "^0.8.2"
   },
   "preferGlobal": true,
   "devDependencies": {
-    "cross-env": "^7.0.2"
-  },
-  "gitHead": "929ab2c49e9cf070aa56d5fb3c5d5fca796b8c6c"
+    "cross-env": "^7.0.2",
+    "jest": "^25.3.0"
+  }
 }
