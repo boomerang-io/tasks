@@ -1,27 +1,27 @@
 #!/usr/bin/env node
+"use strict";
 
-process.on("unhandledRejection", (error) => {
-  console.error(error);
-});
-
+const cli = require("../src/cli");
 const { log } = require("@boomerang-worker/core");
 
-const currentNodeVersion = process.versions.node;
+const { node: currentNodeVersion } = process.versions;
 const semver = currentNodeVersion.split(".");
 const major = semver[0];
+
+process.on("unhandledRejection", (error) => {
+  log.err(error);
+});
 
 if (major < 8) {
   log.err(
     `You are running Node ${currentNodeVersion}.\n` +
-    `carbon-upgrade requires Node 8 or higher, please update your ` +
-    `version of Node.`
+      `carbon-upgrade requires Node 8 or higher, please update your ` +
+      `version of Node.`
   );
   process.exit(1);
 }
 
-const cli = require("../src/cli");
-
 cli(process).catch((error) => {
-  console.error(error);
+  log.err(error);
   process.exit(1);
 });
