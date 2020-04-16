@@ -1,65 +1,105 @@
-# Boomerang Flow Worker Template
+# Boomerang Worker Template
 
-Starter template for creating worker templates
+Starter template for creating Boomerang Workers
+
+## Getting Started
+
+1. Add `.js` file to `commands` folder that exports an object with functions
+2. Execute new method by running `npm run dev -- <filename> <method>`
+
+```js
+// ./commands/greetings.js
+module.exports = {
+  hello: () => console.log("Hello from Boomerang"),
+  goodbye: () => console.log("Goodbye, friend"),
+};
+```
+
+```sh
+npm start -- greetings hello
+```
 
 ## Folder Structure
 
     |-- .npmrc
+    |-- Dockerfile
     |-- .gitignore
+    |-- package.json
+    |-- README.md
     |-- .github
         |-- PULL_REQUEST_TEMPLATE.md
-    |-- README.md
-    |-- package.json
-    |-- Dockerfile
-    |-- command.js
-    |-- command.spec.js
     |-- commands
-        |-- index.js
+        |-- command.js
+    |-- tests
+        |-- command.spec.js
 
-## Design
+### Key Files and Directories
 
-## Local Development
+`.npmrc` - necessary to install `@boomerang-worker` scoped npm modules
+`Dockerfile` - containerize and execute commands in a kubernetes environments
+`commands` - where all of your modules are located to be registered and executed by `boomerang-worker-cli`
+
+### How it works
+
+The `boomerang-worker-cli` imports all the `*.js` modules in the `./commands` directory. The file name of the exported module becomes the `commmand` and any functions on the exported object are executable methods.
+
+## Available Scripts
+
+### `npm run dev`
+
+Execute `boomerang-worker-cli` in local mode. Used for local development.
+
+### `npm run dev:debug`
+
+Execute `boomerang-worker-cli` in local and debug mode
+
+### `npm run format`
+
+Format your code with [Prettier](https://prettier.io/)
+
+### `npm run lint`
+
+Lint your `.js` files with [ESLint](https://eslint.org/)
+
+### `npm start`
+
+Execute `boomerang-worker-cli`. Used for execution in worker environment. There are assumptions made about files and directories available.
+
+### `npm run test`
+
+Execute unit tests with [Jest](https://jestjs.io/)
+
+### `npm run test:coverage`
+
+Execute unit tests with [Jest](https://jestjs.io/) and generate coverage report
 
 ## Testing
 
-## Learn More
+[Jest](https://jestjs.io/) is included as a test runner with scripts to execute unit tests and generate code coverage reports.
+
+## Project Configuration
+
+The template includes configuration for the following:
+
+- Code Formatting via [Prettier](https://prettier.io/)
+- Linting via [ESLint](https://eslint.org/)
+- Precommit hooks via [Husky](https://github.com/typicode/husky)
+- Commit standards via [Commitlint](https://github.com/conventional-changelog/commitlint) (not configured by default, but recommended)
+
+Enable commit standards via [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.4/) by adding the following to your `package.json`.
+
+```js
+"husky": {
+    "hooks": {
+      "commit-msg": "commitlint -e $HUSKY_GIT_PARAMS",
+    }
+  }
+```
 
 ## Troubleshooting
 
-The CLI has a main cli.js which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the flow_task_template mongodb collection. A command and sub command are required for all runs.
+- Make sure that your `commands` directory only includes `.js` files that export modules. The CLI will try to register every matching file in it.
 
-### CLI
+## Further Reading
 
-The CLI is a main execution script that offers task developers the ease of just having to write a js file to do a specific command.
-
-### Core
-
-The core module containers the following main methods
-
-| Method | Purpose                                                                                                             |
-| ------ | ------------------------------------------------------------------------------------------------------------------- |
-| common | Collection of common methods that can be used by task developers to enhance and speed the ease of their development |
-| log    | Collection of logging utilities using chalk to output nice values in the log for the user                           |
-| utils  | Collection of utility functions to help plugin authors retrieve, resolve, and set properties.                       |
-
-In addition the following files are used: config.js and index.js
-
-### Handling Failure
-
-When a method fails, we need to set or return (depending on the type of method) by catching the error to log and then return process.exit(1). This allows the container to fail the Kubernetes Pod which will in turn eventually bubble up the failure to the UI.
-
-## Packaging
-
-The following command will use lerna to release new versions of the modules. It determines minor and iteration release numbers and the changelog based on git commit messages.
-
-`npm run-script release`
-
-## Clean up
-
-### Cleaning up jobs in Kubernetes
-
-When running against the non production cluster. You will need to clean up your runs using `kubectl delete job -l "app=bmrg-flow"`
-
-## References
-
-- [Node Initial Starter Tutorial](https://scotch.io/tutorials/build-an-interactive-command-line-application-with-nodejs)
+- [Boomerang Worker CLI and Core](https://github.ibm.com/Boomerang-Workers/boomerang.worker.base)
