@@ -81,6 +81,13 @@ function updatePackageJson(fileContent, projectName) {
   return JSON.stringify(packageJson);
 }
 
+function updateReadme(fileContent, commandName) {
+  const newFileContent = fileContent
+    .replace(/command\.js/g, `${commandName}.js`)
+    .replace(/command\.spec\.js/g, `${commandName}.spec.js`);
+  return newFileContent;
+}
+
 function createDirectoryContents(templatePath, projectName, commandName) {
   const filesToCreate = fs.readdirSync(templatePath);
 
@@ -111,13 +118,17 @@ function createDirectoryContents(templatePath, projectName, commandName) {
         fileContent = updatePackageJson(fileContent, projectName);
       }
 
+      if (file === "README.md") {
+        fileContent = updateReadme(fileContent, commandName);
+      }
+
       const writePath = `${CURR_DIR}/${projectName}/${file}`;
       fs.writeFileSync(writePath, fileContent, "utf8");
     } else if (stats.isDirectory()) {
       fs.mkdirSync(`${CURR_DIR}/${projectName}/${file}`);
 
       // recursive call if in directory
-      createDirectoryContents(`${templatePath}/${file}`, `${projectName}/${file}`);
+      createDirectoryContents(`${templatePath}/${file}`, `${projectName}/${file}`, commandName);
     }
   });
 }

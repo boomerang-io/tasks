@@ -13,7 +13,8 @@ module.exports = (function () {
   try {
     files = fs.readdirSync(workflowProps.WF_PROPS_PATH);
   } catch (err) {
-    log.warn("Error getting properties", err);
+    log.warn("Failed to get properties", err);
+    return;
   }
 
   log.debug("Property Files Found:", files);
