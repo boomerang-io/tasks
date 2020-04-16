@@ -1,14 +1,13 @@
 ---
-name: Change or Enhancement request
+name: "✨ Change or Enhancement Request"
 about: Suggest a change or enhancement for this project
-title: ''
+title: ""
 labels: change, enhancement
-assignees: ''
-
+assignees: ""
 ---
 
 **Is your request related to a problem? Please describe.**
-A clear and concise description of what the problem is. 
+A clear and concise description of what the problem is.
 
 **Describe the solution you'd like**
 A clear and concise description of what you want to happen.
