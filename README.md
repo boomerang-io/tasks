@@ -4,7 +4,9 @@ The purpose of this image is to provide a base foundation for Boomerang Flow wit
 
 ## Contributing
 
-We welcome all contributions. Please read the [Contributing Guidelines](./README.md).
+We welcome all contributions. Please read the [Contributing Guidelines](./CONTRIBUTING.md).
+
+Do you want to contribute your own worker? Follow our [Contributing a Worker Guidelines](./CONTRIBUTING_WORKER.md) for initializing a project to get started quickly.
 
 ## Design
 
