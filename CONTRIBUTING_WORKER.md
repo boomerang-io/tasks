@@ -28,7 +28,15 @@ You can easily set this at the global and user level with the following command:
 npm config set @boomerang-worker:registry https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/
 ```
 
-### 2. Initialize Project
+### 2. Install CLI
+
+Open a shell and run the following command.
+
+```sh
+npm install @boomerang-worker/boomerang-worker-cli -g
+```
+
+### 3. Initialize Project
 
 Open a shell and run the command below.
 
@@ -46,11 +54,11 @@ You should have the following
 
 If something goes wrong, view the error message or take a look at [Troubleshooting](#Troubleshooting) below.
 
-### 3. Navigate to project
+### 4. Navigate to project
 
 A `README.md` is included in the new project with instructions on getting started and how everything works. It includes information about the file structure.
 
-### 4. Create a new project in GitHub Enterprise
+### 5. Create a new project in GitHub Enterprise
 
 Create a [new project](https://github.ibm.com/organizations/Boomerang-Workers/repositories/new) in our Boomerang Worker GitHub Enterprise organization
 
