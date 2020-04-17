@@ -13,8 +13,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@boomerang-worker/cli": "^0.4.0",
-    "@boomerang-worker/core": "^0.3.0"
+    "@boomerang-worker/cli": "latest",
+    "@boomerang-worker/core": "latest"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=local boomerang-worker-cli",
