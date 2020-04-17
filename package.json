@@ -10,7 +10,7 @@
   "license": "MIT",
   "type": "commonjs",
   "engines": {
-    "node": ">=8.10.0",
+    "node": ">=10",
     "yarn": "1"
   },
   "workspaces": [
