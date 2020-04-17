@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/cli@0.3.0...@boomerang-worker/cli@0.4.0) (2020-04-17)
+
+### Features
+
+- add cli project init ([859dc72](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/859dc72555ab7df171bd3bead612ecb82f3bdb77))
+- update cli and template ([798f41f](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/798f41f33c0880765ef2348609b234849024f6c6))
+
 # [0.3.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/cli@0.2.1...@boomerang-worker/cli@0.3.0) (2020-04-15)
 
 ### Bug Fixes
