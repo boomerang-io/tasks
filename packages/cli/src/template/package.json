@@ -20,7 +20,7 @@
     "dev": "cross-env NODE_ENV=local boomerang-worker-cli",
     "dev:debug": "cross-env NODE_ENV=local DEBUG=true boomerang-worker-cli",
     "format": "prettier --write \"**/*.{js,json,md,yml}\"",
-    "lint": "eslint",
+    "lint": "eslint **/*.js",
     "start": "boomerang-worker-cli",
     "test": "jest",
     "test:coverage": "jest --coverage"
