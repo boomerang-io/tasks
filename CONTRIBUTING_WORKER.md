@@ -22,10 +22,10 @@ You need to tell npm to look for the `@boomerang-worker` scoped packages in our 
 "@boomerang-worker:registry=https://tools.boomerangplatform.net/artifactory/api/npm/"
 ```
 
-You can easily do this with the following command
+You can easily set this at the global and user level with the following command:
 
 ```sh
-echo "@boomerang-worker:registry=https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/" >> ~/.npmrc
+npm config set @boomerang-worker:registry https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/
 ```
 
 ### 2. Initialize Project
@@ -33,7 +33,7 @@ echo "@boomerang-worker:registry=https://tools.boomerangplatform.net/artifactory
 Open a shell and run the command below.
 
 ```sh
-npx boomerang-worker-cli init
+npx @boomerang-worker/cli init
 ```
 
 It will prompt you to answer a couple of questions about the worker and attempt to create a new project with all the files and dependencies that you need to get started quickly.
@@ -70,6 +70,6 @@ Following guidance for pushing your local project to the newly created one.
 - Check that you are not running the command in a .git repository
 - Make sure that isn't an existing directory with the same name as what the CLI is trying to create
 
-### Nothing works, how can I be unblocked?
+### Nothing works, how can I be unblocked
 
-- You can manually copy the files from the `packages/cli/template` and run `npm install` inside it
+- You can manually copy the files from the `packages/cli/template` into a new directory outside a local git repositoryand run `npm install` inside it.
