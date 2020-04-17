@@ -109,12 +109,12 @@ function createDirectoryContents(templatePath, projectName, commandName) {
       if (file === "command.spec.js") {
         file = `${commandName}.spec.js`;
       }
-      
+
       // rename to account for .gitignore being renamed by npm
       if (file === "gitignore") {
         file = ".gitignore";
       }
-      
+
       if (file === "package.json") {
         fileContent = updatePackageJson(fileContent, projectName);
       }
@@ -135,7 +135,13 @@ function createDirectoryContents(templatePath, projectName, commandName) {
 }
 
 function init(projectName, commandName) {
-  const fullProjectName = `boomerang.worker.${projectName}`;
+  let fullProjectName = projectName;
+
+  // Harcoded check for format
+  if (!projectName.startsWith(`boomerang.worker.`)) {
+    fullProjectName = `boomerang.worker.${projectName}`;
+  }
+
   const fullProjectPath = `${CURR_DIR}/${fullProjectName}`;
 
   if (isInGitRepository(CURR_DIR)) {
