@@ -28,15 +28,7 @@ You can easily set this at the global and user level with the following command:
 npm config set @boomerang-worker:registry https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/
 ```
 
-### 2. Install CLI
-
-Open a shell and run the following command.
-
-```sh
-npm install @boomerang-worker/boomerang-worker-cli -g
-```
-
-### 3. Initialize Project
+### 2. Initialize Project
 
 Open a shell and run the command below.
 
