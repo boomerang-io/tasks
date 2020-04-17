@@ -22,12 +22,13 @@ npm start -- greetings hello
 ## Folder Structure
 
     |-- .npmrc
-    |-- Dockerfile
     |-- .gitignore
+    |-- Dockerfile
     |-- package.json
     |-- README.md
     |-- .github
         |-- PULL_REQUEST_TEMPLATE.md
+        |-- ISSUE_TEMPLATE.md
     |-- commands
         |-- command.js
     |-- tests
