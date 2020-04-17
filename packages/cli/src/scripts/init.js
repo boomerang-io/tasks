@@ -8,10 +8,17 @@ const { log } = require("@boomerang-worker/core");
 
 const CURR_DIR = process.cwd();
 
+/**
+ * @param {string} value - string to capitalize
+ */
 function capitalize(value) {
   return `${value.slice(0, 1).toUpperCase() + value.slice(1)}`;
 }
 
+/**
+ *  Check if directory at path is a git repo
+ * @param {string} path - path to project directory
+ */
 function isInGitRepository(path) {
   try {
     execSync("git rev-parse --is-inside-work-tree", { cwd: path, stdio: "ignore" });
@@ -21,6 +28,10 @@ function isInGitRepository(path) {
   }
 }
 
+/**
+ * Try initializing git repo at path
+ * @param {string} projectPath - path to project directory
+ */
 function tryGitInit(projectPath) {
   try {
     execSync("git --version", { cwd: projectPath, stdio: "ignore" });
@@ -35,6 +46,10 @@ function tryGitInit(projectPath) {
   }
 }
 
+/**
+ * Try first commit at path
+ * @param {string} projectPath - path to project directory
+ */
 function tryGitCommit(projectPath) {
   try {
     execSync("git add -A", { cwd: projectPath, stdio: "ignore" });
@@ -63,6 +78,10 @@ function tryGitCommit(projectPath) {
   }
 }
 
+/**
+ * Install project dependencies
+ * @param {string} projectPath - path to project directory
+ */
 function installDependencies(projectPath) {
   const command = "npm";
   const args = ["install"];
@@ -73,14 +92,39 @@ function installDependencies(projectPath) {
   }
 }
 
+/**
+ * Intall @boomerang-worker dependencies
+ * @param {string} projectPath - path to project directory
+ */
+function installBoomerangWorkerDependencies(projectPath) {
+  const command = "npm";
+  const args = ["install", "@boomerang-worker/cli", "@boomerang-worker/core"];
+  const proc = spawn.sync(command, args, { cwd: projectPath, stdio: "inherit" });
+  if (proc.status !== 0) {
+    log.err(`${command} ${args.join(" ")} failed`);
+    return;
+  }
+}
+
+/**
+ * Update project package.json based on user input
+ * @param {string} fileContent
+ * @param {string} projectName
+ */
 function updatePackageJson(fileContent, projectName) {
   const packageJson = JSON.parse(fileContent);
   packageJson.name = projectName;
   packageJson.description = projectName.split(".").map(capitalize).join(" ");
   packageJson.repository = `git@github.ibm.com:Boomerang/${projectName}.git`;
+  packageJson.dependencies = {}; // Set to empty so latest versions of @boomerang-worker are installed
   return JSON.stringify(packageJson);
 }
 
+/**
+ * Update readme based on user input
+ * @param {string} fileContent
+ * @param {string} commandName
+ */
 function updateReadme(fileContent, commandName) {
   const newFileContent = fileContent
     .replace(/command\.js/g, `${commandName}.js`)
@@ -88,6 +132,12 @@ function updateReadme(fileContent, commandName) {
   return newFileContent;
 }
 
+/**
+ * Recursively copy files from template directory to new project one
+ * @param {string} templatePath - path to worker template
+ * @param {string} projectName
+ * @param {string} commandName
+ */
 function createDirectoryContents(templatePath, projectName, commandName) {
   const filesToCreate = fs.readdirSync(templatePath);
 
@@ -134,6 +184,11 @@ function createDirectoryContents(templatePath, projectName, commandName) {
   });
 }
 
+/**
+ * Initialize project given user input
+ * @param {string} projectName
+ * @param {string} commandName
+ */
 function init(projectName, commandName) {
   let fullProjectName = projectName;
 
@@ -159,10 +214,11 @@ function init(projectName, commandName) {
 
     // initialize git repo
     tryGitInit(fullProjectPath);
-    log.sys(`Initialized git repo ${fullProjectName}`);
+    log.sys(`Initialized git repo in ${fullProjectName}`);
 
     // install dependencies
-    log.sys(`Installing project dependencies ${fullProjectName}`);
+    log.sys(`Installing project dependencies for ${fullProjectName}`);
+    installBoomerangWorkerDependencies(fullProjectPath);
     installDependencies(fullProjectPath);
 
     // initial commit
