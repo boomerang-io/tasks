@@ -1,6 +1,8 @@
 /* eslint-disable no-useless-escape */
-const { NODE_ENV } = process.env;
+const { NODE_ENV, DEBUG } = process.env;
 const appRoot = require("app-root-path");
+
+const isDebug = DEBUG === "true";
 
 const inputOptions = {
   path: true,
@@ -47,4 +49,5 @@ module.exports = {
   workflowProps,
   outputOptions,
   PROPS_FILES_CONFIG,
+  isDebug,
 };
