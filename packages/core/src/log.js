@@ -1,6 +1,6 @@
-const isDebug = process.env.DEBUG === "true";
 const chalk = require("chalk");
 const datetime = require("node-datetime");
+const { isDebug } = require("./config");
 
 module.exports = {
   out(...args) {
