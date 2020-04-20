@@ -2,6 +2,7 @@ const log = require("./log");
 const properties = require("properties");
 const fetch = require("node-fetch");
 const fs = require("fs");
+const { isDebug } = require("./config");
 const { workflowProps, PROPS_FILES_CONFIG } = require("./config");
 
 /**
@@ -227,6 +228,10 @@ module.exports = (function () {
       const taskName = taskSystemProps["task.name"].replace(/\s+/g, "");
 
       //log.debug("  url: ", `http://${controllerUrl}/controller/properties/set?workflowId=${workflowId}&workflowActivityId=${activityId}&taskId=${taskId}&taskName=${taskName}`);
+      if (isDebug) {
+        return Promise.resolve();
+      }
+
       return fetch(
         `http://${controllerUrl}/controller/properties/set?workflowId=${workflowId}&workflowActivityId=${activityId}&taskId=${taskId}&taskName=${taskName}`,
         {
