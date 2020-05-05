@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.3.0...@boomerang-worker/core@0.3.1) (2020-05-05)
+
+### Bug Fixes
+
+- return early for util set property in debug mode ([fbf7dc1](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/fbf7dc1eb692040e6cb54d912ace7fb3c00fdb45))
+
 # [0.3.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.2.0...@boomerang-worker/core@0.3.0) (2020-04-17)
 
 ### Features
