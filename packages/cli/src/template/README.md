@@ -36,8 +36,8 @@ npm start -- greetings hello
 
 ### Key Files and Directories
 
-`.npmrc` - necessary to install `@boomerang-worker` scoped npm modules
-`Dockerfile` - containerize and execute commands in a kubernetes environments
+`.npmrc` - necessary to install `@boomerang-worker` scoped npm modules  
+`Dockerfile` - containerize and execute commands in a kubernetes environments  
 `commands` - where all of your modules are located to be registered and executed by `boomerang-worker-cli`
 
 ### How it works

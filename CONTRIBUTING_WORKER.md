@@ -54,9 +54,9 @@ A `README.md` is included in the new project with instructions on getting starte
 
 Create a [new project](https://github.ibm.com/organizations/Boomerang-Workers/repositories/new) in our Boomerang Worker GitHub Enterprise organization
 
-Use the `name` property from the `package.json` in the root of the project to following the Boomerang Worker naming standard.
+Use the `name` property from the `package.json` in the root of the project to follow the Boomerang Worker naming standard.
 
-Following guidance for pushing your local project to the newly created one.
+Follow the guide for pushing your local project to the newly created repository.
 
 ## Troubleshooting
 
