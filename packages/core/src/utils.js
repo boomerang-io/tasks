@@ -136,7 +136,8 @@ module.exports = (function () {
           for (var property of matchedProps) {
             /** @todo use original regex for capture group of key*/
             var propertyKey = property.replace("${p:", "").replace("}", "");
-            var replacementStr = taskInputProps[`${propertyKey}`] ? taskInputProps[`${propertyKey}`] : "";
+            var replacementStr =
+              taskInputProps && taskInputProps[`${propertyKey}`] ? taskInputProps[`${propertyKey}`] : "";
             log.debug("Replacing property:", property, "with:", replacementStr);
             filteredEntry[1] = filteredEntry[1].replace(property, replacementStr);
           }
