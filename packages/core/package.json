@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-worker/core",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Boomerang Worker Core",
   "main": "src/index.js",
   "repository": "git@github.ibm.com:Boomerang/boomerang.worker.base.git",
