@@ -3,6 +3,7 @@ const { NODE_ENV, DEBUG } = process.env;
 const appRoot = require("app-root-path");
 
 const isDebug = DEBUG === "true";
+const isLocalEnv = NODE_ENV === "local";
 
 const inputOptions = {
   path: true,
@@ -50,4 +51,5 @@ module.exports = {
   outputOptions,
   PROPS_FILES_CONFIG,
   isDebug,
+  isLocalEnv,
 };
