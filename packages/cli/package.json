@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-worker/cli",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Boomerang Worker CLI",
   "bin": {
     "boomerang-worker-cli": "./bin/cli.js"
@@ -20,7 +20,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@boomerang-worker/core": "^0.4.0",
+    "@boomerang-worker/core": "^0.5.0",
     "commander": "^2.19.0",
     "cross-spawn": "^7.0.2",
     "dotenv": "^6.2.0",
