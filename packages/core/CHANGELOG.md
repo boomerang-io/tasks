@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.3.1...@boomerang-worker/core@0.4.0) (2020-05-12)
+
+### Features
+
+- update local vs debug ([d12ed4e](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/d12ed4efd2cea7a6a88a603669dce3a711f9a95b))
+
 ## [0.3.1](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.3.0...@boomerang-worker/core@0.3.1) (2020-05-05)
 
 ### Bug Fixes
