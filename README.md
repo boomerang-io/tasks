@@ -1,4 +1,4 @@
-# Boomeran Worker CLI and Common Core
+# Boomerang Worker CLI and Common Core
 
 The purpose of this image is to provide a base foundation for Boomerang Workers by providing an easy to leverage CLI and also Common Core functions or methods.
 
