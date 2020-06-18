@@ -10,11 +10,11 @@ Do you want to contribute your own worker? Follow our [Contributing a Worker Gui
 
 ## Design
 
-The CLI has a main cli.js which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the flow_task_template mongodb collection. A command and sub command are required for all runs.
+The CLI has a main `cli.js` which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the `flow_task_template mongodb` collection. A command and sub command are required for all runs.
 
 ### Project Structure
 
-Uses yarn workspaces and lerna to manage the monorepo
+Uses [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) and [lerna](https://github.com/lerna/lerna) to manage the project as a monorepo.
 
 ### CLI
 
@@ -82,8 +82,8 @@ Try adding the following to your VSCode `settings.json` file
 
 ```json
 "eslint.workingDirectories": [
-        {
-            "mode": "auto"
-        }
-    ],
+    {
+      "mode": "auto"
+    }
+  ],
 ```
