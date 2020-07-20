@@ -1,5 +1,7 @@
 # Boomerang Worker CLI and Common Core
 
+**This project is now archived and migrated to the open source github.com/boomerang-io project**
+
 The purpose of this image is to provide a base foundation for Boomerang Workers by providing an easy to leverage CLI and also Common Core functions or methods.
 
 ## Contributing
