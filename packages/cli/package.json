@@ -9,6 +9,9 @@
   "author": "Tyson Lawrie <twlawrie@us.ibm.com>",
   "license": "Apache-2.0",
   "type": "commonjs",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=10"
   },
@@ -34,5 +37,5 @@
     "cross-env": "^7.0.2",
     "jest": "^25.3.0"
   },
-  "gitHead": "0c816282b425f1ca24501e2f93f8e973123958e2"
+  "gitHead": "bfe4a8bc90529d776438cc89b2c953afa04f1198"
 }
