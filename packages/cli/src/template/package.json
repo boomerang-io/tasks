@@ -2,14 +2,11 @@
   "name": "boomerang-worker-template",
   "version": "0.1.0",
   "description": "Boomerang Worker Template",
-  "repository": "git@github.ibm.com:Boomerang/boomerang.worker.template.git",
+  "repository": "git@github.com:boomerang-io/boomerang.worker.template.git",
   "author": "Boomerang Joe <boomrng@us.ibm.com>",
   "type": "commonjs",
   "engines": {
     "node": ">=10"
-  },
-  "publishConfig": {
-    "registry": "https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/"
   },
   "license": "MIT",
   "dependencies": {
