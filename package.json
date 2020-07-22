@@ -1,11 +1,8 @@
 {
-  "name": "boomerang-worker",
+  "name": "@boomerang-io/boomerang-worker",
   "version": "0.0.0",
   "private": true,
-  "repository": "git@github.ibm.com:Boomerang/boomerang.worker.base.git",
-  "publishConfig": {
-    "registry": "https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/"
-  },
+  "repository": "git@github.com:boomerang-io/boomerang.worker.main.git",
   "author": "Tyson Lawrie <twlawrie@us.ibm.com>",
   "license": "MIT",
   "type": "commonjs",
