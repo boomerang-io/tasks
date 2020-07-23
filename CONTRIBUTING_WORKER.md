@@ -11,7 +11,6 @@ Before contributing your own worker, make sure that you have the following tools
     version manager for Node.
 - [npm](https://www.npmjs.com/) v5.2 or greater
 - [Git](https://git-scm.com/)
-- Access to IBM network
 
 ### 1. `@boomerang-io` scope
 
