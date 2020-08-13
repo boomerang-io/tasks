@@ -23,7 +23,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@boomerang-worker/core": "^0.5.0",
+    "@boomerang-io/worker-core": "^0.6.0",
     "commander": "^2.19.0",
     "cross-spawn": "^7.0.2",
     "dotenv": "^6.2.0",
