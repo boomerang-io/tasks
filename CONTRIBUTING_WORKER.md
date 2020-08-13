@@ -11,29 +11,17 @@ Before contributing your own worker, make sure that you have the following tools
     version manager for Node.
 - [npm](https://www.npmjs.com/) v5.2 or greater
 - [Git](https://git-scm.com/)
-- Access to IBM network
 
-### 1. Add `@boomerang-worker` scope
+### 1. `@boomerang-io` scope
 
-You need to tell npm to look for the `@boomerang-worker` scoped packages in our Boomerang Artifactory instance. To do this, add the value below to your local `.npmrc` file. npm has more documentation about [scopes](https://docs.npmjs.com/using-npm/scope.html_) and the [.npmrc](https://docs.npmjs.com/configuring-npm/npmrc.html).
-
-```sh
-# .npmrc
-"@boomerang-worker:registry=https://tools.boomerangplatform.net/artifactory/api/npm/"
-```
-
-You can easily set this at the global and user level with the following command:
-
-```sh
-npm config set @boomerang-worker:registry https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/
-```
+The interface packages are available on npm under the boomerang-io organization and scope. npm has more documentation about [scopes](https://docs.npmjs.com/using-npm/scope.html_) and [.npmrc](https://docs.npmjs.com/configuring-npm/npmrc.html) if you need it manually configured.
 
 ### 2. Initialize Project
 
 Open a shell and run the command below.
 
 ```sh
-npx @boomerang-worker/cli init
+npx @boomerang-io/worker-cli init
 ```
 
 It will prompt you to answer a couple of questions about the worker and attempt to create a new project with all the files and dependencies that you need to get started quickly.
@@ -52,7 +40,7 @@ A `README.md` is included in the new project with instructions on getting starte
 
 ### 5. Create a new project in GitHub Enterprise
 
-Create a [new project](https://github.ibm.com/organizations/Boomerang-Workers/repositories/new) in our Boomerang Worker GitHub Enterprise organization
+Create a [new project](https://github.ibm.com/organizations/boomerang-io/repositories/new) in our Boomerang GitHub organization
 
 Use the `name` property from the `package.json` in the root of the project to follow the Boomerang Worker naming standard.
 
@@ -63,7 +51,7 @@ Follow the guide for pushing your local project to the newly created repository.
 ### `npx` failed
 
 - Check that you have the correct versions of node and npm installed
-- Make sure that you are connected to the IBM network. Our `@boomerang-worker` packages are hosted on an internal Artifactory instance.
+- Can access the `@boomerang-io` scoped packages.
 
 ### `init` command failed
 

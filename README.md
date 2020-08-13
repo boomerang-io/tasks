@@ -1,20 +1,6 @@
 # Boomerang Worker Interfaces
 
-The purpose of this image is to provide a base foundation for Boomerang Workers by providing an easy to leverage CLI and also Common Core functions or methods.
-
-## Contributing
-
-We welcome all contributions. Please read the [Contributing Guidelines](./CONTRIBUTING.md).
-
-Do you want to contribute your own worker? Follow our [Contributing a Worker Guidelines](./CONTRIBUTING_WORKER.md) for initializing a project to get started quickly.
-
-## Design
-
-The CLI has a main `cli.js` which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the `flow_task_template mongodb` collection. A command and sub command are required for all runs.
-
-### Project Structure
-
-Uses [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) and [lerna](https://github.com/lerna/lerna) to manage the project as a monorepo.
+The following interfaces provide integrations to the Boomerang Workers, in particular for Boomerang Flow, by providing an easy to leverage CLI and also Common Core functions or methods.
 
 ### CLI
 
@@ -31,6 +17,20 @@ The core module containers the following main methods
 | utils  | Collection of utility functions to help plugin authors retrieve, resolve, and set properties.                       |
 
 In addition the following files are used: config.js and index.js
+
+## Contributing
+
+We welcome all contributions. Please read the [Contributing Guidelines](./CONTRIBUTING.md).
+
+Do you want to contribute your own worker? Follow our [Contributing a Worker Guidelines](./CONTRIBUTING_WORKER.md) for initializing a project to get started quickly.
+
+## Design
+
+The CLI has a main `cli.js` which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the `flow_task_template mongodb` collection. A command and sub command are required for all runs.
+
+### Project Structure
+
+Uses [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) and [lerna](https://github.com/lerna/lerna) to manage the project as a monorepo.
 
 ### Handling Failure
 
