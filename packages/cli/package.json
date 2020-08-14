@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-io/worker-cli",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "Boomerang Worker CLI",
   "bin": {
     "boomerang-worker-cli": "./bin/cli.js"
