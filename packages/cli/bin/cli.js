@@ -2,7 +2,7 @@
 "use strict";
 
 const cli = require("../src/cli");
-const { log } = require("@boomerang-worker/core");
+const { log } = require("@boomerang-io/worker-core");
 
 const { node: currentNodeVersion } = process.versions;
 const semver = currentNodeVersion.split(".");
