@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.5](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.4...@boomerang-io/worker-cli@0.7.5) (2020-08-14)
+
+### Bug Fixes
+
+- **cli:** use the oss package ([801598c](https://github.com/boomerang-io/boomerang.worker.main/commit/801598cf7a35e6b43b1f19ce3081c15d723f9778))
+
 ## [0.7.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.3...@boomerang-io/worker-cli@0.7.4) (2020-08-13)
 
 **Note:** Version bump only for package @boomerang-io/worker-cli
