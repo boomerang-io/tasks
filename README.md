@@ -40,7 +40,7 @@ When a method fails, we need to set or return (depending on the type of method) 
 
 The following command will use lerna to release new versions of the modules. It determines minor and iteration release numbers and the changelog based on git commit messages.
 
-`yarn run release`
+`yarn release`
 
 ## Clean up
 
