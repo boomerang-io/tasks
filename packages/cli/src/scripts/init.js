@@ -4,7 +4,7 @@ const execSync = require("child_process").execSync;
 const fs = require("fs");
 const path = require("path");
 const spawn = require("cross-spawn");
-const { log } = require("@boomerang-worker/core");
+const { log } = require("@boomerang-io/worker-core");
 
 const CURR_DIR = process.cwd();
 
@@ -98,7 +98,7 @@ function installDependencies(projectPath) {
  */
 function installBoomerangWorkerDependencies(projectPath) {
   const command = "npm";
-  const args = ["install", "@boomerang-worker/cli", "@boomerang-worker/core"];
+  const args = ["install", "@boomerang-worker/cli", "@boomerang-io/worker-core"];
   const proc = spawn.sync(command, args, { cwd: projectPath, stdio: "inherit" });
   if (proc.status !== 0) {
     log.err(`${command} ${args.join(" ")} failed`);

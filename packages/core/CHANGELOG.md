@@ -36,34 +36,34 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - update cli and template ([798f41f](https://github.com/boomerang-io/boomerang.worker.main/commit/798f41f33c0880765ef2348609b234849024f6c6))
 - update local vs debug ([e902035](https://github.com/boomerang-io/boomerang.worker.main/commit/e902035a34e9daac5054442e0ba5f1e7cb44656c))
 - update local vs debug ([d12ed4e](https://github.com/boomerang-io/boomerang.worker.main/commit/d12ed4efd2cea7a6a88a603669dce3a711f9a95b))
-- **@boomerang-worker/core:** fix debug logging for file ([67bfe6e](https://github.com/boomerang-io/boomerang.worker.main/commit/67bfe6ebc26c2de5018a55e9875e57881c1d89a1))
+- **@boomerang-io/worker-core:** fix debug logging for file ([67bfe6e](https://github.com/boomerang-io/boomerang.worker.main/commit/67bfe6ebc26c2de5018a55e9875e57881c1d89a1))
 
-# [0.5.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.4.0...@boomerang-worker/core@0.5.0) (2020-05-12)
+# [0.5.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-io/worker-core@0.4.0...@boomerang-io/worker-core@0.5.0) (2020-05-12)
 
 ### Features
 
 - update local vs debug ([e902035](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/e902035a34e9daac5054442e0ba5f1e7cb44656c))
 
-# [0.4.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.3.1...@boomerang-worker/core@0.4.0) (2020-05-12)
+# [0.4.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-io/worker-core@0.3.1...@boomerang-io/worker-core@0.4.0) (2020-05-12)
 
 ### Features
 
 - update local vs debug ([d12ed4e](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/d12ed4efd2cea7a6a88a603669dce3a711f9a95b))
 
-## [0.3.1](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.3.0...@boomerang-worker/core@0.3.1) (2020-05-05)
+## [0.3.1](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-io/worker-core@0.3.0...@boomerang-io/worker-core@0.3.1) (2020-05-05)
 
 ### Bug Fixes
 
 - return early for util set property in debug mode ([fbf7dc1](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/fbf7dc1eb692040e6cb54d912ace7fb3c00fdb45))
 
-# [0.3.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.2.0...@boomerang-worker/core@0.3.0) (2020-04-17)
+# [0.3.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-io/worker-core@0.2.0...@boomerang-io/worker-core@0.3.0) (2020-04-17)
 
 ### Features
 
 - add cli project init ([859dc72](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/859dc72555ab7df171bd3bead612ecb82f3bdb77))
 - update cli and template ([798f41f](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/798f41f33c0880765ef2348609b234849024f6c6))
 
-# [0.2.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.1.2...@boomerang-worker/core@0.2.0) (2020-04-15)
+# [0.2.0](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-io/worker-core@0.1.2...@boomerang-io/worker-core@0.2.0) (2020-04-15)
 
 ### Bug Fixes
 
@@ -73,11 +73,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - add common ([ed80d4f](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/ed80d4f5b467e0d73ecb9cefcb287ad7aad21539))
 
-## [0.1.2](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.1.1...@boomerang-worker/core@0.1.2) (2020-04-14)
+## [0.1.2](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-io/worker-core@0.1.1...@boomerang-io/worker-core@0.1.2) (2020-04-14)
 
-**Note:** Version bump only for package @boomerang-worker/core
+**Note:** Version bump only for package @boomerang-io/worker-core
 
-## [0.1.1](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-worker/core@0.1.0...@boomerang-worker/core@0.1.1) (2020-04-14)
+## [0.1.1](https://github.ibm.com/Boomerang/boomerang.worker.base/compare/@boomerang-io/worker-core@0.1.0...@boomerang-io/worker-core@0.1.1) (2020-04-14)
 
 ### Bug Fixes
 
@@ -93,6 +93,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - add changelog ([04f40ee](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/04f40eecf60610486abd0775f9de5c6e6b7989ac))
-- **@boomerang-worker/core:** fix debug logging for file ([67bfe6e](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/67bfe6ebc26c2de5018a55e9875e57881c1d89a1))
+- **@boomerang-io/worker-core:** fix debug logging for file ([67bfe6e](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/67bfe6ebc26c2de5018a55e9875e57881c1d89a1))
 - add dependencies ([02074ef](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/02074ef1a59113801b1bceff664ae0bd397f2c2a))
 - add linting and fix some errors ([0c38c94](https://github.ibm.com/Boomerang/boomerang.worker.base/commit/0c38c9416702638389ea28ed114383e34ba7dc32))

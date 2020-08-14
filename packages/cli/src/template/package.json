@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@boomerang-worker/cli": "latest",
-    "@boomerang-worker/core": "latest"
+    "@boomerang-io/worker-core": "latest"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=local boomerang-worker-cli",
