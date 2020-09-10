@@ -14,6 +14,7 @@ const inputOptions = {
 };
 const workflowProps = {
   WF_PROPS_PATH: NODE_ENV === "local" || NODE_ENV === "test" ? `${appRoot}/props` : "/props",
+  WF_COMMANDS_PATH: NODE_ENV === "local" || NODE_ENV === "test" ? `${appRoot}/commands` : "/cli/commands",
   // We have two properties that are the same other than the Global regex flag
   // This is as regex.test(), if passed global, will not reset the index from word to word of our search
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test
