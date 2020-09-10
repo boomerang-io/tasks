@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.6.4...@boomerang-io/worker-core@0.7.0) (2020-09-10)
+
+### Features
+
+- added new getWorkflowInputProperty to utils ([0ea914e](https://github.com/boomerang-io/boomerang.worker.main/commit/0ea914eb65d8816d7cde33dca23ec81a21a876e5))
+
 ## [0.6.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.6.3...@boomerang-io/worker-core@0.6.4) (2020-09-10)
 
 ### Bug Fixes
