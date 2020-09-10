@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.6.3...@boomerang-io/worker-core@0.6.4) (2020-09-10)
+
+### Bug Fixes
+
+- added WF_COMMANDS_PATH for when locally testing ([336a2bb](https://github.com/boomerang-io/boomerang.worker.main/commit/336a2bb4b6abad410e5304252678bd7a88a0f925))
+- use oss package ([d8f3f62](https://github.com/boomerang-io/boomerang.worker.main/commit/d8f3f62adb2fb26605d438e46d9a7dba7448f569))
+
 ## [0.6.3](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.6.2...@boomerang-io/worker-core@0.6.3) (2020-07-22)
 
 **Note:** Version bump only for package @boomerang-io/worker-core
