@@ -160,6 +160,12 @@ module.exports = (function () {
       const taskInputProps = props[TASK_INPUT_PROPS_FILENAME];
       return taskInputProps[key];
     },
+    getWorkflowInputProperty(key) {
+      // Figure out why this doesn't work
+      const { WORKFLOW_INPUT_PROPS_FILENAME } = PROPS_FILES_CONFIG;
+      const wfInputProps = props[WORKFLOW_INPUT_PROPS_FILENAME];
+      return wfInputProps[key];
+    },
     getWorkflowSystemProperty(key) {
       const { WORKFLOW_SYSTEM_PROPS_FILENAME } = PROPS_FILES_CONFIG;
       const workflowSystemProps = props[WORKFLOW_SYSTEM_PROPS_FILENAME];
