@@ -92,7 +92,7 @@ module.exports = (function () {
             } else if (property.includes("task/")) {
               const prop = propertyKey.split("/")[1];
               replacementStr = props[`task.system.properties`][prop];
-            } else if (property.startsWith("cicd/")) {
+            } else if (propertyKey.startsWith("cicd/")) {
               const prop = propertyKey.substring(propertyKey.indexOf("/") + 1);
               log.debug("CICD Property Reference Requested. Checking for property:", prop);
               replacementStr = workflowInputProps[`${prop}`];
