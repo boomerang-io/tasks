@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.2](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.8.1...@boomerang-io/worker-core@0.8.2) (2020-09-25)
+
+### Bug Fixes
+
+- adjusted regular expression to allow for CICD ([069a939](https://github.com/boomerang-io/boomerang.worker.main/commit/069a9392120948488b303f94eef0de6fb50997cb))
+
 ## [0.8.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.8.0...@boomerang-io/worker-core@0.8.1) (2020-09-25)
 
 ### Bug Fixes
