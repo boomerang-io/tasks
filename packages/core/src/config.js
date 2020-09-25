@@ -18,8 +18,8 @@ const workflowProps = {
   // We have two properties that are the same other than the Global regex flag
   // This is as regex.test(), if passed global, will not reset the index from word to word of our search
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test
-  WF_PROPS_PATTERN: /\$\{p:([\w\ \.]*\/?[\w\.]+)\}/,
-  WF_PROPS_PATTERN_GLOBAL: /\$\{p:([\w\ \.]*\/?[\w\.]+)\}/g,
+  WF_PROPS_PATTERN: /\$\{p:([\w\ \.]*\/){0,2}([\w\.]+)\}/,
+  WF_PROPS_PATTERN_GLOBAL: /\$\{p:([\w\ \.]*\/){0,2}([\w\.]+)\}/g,
 };
 
 const outputOptions = {
