@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.8.0...@boomerang-io/worker-core@0.8.1) (2020-09-25)
+
+### Bug Fixes
+
+- adjustment to CICD property layer ([1815c4b](https://github.com/boomerang-io/boomerang.worker.main/commit/1815c4bea9d0400332c3e434ae2ae5e03877d79a))
+
 # [0.8.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.7.0...@boomerang-io/worker-core@0.8.0) (2020-09-25)
 
 ### Features
