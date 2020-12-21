@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.8.4...@boomerang-io/worker-core@0.9.0) (2020-12-21)
+
+### Features
+
+- added new resolveCICDInputProps for PoC ([3c1c91a](https://github.com/boomerang-io/boomerang.worker.main/commit/3c1c91a80b404d6ca4b1126c4b2cfa3bc3b0888c))
+
 ## [0.8.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.8.3...@boomerang-io/worker-core@0.8.4) (2020-09-25)
 
 ### Bug Fixes
