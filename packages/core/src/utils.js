@@ -157,6 +157,18 @@ module.exports = (function () {
       };
       return substitutedProps;
     },
+    resolveCICDInputProperties() {
+      log.debug("Resolving CICD input properties");
+      const taskInputProps = props[PROPS_FILES_CONFIG.TASK_INPUT_PROPS_FILENAME];
+      const workflowInputProps = props[PROPS_FILES_CONFIG.WORKFLOW_INPUT_PROPS_FILENAME];
+      Object.entries(taskInputProps).forEach((taskInputEntry) => log.debug(taskInputEntry[0], "=", taskInputEntry[1]));
+      //Combine both w/ new values overwriting old ones
+      const substitutedProps = {
+        ...workflowInputProps,
+        ...taskInputProps,
+      };
+      return substitutedProps;
+    },
     getInputProperty(key) {
       // Figure out why this doesn't work
       const { TASK_INPUT_PROPS_FILENAME } = PROPS_FILES_CONFIG;
