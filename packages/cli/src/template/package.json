@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@boomerang-worker/cli": "latest",
+    "@boomerang-io/worker-cli": "latest",
     "@boomerang-io/worker-core": "latest"
   },
   "scripts": {
