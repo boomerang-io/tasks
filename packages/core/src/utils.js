@@ -6,7 +6,7 @@ const { isLocalEnv } = require("./config");
 const { workflowProps, PROPS_FILES_CONFIG } = require("./config");
 
 /**
- * Use IFFE to enscapsulate properties
+ * Use IIFE to enscapsulate properties
  */
 module.exports = (function () {
   // Read in property files
