@@ -98,7 +98,7 @@ function installDependencies(projectPath) {
  */
 function installBoomerangWorkerDependencies(projectPath) {
   const command = "npm";
-  const args = ["install", "@boomerang-worker/cli", "@boomerang-io/worker-core"];
+  const args = ["install", "@boomerang-io/worker-cli", "@boomerang-io/worker-core"];
   const proc = spawn.sync(command, args, { cwd: projectPath, stdio: "inherit" });
   if (proc.status !== 0) {
     log.err(`${command} ${args.join(" ")} failed`);
