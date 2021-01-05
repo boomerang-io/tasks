@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.9.0...@boomerang-io/worker-core@0.10.0) (2021-01-05)
+
+### Features
+
+- new method resolveInputParams ([75e75a8](https://github.com/boomerang-io/boomerang.worker.main/commit/75e75a8afc457c40d23a2f39109a1b47ce4272c7))
+- new method resolveInputParams ([550044f](https://github.com/boomerang-io/boomerang.worker.main/commit/550044fe22d76fad05ef91db0fea05cb6a6ce017))
+
 # [0.9.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.8.4...@boomerang-io/worker-core@0.9.0) (2020-12-21)
 
 ### Features
