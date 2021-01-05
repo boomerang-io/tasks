@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.15](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.14...@boomerang-io/worker-cli@0.7.15) (2020-12-31)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
 ## [0.7.14](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.13...@boomerang-io/worker-cli@0.7.14) (2020-12-21)
 
 **Note:** Version bump only for package @boomerang-io/worker-cli

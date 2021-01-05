@@ -56,7 +56,7 @@ Follow the guide for pushing your local project to the newly created repository.
 ### `init` command failed
 
 - Check that you are not running the command in a .git repository
-- Make sure that isn't an existing directory with the same name as what the CLI is trying to create
+- Make sure that there isn't an existing directory with the same name as what the CLI is trying to create
 
 ### Nothing works, how can I be unblocked
 
