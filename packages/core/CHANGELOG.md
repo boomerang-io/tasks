@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.10.0...@boomerang-io/worker-core@0.10.1) (2021-01-05)
+
+### Bug Fixes
+
+- updated setOutputProperties to correctly reference system params ([c14c215](https://github.com/boomerang-io/boomerang.worker.main/commit/c14c215b9d4b6fd282bc30d12ef2131db128405f))
+
 # [0.10.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.9.0...@boomerang-io/worker-core@0.10.0) (2021-01-05)
 
 ### Features
