@@ -246,11 +246,11 @@ module.exports = (function () {
       const { WORKFLOW_SYSTEM_PROPS_FILENAME, TASK_SYSTEM_PROPS_FILENAME } = PROPS_FILES_CONFIG;
       const workflowSystemProps = props[WORKFLOW_SYSTEM_PROPS_FILENAME];
       const taskSystemProps = props[TASK_SYSTEM_PROPS_FILENAME];
-      const controllerUrl = workflowSystemProps["controller.service.url"];
-      const workflowId = workflowSystemProps["workflow.id"];
-      const activityId = workflowSystemProps["activity.id"];
-      const taskId = taskSystemProps["task.id"];
-      const taskName = taskSystemProps["task.name"].replace(/\s+/g, "");
+      const controllerUrl = workflowSystemProps["controller-service-url"];
+      const workflowId = workflowSystemProps["workflow-id"];
+      const activityId = workflowSystemProps["activity-id"];
+      const taskId = taskSystemProps["task-id"];
+      const taskName = taskSystemProps["task-name"].replace(/\s+/g, "");
 
       //log.debug("  url: ", `http://${controllerUrl}/controller/properties/set?workflowId=${workflowId}&workflowActivityId=${activityId}&taskId=${taskId}&taskName=${taskName}`);
       if (isLocalEnv) {
