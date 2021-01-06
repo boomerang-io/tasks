@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.10.1...@boomerang-io/worker-core@1.0.0) (2021-01-06)
+
+- feat!: deprecated substituteTaskInputProps() with resolveInputParams() ([0a09657](https://github.com/boomerang-io/boomerang.worker.main/commit/0a09657687adbd05a88a956ea379928d65f97a5a))
+
+### BREAKING CHANGES
+
+- the util.substituteTaskInputPropsValuesForWorkflowInputProps() method has been replaced to match the new parameters implementation where parameters (not properties) are resolved by the workflow service
+
 ## [0.10.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.10.0...@boomerang-io/worker-core@0.10.1) (2021-01-05)
 
 ### Bug Fixes
