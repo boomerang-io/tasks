@@ -8,7 +8,7 @@ module.exports = {
     //Create file on file system
     log.debug("Started Create File Plugin");
 
-    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    const taskProps = utils.resolveInputParameters();
     log.debug(taskProps);
     const { path, content } = taskProps;
 
@@ -31,7 +31,7 @@ module.exports = {
     //Read in a file and set contents as an output property
     log.debug("Started Read File to Property Plugin");
 
-    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    const taskProps = utils.resolveInputParameters();
     const { path: path, propertyName: propertyName } = taskProps;
     try {
       const file = fs.readFileSync(path, "utf8");
@@ -48,7 +48,7 @@ module.exports = {
     //Read in a file of type properties file and parse every property (based on a delimiter, default being '=') and set as output properties.
     log.debug("Started Read Properties From File Plugin");
 
-    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    const taskProps = utils.resolveInputParameters();
     const { path, delimiter = "=" } = taskProps;
     const delimiterExpression = new RegExp(`${delimiter}(.+)`);
 
@@ -75,7 +75,7 @@ module.exports = {
     //Return true if file or folder exists based on regular expression
     log.debug("Started Check File or Folder Exists Plugin");
 
-    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    const taskProps = utils.resolveInputParameters();
     const { path, expression } = taskProps;
 
     this.checkFileOrFolderExistsWithProps(path, expression);
@@ -110,7 +110,7 @@ module.exports = {
     // Check if a file contains string or matches regular expression
     log.debug("Started Check File Contains String Plugin");
 
-    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    const taskProps = utils.resolveInputParameters();
     const { path, expression, flags, failIfNotFound = false } = taskProps;
 
     this.checkFileContainsStringWithProps(path, expression, flags, failIfNotFound);
@@ -139,7 +139,7 @@ module.exports = {
     // Replace string in file finding by string or regular expression
     log.debug("Started Replace String In File Plugin");
 
-    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    const taskProps = utils.resolveInputParameters();
     const { path, expression, replaceString, flags, failIfNotFound = false } = taskProps;
 
     this.replaceStringInFileWithProps(path, expression, replaceString, flags, failIfNotFound);
@@ -166,7 +166,7 @@ module.exports = {
     // Replace tokens in files
     log.debug("Started Replace Tokens in File Plugin");
 
-    const taskProps = utils.substituteTaskInputPropsValuesForWorkflowInputProps();
+    const taskProps = utils.resolveInputParameters();
     const {
       path,
       files,
