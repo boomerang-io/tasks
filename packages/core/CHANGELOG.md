@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.0.0...@boomerang-io/worker-core@1.1.0) (2021-01-06)
+
+### Features
+
+- updated versions of dependencies ([9856e2a](https://github.com/boomerang-io/boomerang.worker.main/commit/9856e2a270d889f9d9cae0266f871a769facb89d))
+
 # [1.0.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.10.1...@boomerang-io/worker-core@1.0.0) (2021-01-06)
 
 - feat!: deprecated substituteTaskInputProps() with resolveInputParams() ([0a09657](https://github.com/boomerang-io/boomerang.worker.main/commit/0a09657687adbd05a88a956ea379928d65f97a5a))

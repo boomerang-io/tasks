@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.18...@boomerang-io/worker-cli@0.8.0) (2021-01-06)
+
+### Features
+
+- updated versions of dependencies ([9856e2a](https://github.com/boomerang-io/boomerang.worker.main/commit/9856e2a270d889f9d9cae0266f871a769facb89d))
+
 ## [0.7.18](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.17...@boomerang-io/worker-cli@0.7.18) (2021-01-06)
 
 **Note:** Version bump only for package @boomerang-io/worker-cli
