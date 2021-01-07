@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.1.0...@boomerang-io/worker-core@1.1.1) (2021-01-07)
+
+### Bug Fixes
+
+- fixed context path to setting output parameter ([7c468bc](https://github.com/boomerang-io/boomerang.worker.main/commit/7c468bc09355f48441d3854795e50ff4573fef49))
+
 # [1.1.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.0.0...@boomerang-io/worker-core@1.1.0) (2021-01-06)
 
 ### Features
