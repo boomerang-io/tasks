@@ -200,13 +200,12 @@ module.exports = (function () {
       const taskId = taskSystemProps["task-id"];
       const taskName = taskSystemProps["task-name"].replace(/\s+/g, "");
 
-      //log.debug("  url: ", `http://${controllerUrl}/controller/parameters/set?workflowId=${workflowId}&workflowActivityId=${activityId}&taskId=${taskId}&taskName=${taskName}`);
       if (isLocalEnv) {
         return Promise.resolve();
       }
 
       return fetch(
-        `http://${controllerUrl}/controller/parameters/set?workflowId=${workflowId}&workflowActivityId=${activityId}&taskId=${taskId}&taskName=${taskName}`,
+        `http://${controllerUrl}/controller/results/parameters/set?workflowId=${workflowId}&workflowActivityId=${activityId}&taskId=${taskId}&taskName=${taskName}`,
         {
           method: "patch",
           body: JSON.stringify(parameters),
