@@ -129,9 +129,10 @@ module.exports = (function () {
       const workflowInputParams = props[PROPS_FILES_CONFIG.WORKFLOW_INPUT_PROPS_FILENAME];
 
       var allParamsDecoded = {};
-      log.debug("Decoding allParams content...");
       if (taskInputParams && Object.prototype.hasOwnProperty.call(taskInputParams, "allParams")) {
+        log.debug("Decoding allParams content...");
         allParamsDecoded = Buffer.from(taskInputParams["allParams"], "base64").toString("utf-8");
+        log.debug("All Parameters Decoded:\n", allParamsDecoded);
       }
       // Layered to ensure that system params cannot be overwritten by the user
 
