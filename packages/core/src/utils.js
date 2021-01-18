@@ -127,9 +127,18 @@ module.exports = (function () {
       const taskSystemParams = props[PROPS_FILES_CONFIG.TASK_SYSTEM_PROPS_FILENAME];
       const workflowSystemParams = props[PROPS_FILES_CONFIG.WORKFLOW_SYSTEM_PROPS_FILENAME];
       const workflowInputParams = props[PROPS_FILES_CONFIG.WORKFLOW_INPUT_PROPS_FILENAME];
+
+      var allParamsDecoded = {};
+      log.debug("Decoding allParams content...");
+      if (taskInputParams && Object.prototype.hasOwnProperty.call(taskInputParams, "allParams")) {
+        allParamsDecoded = Buffer.from(taskInputParams["allParams"], "base64").toString("utf-8");
+      }
       // Layered to ensure that system params cannot be overwritten by the user
+
+      log.debug("Returning stack parameters...");
       const layeredParams = {
         ...workflowInputParams,
+        ...allParamsDecoded,
         ...taskInputParams,
         ...workflowSystemParams,
         ...taskSystemParams,
