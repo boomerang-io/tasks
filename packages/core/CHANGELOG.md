@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.2](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.1...@boomerang-io/worker-core@1.2.2) (2021-01-19)
+
+### Bug Fixes
+
+- adding debug logging to allParams decoding ([75aba98](https://github.com/boomerang-io/boomerang.worker.main/commit/75aba981f552c8ace68dd43af910c596e58d7f72))
+
 ## [1.2.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.0...@boomerang-io/worker-core@1.2.1) (2021-01-18)
 
 ### Bug Fixes
