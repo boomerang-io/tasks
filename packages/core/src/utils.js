@@ -122,7 +122,7 @@ module.exports = (function () {
       return substitutedProps;
     },
     resolveInputParameters() {
-      log.debug("Resolving input parameters");
+      log.debug("Resolving input parameters...");
       const taskInputParams = props[PROPS_FILES_CONFIG.TASK_INPUT_PROPS_FILENAME];
       const taskSystemParams = props[PROPS_FILES_CONFIG.TASK_SYSTEM_PROPS_FILENAME];
       const workflowSystemParams = props[PROPS_FILES_CONFIG.WORKFLOW_SYSTEM_PROPS_FILENAME];
@@ -136,7 +136,7 @@ module.exports = (function () {
       }
       // Layered to ensure that system params cannot be overwritten by the user
 
-      log.debug("Returning stack parameters...");
+      log.debug("Returning resolved parameters...");
       const layeredParams = {
         ...workflowInputParams,
         ...allParamsDecoded,
