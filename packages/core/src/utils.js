@@ -187,6 +187,8 @@ module.exports = (function () {
       log.debug("Setting task output parameters");
       /**
        * Please note the current limitation that this method can only be called once.
+       *
+       * The controller endpoint also only accepts Map<String, String> so not full JSON
        */
       //Validation that parameters is in fact an array of key values
       try {
