@@ -206,7 +206,7 @@ module.exports = (function () {
       const taskSystemProps = props[TASK_SYSTEM_PROPS_FILENAME];
       const controllerUrl = workflowSystemProps["controller-service-url"];
       const workflowId = workflowSystemProps["workflow-id"];
-      const activityId = workflowSystemProps["activity-id"];
+      const activityId = workflowSystemProps["workflow-activity-id"];
       const taskId = taskSystemProps["task-id"];
       const taskName = taskSystemProps["task-name"].replace(/\s+/g, "");
 
