@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.3](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.2...@boomerang-io/worker-core@1.2.3) (2021-02-08)
+
+### Bug Fixes
+
+- setResultParameters to use workflow-activity-id ([dd8c4df](https://github.com/boomerang-io/boomerang.worker.main/commit/dd8c4dfd7c960f8d21f6be3ad61d4bf45dc15ced))
+
 ## [1.2.2](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.1...@boomerang-io/worker-core@1.2.2) (2021-01-19)
 
 ### Bug Fixes
