@@ -131,7 +131,23 @@ module.exports = (function () {
       var allParamsDecoded = {};
       if (taskInputParams && Object.prototype.hasOwnProperty.call(taskInputParams, "allParams")) {
         log.debug("Decoding allParams content...");
-        allParamsDecoded = Buffer.from(taskInputParams["allParams"], "base64").toString("utf-8");
+        var options = {
+          comments: "#",
+          separators: "=",
+          strict: true,
+          reviver: function (key, value) {
+            if (key != null && value == null) {
+              return '""';
+            } else {
+              //Returns all the lines
+              return this.assert();
+            }
+          },
+        };
+        allParamsDecoded = properties.parse(
+          Buffer.from(taskInputParams["allParams"], "base64").toString("utf-8"),
+          options
+        );
         log.debug("All Parameters Decoded:\n", allParamsDecoded);
       }
       // Layered to ensure that system params cannot be overwritten by the user
