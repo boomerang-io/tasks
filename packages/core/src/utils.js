@@ -219,12 +219,11 @@ module.exports = (function () {
 
       log.debug("  parameters: ", JSON.stringify(parameters));
 
-      const { WORKFLOW_SYSTEM_PROPS_FILENAME, TASK_SYSTEM_PROPS_FILENAME } = PROPS_FILES_CONFIG;
-      const workflowSystemProps = props[WORKFLOW_SYSTEM_PROPS_FILENAME];
+      const { TASK_SYSTEM_PROPS_FILENAME } = PROPS_FILES_CONFIG;
       const taskSystemProps = props[TASK_SYSTEM_PROPS_FILENAME];
-      const controllerUrl = workflowSystemProps["controller-service-url"];
-      const workflowId = workflowSystemProps["workflow-id"];
-      const activityId = workflowSystemProps["workflow-activity-id"];
+      const controllerUrl = taskSystemProps["controller-service-url"];
+      const workflowId = taskSystemProps["workflow-id"];
+      const activityId = taskSystemProps["workflow-activity-id"];
       const taskId = taskSystemProps["task-id"];
       const taskName = taskSystemProps["task-name"].replace(/\s+/g, "");
 
