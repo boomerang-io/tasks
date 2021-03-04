@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.6](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.5...@boomerang-io/worker-core@1.2.6) (2021-03-04)
+
+### Bug Fixes
+
+- reverting last change ([f1a51f1](https://github.com/boomerang-io/boomerang.worker.main/commit/f1a51f1e70d65e32337e502865bab262a55ba901))
+
 ## [1.2.5](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.4...@boomerang-io/worker-core@1.2.5) (2021-03-04)
 
 ### Bug Fixes
