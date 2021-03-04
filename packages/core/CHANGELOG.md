@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.5](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.4...@boomerang-io/worker-core@1.2.5) (2021-03-04)
+
+### Bug Fixes
+
+- setOutputParametersPropsReferences ([9d68771](https://github.com/boomerang-io/boomerang.worker.main/commit/9d68771144a34e5bfbb8c4836345a7e3f6f55fdf))
+
 ## [1.2.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.3...@boomerang-io/worker-core@1.2.4) (2021-02-12)
 
 ### Bug Fixes
