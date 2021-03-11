@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.7](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.6...@boomerang-io/worker-core@1.2.7) (2021-03-11)
+
+### Bug Fixes
+
+- removed the base64decoding method in utils resolveParameters ([cc69778](https://github.com/boomerang-io/boomerang.worker.main/commit/cc6977843899078c9e4b5e1ee4202be80daecd3c))
+
 ## [1.2.6](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.5...@boomerang-io/worker-core@1.2.6) (2021-03-04)
 
 ### Bug Fixes
