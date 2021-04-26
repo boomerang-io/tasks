@@ -3,6 +3,93 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.7](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.6...@boomerang-io/worker-core@1.2.7) (2021-03-11)
+
+### Bug Fixes
+
+- removed the base64decoding method in utils resolveParameters ([cc69778](https://github.com/boomerang-io/boomerang.worker.main/commit/cc6977843899078c9e4b5e1ee4202be80daecd3c))
+
+## [1.2.6](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.5...@boomerang-io/worker-core@1.2.6) (2021-03-04)
+
+### Bug Fixes
+
+- reverting last change ([f1a51f1](https://github.com/boomerang-io/boomerang.worker.main/commit/f1a51f1e70d65e32337e502865bab262a55ba901))
+
+## [1.2.5](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.4...@boomerang-io/worker-core@1.2.5) (2021-03-04)
+
+### Bug Fixes
+
+- setOutputParametersPropsReferences ([9d68771](https://github.com/boomerang-io/boomerang.worker.main/commit/9d68771144a34e5bfbb8c4836345a7e3f6f55fdf))
+
+## [1.2.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.3...@boomerang-io/worker-core@1.2.4) (2021-02-12)
+
+### Bug Fixes
+
+- parsed allParams after decoding ([2496924](https://github.com/boomerang-io/boomerang.worker.main/commit/249692466e6924bcdec3fba604e1c82c4bd2adf0))
+
+## [1.2.3](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.2...@boomerang-io/worker-core@1.2.3) (2021-02-08)
+
+### Bug Fixes
+
+- setResultParameters to use workflow-activity-id ([dd8c4df](https://github.com/boomerang-io/boomerang.worker.main/commit/dd8c4dfd7c960f8d21f6be3ad61d4bf45dc15ced))
+
+## [1.2.2](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.1...@boomerang-io/worker-core@1.2.2) (2021-01-19)
+
+### Bug Fixes
+
+- adding debug logging to allParams decoding ([75aba98](https://github.com/boomerang-io/boomerang.worker.main/commit/75aba981f552c8ace68dd43af910c596e58d7f72))
+
+## [1.2.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.0...@boomerang-io/worker-core@1.2.1) (2021-01-18)
+
+### Bug Fixes
+
+- adding debug logging to allParams decoding ([86f40a3](https://github.com/boomerang-io/boomerang.worker.main/commit/86f40a3eb3b0906ccfc9128002c94c9ea027034d))
+
+# [1.2.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.1.1...@boomerang-io/worker-core@1.2.0) (2021-01-18)
+
+### Features
+
+- testing addition of allParams decoding ([ebdb2e2](https://github.com/boomerang-io/boomerang.worker.main/commit/ebdb2e233536229fda008b9e2b89241428a43fe8))
+
+## [1.1.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.1.0...@boomerang-io/worker-core@1.1.1) (2021-01-07)
+
+### Bug Fixes
+
+- fixed context path to setting output parameter ([7c468bc](https://github.com/boomerang-io/boomerang.worker.main/commit/7c468bc09355f48441d3854795e50ff4573fef49))
+
+# [1.1.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.0.0...@boomerang-io/worker-core@1.1.0) (2021-01-06)
+
+### Features
+
+- updated versions of dependencies ([9856e2a](https://github.com/boomerang-io/boomerang.worker.main/commit/9856e2a270d889f9d9cae0266f871a769facb89d))
+
+# [1.0.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.10.1...@boomerang-io/worker-core@1.0.0) (2021-01-06)
+
+- feat!: deprecated substituteTaskInputProps() with resolveInputParams() ([0a09657](https://github.com/boomerang-io/boomerang.worker.main/commit/0a09657687adbd05a88a956ea379928d65f97a5a))
+
+### BREAKING CHANGES
+
+- the util.substituteTaskInputPropsValuesForWorkflowInputProps() method has been replaced to match the new parameters implementation where parameters (not properties) are resolved by the workflow service
+
+## [0.10.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.10.0...@boomerang-io/worker-core@0.10.1) (2021-01-05)
+
+### Bug Fixes
+
+- updated setOutputProperties to correctly reference system params ([c14c215](https://github.com/boomerang-io/boomerang.worker.main/commit/c14c215b9d4b6fd282bc30d12ef2131db128405f))
+
+# [0.10.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.9.0...@boomerang-io/worker-core@0.10.0) (2021-01-05)
+
+### Features
+
+- new method resolveInputParams ([75e75a8](https://github.com/boomerang-io/boomerang.worker.main/commit/75e75a8afc457c40d23a2f39109a1b47ce4272c7))
+- new method resolveInputParams ([550044f](https://github.com/boomerang-io/boomerang.worker.main/commit/550044fe22d76fad05ef91db0fea05cb6a6ce017))
+
+# [0.9.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.8.4...@boomerang-io/worker-core@0.9.0) (2020-12-21)
+
+### Features
+
+- added new resolveCICDInputProps for PoC ([3c1c91a](https://github.com/boomerang-io/boomerang.worker.main/commit/3c1c91a80b404d6ca4b1126c4b2cfa3bc3b0888c))
+
 ## [0.8.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@0.8.3...@boomerang-io/worker-core@0.8.4) (2020-09-25)
 
 ### Bug Fixes

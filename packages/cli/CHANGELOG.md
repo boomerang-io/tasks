@@ -3,6 +3,68 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.9](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.8...@boomerang-io/worker-cli@0.8.9) (2021-03-11)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.8.8](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.7...@boomerang-io/worker-cli@0.8.8) (2021-03-04)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.8.7](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.6...@boomerang-io/worker-cli@0.8.7) (2021-03-04)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.8.6](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.5...@boomerang-io/worker-cli@0.8.6) (2021-02-12)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.8.5](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.4...@boomerang-io/worker-cli@0.8.5) (2021-02-08)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.8.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.3...@boomerang-io/worker-cli@0.8.4) (2021-01-19)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.8.3](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.2...@boomerang-io/worker-cli@0.8.3) (2021-01-18)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.8.2](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.1...@boomerang-io/worker-cli@0.8.2) (2021-01-18)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.8.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.0...@boomerang-io/worker-cli@0.8.1) (2021-01-07)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+# [0.8.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.18...@boomerang-io/worker-cli@0.8.0) (2021-01-06)
+
+### Features
+
+- updated versions of dependencies ([9856e2a](https://github.com/boomerang-io/boomerang.worker.main/commit/9856e2a270d889f9d9cae0266f871a769facb89d))
+
+## [0.7.18](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.17...@boomerang-io/worker-cli@0.7.18) (2021-01-06)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.7.17](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.16...@boomerang-io/worker-cli@0.7.17) (2021-01-05)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.7.16](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.15...@boomerang-io/worker-cli@0.7.16) (2021-01-05)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.7.15](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.14...@boomerang-io/worker-cli@0.7.15) (2020-12-31)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
+## [0.7.14](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.13...@boomerang-io/worker-cli@0.7.14) (2020-12-21)
+
+**Note:** Version bump only for package @boomerang-io/worker-cli
+
 ## [0.7.13](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.7.12...@boomerang-io/worker-cli@0.7.13) (2020-09-25)
 
 **Note:** Version bump only for package @boomerang-io/worker-cli
