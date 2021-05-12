@@ -195,29 +195,20 @@ module.exports = (function () {
 
       log.debug("  parameters: ", JSON.stringify(parameters));
 
-      const { WORKFLOW_SYSTEM_PROPS_FILENAME, TASK_SYSTEM_PROPS_FILENAME } = PROPS_FILES_CONFIG;
-      const workflowSystemProps = props[WORKFLOW_SYSTEM_PROPS_FILENAME];
-      const taskSystemProps = props[TASK_SYSTEM_PROPS_FILENAME];
-      const controllerUrl = workflowSystemProps["controller-service-url"];
-      const workflowId = workflowSystemProps["workflow-id"];
-      const activityId = workflowSystemProps["workflow-activity-id"];
-      const taskId = taskSystemProps["task-id"];
-      const taskName = taskSystemProps["task-name"].replace(/\s+/g, "");
-
-      if (isLocalEnv) {
-        return Promise.resolve();
-      }
-
-      return fetch(
-        `http://${controllerUrl}/controller/results/parameters/set?workflowId=${workflowId}&workflowActivityId=${activityId}&taskId=${taskId}&taskName=${taskName}`,
-        {
-          method: "patch",
-          body: JSON.stringify(parameters),
-          headers: { "Content-Type": "application/json" },
+      parameters.forEach((parameterKey, parameterValue) => {
+        log.debug("Setting task output parameter ", parameterKey, " = ", parameterValue);
+        try {
+          fs.writeFileSync("/tekton/results/" + parameterKey, parameterValue, err => {
+            if (err) {
+              log.err(err);
+              throw err;
+            }
+            log.debug("The task output parameter successfully saved.");
+          });
+        } catch (e) {
+          log.err(e);
         }
-      )
-        .then((res) => log.debug(res))
-        .catch((err) => log.err("setOutputParameters", err));
+      });
     },
   };
 })();
