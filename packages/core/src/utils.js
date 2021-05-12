@@ -2,7 +2,6 @@ const log = require("./log");
 const properties = require("properties");
 const fetch = require("node-fetch");
 const fs = require("fs");
-const { isLocalEnv } = require("./config");
 const { workflowProps, PROPS_FILES_CONFIG } = require("./config");
 
 /**
@@ -177,11 +176,6 @@ module.exports = (function () {
     },
     async setOutputParameters(parameters) {
       log.debug("Setting task output parameters");
-      /**
-       * Please note the current limitation that this method can only be called once.
-       *
-       * The controller endpoint also only accepts Map<String, String> so not full JSON
-       */
       //Validation that parameters is in fact an array of key values
       try {
         if (!(Object.keys(parameters) && typeof parameters === "object")) {
@@ -195,7 +189,7 @@ module.exports = (function () {
 
       log.debug("  parameters: ", JSON.stringify(parameters));
 
-      parameters.forEach((parameterKey, parameterValue) => {
+      for (const [parameterKey, parameterValue] of Object.entries(parameters)) {
         log.debug("Setting task output parameter ", parameterKey, " = ", parameterValue);
         try {
           fs.writeFileSync("/tekton/results/" + parameterKey, parameterValue, err => {
@@ -208,7 +202,7 @@ module.exports = (function () {
         } catch (e) {
           log.err(e);
         }
-      });
+      }
     },
   };
 })();
