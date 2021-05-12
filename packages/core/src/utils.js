@@ -187,20 +187,33 @@ module.exports = (function () {
         return;
       }
 
+      let systemConfiguredPath = await this.resolveInputParameter("controller.task.output");
+      let resultsPath = systemConfiguredPath !== undefined ? systemConfiguredPath : "/tekton/results";
+
       log.debug("  parameters: ", JSON.stringify(parameters));
 
-      for (const [parameterKey, parameterValue] of Object.entries(parameters)) {
-        log.debug("Setting task output parameter ", parameterKey, " = ", parameterValue);
-        try {
-          fs.writeFileSync("/tekton/results/" + parameterKey, parameterValue, err => {
-            if (err) {
-              log.err(err);
-              throw err;
+      //check if folder exists
+      if (!fs.existsSync(resultsPath)) {
+        log.warn("unable to set the output parameters, destination path doesn't exists ", resultsPath);
+      } else {
+        for (const [parameterKey, parameterValue] of Object.entries(parameters)) {
+          log.debug("Setting task output parameter ", parameterKey, " = ", parameterValue);
+          try {
+            //check if folder doesn't exists, create it
+            if (!fs.existsSync(resultsPath)) {
+              log.warn("unable to set the output parameters, destination path doesn't exists ", resultsPath);
+            } else {
+              fs.writeFileSync(resultsPath + "/" + parameterKey, parameterValue, err => {
+                if (err) {
+                  log.err(err);
+                  throw err;
+                }
+                log.debug("The task output parameter successfully saved.");
+              });
             }
-            log.debug("The task output parameter successfully saved.");
-          });
-        } catch (e) {
-          log.err(e);
+          } catch (e) {
+            log.err(e);
+          }
         }
       }
     },
