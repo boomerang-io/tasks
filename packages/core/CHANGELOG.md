@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.5](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.4...@boomerang-io/worker-core@1.3.5) (2021-05-13)
+
+**Note:** Version bump only for package @boomerang-io/worker-core
+
+## [1.3.4](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.3...@boomerang-io/worker-core@1.3.4) (2021-05-13)
+
+**Note:** Version bump only for package @boomerang-io/worker-core
+
+## [1.3.3](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.2...@boomerang-io/worker-core@1.3.3) (2021-05-12)
+
+**Note:** Version bump only for package @boomerang-io/worker-core
+
+## [1.3.2](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.1...@boomerang-io/worker-core@1.3.2) (2021-05-12)
+
+**Note:** Version bump only for package @boomerang-io/worker-core
+
+## [1.3.1](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.0...@boomerang-io/worker-core@1.3.1) (2021-05-12)
+
+**Note:** Version bump only for package @boomerang-io/worker-core
+
 ## [1.2.7](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.2.6...@boomerang-io/worker-core@1.2.7) (2021-03-11)
 
 ### Bug Fixes

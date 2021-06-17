@@ -2,7 +2,6 @@ const log = require("./log");
 const properties = require("properties");
 const fetch = require("node-fetch");
 const fs = require("fs");
-const { isLocalEnv } = require("./config");
 const { workflowProps, PROPS_FILES_CONFIG } = require("./config");
 
 /**
@@ -177,11 +176,6 @@ module.exports = (function () {
     },
     async setOutputParameters(parameters) {
       log.debug("Setting task output parameters");
-      /**
-       * Please note the current limitation that this method can only be called once.
-       *
-       * The controller endpoint also only accepts Map<String, String> so not full JSON
-       */
       //Validation that parameters is in fact an array of key values
       try {
         if (!(Object.keys(parameters) && typeof parameters === "object")) {
@@ -193,31 +187,35 @@ module.exports = (function () {
         return;
       }
 
+      let systemConfiguredPath = await this.resolveInputParameter("controller.task.output");
+      let resultsPath = systemConfiguredPath !== undefined ? systemConfiguredPath : "/tekton/results";
+
       log.debug("  parameters: ", JSON.stringify(parameters));
 
-      const { WORKFLOW_SYSTEM_PROPS_FILENAME, TASK_SYSTEM_PROPS_FILENAME } = PROPS_FILES_CONFIG;
-      const workflowSystemProps = props[WORKFLOW_SYSTEM_PROPS_FILENAME];
-      const taskSystemProps = props[TASK_SYSTEM_PROPS_FILENAME];
-      const controllerUrl = workflowSystemProps["controller-service-url"];
-      const workflowId = workflowSystemProps["workflow-id"];
-      const activityId = workflowSystemProps["workflow-activity-id"];
-      const taskId = taskSystemProps["task-id"];
-      const taskName = taskSystemProps["task-name"].replace(/\s+/g, "");
-
-      if (isLocalEnv) {
-        return Promise.resolve();
-      }
-
-      return fetch(
-        `http://${controllerUrl}/controller/results/parameters/set?workflowId=${workflowId}&workflowActivityId=${activityId}&taskId=${taskId}&taskName=${taskName}`,
-        {
-          method: "patch",
-          body: JSON.stringify(parameters),
-          headers: { "Content-Type": "application/json" },
+      //check if folder exists
+      if (!fs.existsSync(resultsPath)) {
+        log.warn("unable to set the output parameters, destination path doesn't exists ", resultsPath);
+      } else {
+        for (const [parameterKey, parameterValue] of Object.entries(parameters)) {
+          log.debug("Setting task output parameter ", parameterKey, " = ", parameterValue);
+          try {
+            //check if folder doesn't exists, create it
+            if (!fs.existsSync(resultsPath)) {
+              log.warn("unable to set the output parameters, destination path doesn't exists ", resultsPath);
+            } else {
+              fs.writeFileSync(resultsPath + "/" + parameterKey, parameterValue, err => {
+                if (err) {
+                  log.err(err);
+                  throw err;
+                }
+                log.debug("The task output parameter successfully saved.");
+              });
+            }
+          } catch (e) {
+            log.err(e);
+          }
         }
-      )
-        .then((res) => log.debug(res))
-        .catch((err) => log.err("setOutputParameters", err));
+      }
     },
   };
 })();
