@@ -1,6 +1,5 @@
 const log = require("./log");
 const properties = require("properties");
-const fetch = require("node-fetch");
 const fs = require("fs");
 const { workflowProps, PROPS_FILES_CONFIG } = require("./config");
 
@@ -196,14 +195,17 @@ module.exports = (function () {
       if (!fs.existsSync(resultsPath)) {
         log.warn("unable to set the output parameters, destination path doesn't exists ", resultsPath);
       } else {
-        for (const [parameterKey, parameterValue] of Object.entries(parameters)) {
+        for (var [parameterKey, parameterValue] of Object.entries(parameters)) {
           log.debug("Setting task output parameter ", parameterKey, " = ", parameterValue);
           try {
             //check if folder doesn't exists, create it
             if (!fs.existsSync(resultsPath)) {
               log.warn("unable to set the output parameters, destination path doesn't exists ", resultsPath);
             } else {
-              fs.writeFileSync(resultsPath + "/" + parameterKey, parameterValue, err => {
+              if (typeof parameterValue === "number" || typeof parameterValue === "object") {
+                parameterValue = JSON.stringify(parameterValue);
+              }
+              fs.writeFileSync(resultsPath + "/" + parameterKey, parameterValue, (err) => {
                 if (err) {
                   log.err(err);
                   throw err;
