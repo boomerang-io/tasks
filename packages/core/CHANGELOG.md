@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.6](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.5...@boomerang-io/worker-core@1.3.6) (2021-06-25)
+
+### Bug Fixes
+
+- convert number and object when setting output parameter ([1c7ff0a](https://github.com/boomerang-io/boomerang.worker.main/commit/1c7ff0a8ef32e9fa9f463dfbcf9338dac256cce8))
+
 ## [1.3.5](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.4...@boomerang-io/worker-core@1.3.5) (2021-05-13)
 
 **Note:** Version bump only for package @boomerang-io/worker-core
