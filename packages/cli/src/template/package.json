@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Boomerang Worker Template",
   "repository": "git@github.com:boomerang-io/boomerang.worker.template.git",
-  "author": "Boomerang Joe <boomrng@us.ibm.com>",
+  "author": "Boomerang Joe <>",
   "type": "commonjs",
   "engines": {
     "node": ">=10"
