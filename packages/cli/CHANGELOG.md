@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.15...@boomerang-io/worker-cli@0.9.0) (2021-07-27)
+
+### Bug Fixes
+
+- updated legacy parts ([4424f6c](https://github.com/boomerang-io/boomerang.worker.main/commit/4424f6cff82ee61de6f4fce036a5417f784c782d))
+
+### Features
+
+- added new greeting with ENV input ([e4efdcb](https://github.com/boomerang-io/boomerang.worker.main/commit/e4efdcb5640935d343f054ee41670f3925b994e0))
+
 ## [0.8.15](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-cli@0.8.14...@boomerang-io/worker-cli@0.8.15) (2021-06-25)
 
 **Note:** Version bump only for package @boomerang-io/worker-cli
