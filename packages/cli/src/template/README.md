@@ -10,13 +10,30 @@ Starter template for creating Boomerang Flow Workers
 ```js
 // ./commands/greetings.js
 module.exports = {
-  hello: () => console.log("Hello from Boomerang"),
+  hello: () => console.log("Hello from Boomerang Flow"),
   goodbye: () => console.log("Goodbye, friend"),
 };
 ```
 
+### Basic Hello
+
 ```sh
 npm start -- greetings hello
+```
+
+### With ENV input
+
+```sh
+export FLOW_FRIEND=Joe
+npm start -- greetings helloFriend
+```
+
+This will return with
+
+```
+01/01/21 10:11:12 🤖  Boomerang Worker CLI 2.0.0
+01/01/21 10:11:12 🤖  Executing command helloFriend
+01/01/21 10:11:12 🤖  Hello Joe, welcome to Boomerang Flow!
 ```
 
 ## Folder Structure
