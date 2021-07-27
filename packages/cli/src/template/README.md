@@ -1,6 +1,6 @@
-# Boomerang Worker Template
+# Boomerang Flow Worker Template
 
-Starter template for creating Boomerang Workers
+Starter template for creating Boomerang Flow Workers
 
 ## Getting Started
 
@@ -21,7 +21,6 @@ npm start -- greetings hello
 
 ## Folder Structure
 
-    |-- .npmrc
     |-- .gitignore
     |-- Dockerfile
     |-- package.json

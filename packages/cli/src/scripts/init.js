@@ -115,7 +115,7 @@ function updatePackageJson(fileContent, projectName) {
   const packageJson = JSON.parse(fileContent);
   packageJson.name = projectName;
   packageJson.description = projectName.split(".").map(capitalize).join(" ");
-  packageJson.repository = `git@github.ibm.com:Boomerang/${projectName}.git`;
+  packageJson.repository = `git@github.com:boomerang-io/${projectName}.git`;
   packageJson.dependencies = {}; // Set to empty so latest versions of @boomerang-worker are installed
   return JSON.stringify(packageJson);
 }
