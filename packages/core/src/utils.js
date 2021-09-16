@@ -204,6 +204,8 @@ module.exports = (function () {
             } else {
               if (typeof parameterValue === "number" || typeof parameterValue === "object") {
                 parameterValue = JSON.stringify(parameterValue);
+              } else if (typeof parameterValue === "boolean") {
+                parameterValue = String(parameterValue) 
               }
               fs.writeFileSync(resultsPath + "/" + parameterKey, parameterValue, (err) => {
                 if (err) {
