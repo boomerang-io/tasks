@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-io/worker-core",
-  "version": "1.3.8",
+  "version": "1.3.9",
   "description": "Boomerang Worker Core",
   "main": "src/index.js",
   "repository": "git@github.com:boomerang-io/boomerang.worker.main.git",
@@ -27,5 +27,5 @@
   "devDependencies": {
     "cross-env": "^7.0.2"
   },
-  "gitHead": "4bddac183eb2a2ba717f4b1ecf4e0afba9f3676d"
+  "gitHead": "878e09f06d7df2ea3d3c054e539ee405f30934f8"
 }

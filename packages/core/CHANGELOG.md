@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.9](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.8...@boomerang-io/worker-core@1.3.9) (2021-09-17)
+
+**Note:** Version bump only for package @boomerang-io/worker-core
+
 ## [1.3.8](https://github.com/boomerang-io/boomerang.worker.main/compare/@boomerang-io/worker-core@1.3.6...@boomerang-io/worker-core@1.3.8) (2021-09-17)
 
 **Note:** Version bump only for package @boomerang-io/worker-core
