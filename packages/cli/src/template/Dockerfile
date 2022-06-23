@@ -1,5 +1,5 @@
 #Import the base Alpine image
-FROM alpine:3.13.5
+FROM alpine:3.15.4
 
 WORKDIR /opt/bin
 
@@ -7,7 +7,8 @@ WORKDIR /opt/bin
 RUN apk add --no-cache bash sed grep curl coreutils nodejs npm
 
 WORKDIR /cli
-ADD ./package.json ./package-lock.json ./
+# 'package-lock.json' contains `*` to not enforce file existance
+ADD ./package.json ./package-lock*.json ./ 
 ADD ./commands ./commands
 RUN npm install --production
 
