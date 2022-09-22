@@ -5,8 +5,8 @@
   "bin": {
     "boomerang-worker-cli": "./bin/cli.js"
   },
-  "repository": "git@github.com:boomerang-io/boomerang.worker.main.git",
-  "author": "Tyson Lawrie <twlawrie@us.ibm.com>",
+  "repository": "git@github.com:boomerang-io/worker-interfaces.git",
+  "author": "Tyson Lawrie <tyson@lawrie.com.au>",
   "license": "Apache-2.0",
   "type": "commonjs",
   "publishConfig": {
@@ -24,10 +24,10 @@
   },
   "dependencies": {
     "@boomerang-io/worker-core": "^1.3.11",
-    "commander": "^6.2.1",
+    "commander": "^9.4.0",
     "cross-spawn": "^7.0.3",
-    "dotenv": "^8.6.0",
-    "inquirer": "^7.3.3",
+    "dotenv": "^16.0.2",
+    "inquirer": "^9.1.2",
     "node-datetime": "^2.1.2",
     "require-all": "^3.0.0",
     "shelljs": "^0.8.5"

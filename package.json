@@ -2,8 +2,8 @@
   "name": "@boomerang-io/boomerang-worker",
   "version": "0.0.0",
   "private": true,
-  "repository": "git@github.com:boomerang-io/boomerang.worker.main.git",
-  "author": "Tyson Lawrie <twlawrie@us.ibm.com>",
+  "repository": "git@github.com:boomerang-io/worker.interfaces.git",
+  "author": "Tyson Lawrie <tyson@lawrie.com.au>",
   "license": "MIT",
   "type": "commonjs",
   "engines": {
@@ -24,14 +24,14 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.0.0",
-    "@commitlint/config-conventional": "^17.0.0",
+    "@commitlint/cli": "^17.1.0",
+    "@commitlint/config-conventional": "^17.1.0",
     "cross-env": "^7.0.2",
-    "eslint": "^8.18.0",
+    "eslint": "^8.23.0",
     "eslint-plugin-node": "^11.1.0",
     "husky": "^8.0.0",
-    "jest": "^28.1.1",
-    "lerna": "^5.1.4",
+    "jest": "^29.0.3",
+    "lerna": "^5.5.2",
     "lerna-changelog": "^2.2.0",
     "lint-staged": "^13.0.2",
     "prettier": "^2.7.1"
