@@ -30,7 +30,7 @@ The CLI has a main `cli.js` which imports all the `*.js` files under `./commands
 
 ### Project Structure
 
-Uses [yarn workspaces](https://classic.yarnpkg.com/en/docs/workspaces/) and [lerna](https://github.com/lerna/lerna) to manage the project as a monorepo.
+Uses [pnpm workspaces](https://pnpm.io/workspaces) and [lerna](https://github.com/lerna/lerna) to manage the project as a monorepo.
 
 ### Handling Failure
 
@@ -40,7 +40,7 @@ When a method fails, we need to set or return (depending on the type of method) 
 
 The following command will use lerna to release new versions of the modules. It determines minor and iteration release numbers and the changelog based on git commit messages.
 
-`yarn release`
+`pnpm release`
 
 ## Clean up
 

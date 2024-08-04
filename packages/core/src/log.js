@@ -1,6 +1,8 @@
 const chalk = require("chalk");
-const datetime = require("node-datetime");
+const { format } = require("date-fns");
 const { isDebug } = require("./config");
+
+const formatted = format(new Date(), "yyyy-MM-dd HH:mm:ss");
 
 module.exports = {
   out(...args) {
@@ -8,24 +10,24 @@ module.exports = {
   },
   debug(...args) {
     if (isDebug) {
-      console.log(chalk.gray(`${datetime.create().format("m/d/y H:M:S")}`), "🔍 ", ...args);
+      console.log(chalk.gray(formatted, "🔍 ", ...args);
     }
   },
   sys(...args) {
-    console.log(chalk.blue(`${datetime.create().format("m/d/y H:M:S")}`, "🤖 ", ...args));
+    console.log(chalk.blue(formatted, "🤖 ", ...args));
   },
   ci(...args) {
     console.log(
-      chalk.blue(`${datetime.create().format("m/d/y H:M:S")}`, "🏗️ ", "-".repeat(20), ...args, "-".repeat(20))
+      chalk.blue(formatted, "🏗️ ", "-".repeat(20), ...args, "-".repeat(20))
     );
   },
   good(...args) {
-    console.log(chalk.green(`${datetime.create().format("m/d/y H:M:S")}`, "✅ ", ...args));
+    console.log(chalk.green(formatted, "✅ ", ...args));
   },
   warn(...args) {
-    console.log(chalk.yellow(`${datetime.create().format("m/d/y H:M:S")}`, "⚠️ ", ...args));
+    console.log(chalk.yellow(formatted, "⚠️ ", ...args));
   },
   err(...args) {
-    console.log(chalk.red(`${datetime.create().format("m/d/y H:M:S")}`, "❗ ", ...args));
+    console.log(chalk.red(formatted, "❗ ", ...args));
   },
 };
