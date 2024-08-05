@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-io/worker-cli",
-  "version": "1.0.0-alpha.15",
+  "version": "1.0.0-alpha.16",
   "description": "Boomerang Worker CLI",
   "homepage": "https://useboomerang.io",
   "bin": {
