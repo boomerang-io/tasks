@@ -3,7 +3,6 @@
     "packages/*"
   ],
   "npmClient": "pnpm",
-  "useWorkspaces": true,
   "version": "independent",
   "ignoreChanges": [
     "**/__fixtures__/**",
