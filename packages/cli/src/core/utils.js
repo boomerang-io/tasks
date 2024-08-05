@@ -1,12 +1,12 @@
-const log = require("./log");
-const properties = require("properties");
-const fs = require("fs");
-const { workflowProps, PROPS_FILES_CONFIG } = require("./config");
+import * as log  from "./log.js";
+import properties from "properties";
+import fs from "fs";
+import { workflowProps, PROPS_FILES_CONFIG } from "./config";
 
 /**
- * Use IFFE to enscapsulate parameters
+ * Use IIFE to encapsulate parameters
  */
-module.exports = (function () {
+export default (function () {
   // Read in parameter property files
   let files = [];
   try {

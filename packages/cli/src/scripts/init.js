@@ -1,10 +1,8 @@
-"use strict";
-
-const execSync = require("child_process").execSync;
-const fs = require("fs");
-const path = require("path");
-const spawn = require("cross-spawn");
-const { log } = require("@boomerang-io/worker-core");
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import spawn from "cross-spawn";
+import * as log  from "../core/log.js";
 
 const CURR_DIR = process.cwd();
 
@@ -230,5 +228,3 @@ function init(projectName, commandName) {
     log.err("Something went wrong", err);
   }
 }
-
-module.exports = init;

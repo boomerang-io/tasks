@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-"use strict";
 
-const cli = require("../src/cli");
-const { log } = require("@boomerang-io/worker-core");
+import cli from '../src/cli.js';
+import * as log  from "../src/core/log.js";
 
 const { node: currentNodeVersion } = process.versions;
 const semver = currentNodeVersion.split(".");
@@ -12,14 +11,18 @@ process.on("unhandledRejection", (error) => {
   log.err(error);
 });
 
-if (major < 8) {
-  log.err(
-    `You are running Node ${currentNodeVersion}.\n` +
-      `boomerang-worker-cli requires Node 8 or higher, please update your ` +
+function checkNodeVersion() {
+  if (major < 18) {
+    log.err(
+      `You are running Node ${currentNodeVersion}.\n` +
+      `boomerang-worker-cli requires Node 18 or higher, please update your ` +
       `version of Node.`
-  );
-  process.exit(1);
+    );
+    process.exit(1);
+  }
 }
+
+checkNodeVersion();
 
 cli(process).catch((error) => {
   log.err(error);

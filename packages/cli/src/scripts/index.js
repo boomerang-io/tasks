@@ -1,7 +1,3 @@
-"use strict";
+import * as init  from "./init.js";
 
-const init = require("./init");
-
-module.exports = {
-  init,
-};
+export { init };

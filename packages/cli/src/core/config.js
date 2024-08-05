@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 const { NODE_ENV, DEBUG } = process.env;
-const appRoot = require("app-root-path");
+import appRoot from "app-root-path";
 
 const isDebug = DEBUG === "true";
 const isLocalEnv = NODE_ENV === "local";
@@ -46,7 +46,7 @@ const PROPS_FILES_CONFIG = {
   INPUT_PROPS_FILENAME_PATTERN: /^.+\.output\.properties$/,
 };
 
-module.exports = {
+export {
   inputOptions,
   workflowProps,
   outputOptions,

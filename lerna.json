@@ -2,8 +2,7 @@
   "packages": [
     "packages/*"
   ],
-  "npmClient": "yarn",
-  "useWorkspaces": true,
+  "npmClient": "pnpm",
   "version": "independent",
   "ignoreChanges": [
     "**/__fixtures__/**",
