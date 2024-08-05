@@ -1,6 +1,5 @@
 import { program } from "commander";
 import inquirer from "inquirer";
-import * as requireAll from "require-all";
 import * as log  from "./core/log.js"
 import init from './scripts/init.js'
 import 'dotenv/config';
@@ -57,6 +56,31 @@ const askInitQuestions = async () => {
   return await inquirer.prompt(question);
 };
 
+/** Find all command files */
+async function importAll(directory) {
+  const excludePattern = /^\.(git|svn|test|tests|__tests__)$/;
+  const modules = {};
+
+  const files = readdirSync(directory);
+  for (const file of files) {
+    if (excludePattern.test(file)) {
+      continue; // Skip files or directories that match the exclusion pattern
+    }
+    const fullPath = join(directory, file);
+    const stat = statSync(fullPath);
+
+    if (stat.isFile() && file.endsWith('.js')) {
+      const moduleName = basename(file, '.js');
+      const module = await import(fullPath);
+      modules[moduleName] = module;
+    } else if (stat.isDirectory()) {
+      modules[file] = await importAll(fullPath);
+    }
+  }
+
+  return modules;
+}
+
 /**
  * Boomerang Worker CLI
  * @param {EventEmitter} process - global Node.js process object for the current process
@@ -84,12 +108,7 @@ export default async function cli(process) {
     let commands = {};
     try {
       // Filter out test and other non-compliant .js files
-      commands = requireAll({
-        dirname: `${process.cwd()}/commands`,
-        filter: /(.+)\.js$/,
-        excludeDirs: /^\.(git|svn|test|tests|__tests__)$/,
-        recursive: true,
-      });
+      commands = importAll(`${process.cwd()}/commands`);
     } catch (err) {
       log.err("Failed to register commands", err);
       return;
