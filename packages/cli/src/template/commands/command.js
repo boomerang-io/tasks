@@ -1,18 +1,11 @@
-"use strict";
+import * as log from "@boomerang-io/worker-cli";
 
-const { log } = require("@boomerang-io/worker-core");
-
-function hello() {
+export function hello() {
   log.sys("Hello from Boomerang Flow!");
 }
 
-function helloFriend() {
+export function helloFriend() {
   const { FLOW_FRIEND: name } = process.env;
 
   log.sys("Hello " + name + ", welcome to Boomerang Flow!");
 }
-
-module.exports = {
-  hello,
-  helloFriend,
-};

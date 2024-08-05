@@ -2,18 +2,7 @@
 
 Starter template for creating Boomerang Flow Workers
 
-## Getting Started
-
-1. Add `.js` file to `commands` folder that exports an object with functions
-2. Execute new method by running `npm run dev -- <filename> <method>`
-
-```js
-// ./commands/greetings.js
-module.exports = {
-  hello: () => console.log("Hello from Boomerang Flow"),
-  goodbye: () => console.log("Goodbye, friend"),
-};
-```
+## Understanding the Worker
 
 ### Basic Hello
 
@@ -36,6 +25,15 @@ This will return with
 01/01/21 10:11:12 🤖  Hello Joe, welcome to Boomerang Flow!
 ```
 
+## Getting Started
+
+1. Add a `.js` file to `commands` folder that exports an object with functions
+2. Execute new method by running `pnpm run dev -- <filename> <method>`
+
+### How it works
+
+The `boomerang-worker-cli` imports all the `*.js` modules in the `./commands` directory. The file name of the exported module becomes the `commmand` and any functions on the exported object are executable methods.
+
 ## Folder Structure
 
     |-- .gitignore
@@ -56,37 +54,33 @@ This will return with
 `Dockerfile` - containerize and execute commands in a kubernetes environments  
 `commands` - where all of your modules are located to be registered and executed by `boomerang-worker-cli`
 
-### How it works
-
-The `boomerang-worker-cli` imports all the `*.js` modules in the `./commands` directory. The file name of the exported module becomes the `commmand` and any functions on the exported object are executable methods.
-
 ## Available Scripts
 
 ### `npm run dev`
 
 Execute `boomerang-worker-cli` in local mode. Used for local development.
 
-### `npm run dev:debug`
+### `pnpm run dev:debug`
 
 Execute `boomerang-worker-cli` in local and debug mode
 
-### `npm run format`
+### `pnpm run format`
 
 Format your code with [Prettier](https://prettier.io/)
 
-### `npm run lint`
+### `pnpm run lint`
 
 Lint your `.js` files with [ESLint](https://eslint.org/)
 
-### `npm start`
+### `pnpm start`
 
 Execute `boomerang-worker-cli`. Used for execution in worker environment. There are assumptions made about files and directories available.
 
-### `npm run test`
+### `pnpm run test`
 
 Execute unit tests with [Jest](https://jestjs.io/)
 
-### `npm run test:coverage`
+### `pnpm run test:coverage`
 
 Execute unit tests with [Jest](https://jestjs.io/) and generate coverage report
 
@@ -119,4 +113,4 @@ Enable commit standards via [Conventional Commits](https://www.conventionalcommi
 
 ## Further Reading
 
-- [Boomerang Worker CLI and Core](https://github.ibm.com/Boomerang-Workers/boomerang.worker.base)
+- [Boomerang Worker CLI and Core](https://github.ibm.com/Boomerang-Workers/worker.interfaces)
