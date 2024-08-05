@@ -110,7 +110,7 @@ export default async function cli(process) {
     let commands = {};
     try {
       // Filter out test and other non-compliant .js files
-      commands = importAll(`${process.cwd()}/commands`);
+      commands = await importAll(`${process.cwd()}/commands`);
     } catch (err) {
       log.err("Failed to register commands", err);
       return;
