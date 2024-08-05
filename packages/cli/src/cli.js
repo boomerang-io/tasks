@@ -1,4 +1,4 @@
-import program from "commander";
+import { program } from "commander";
 import inquirer from "inquirer";
 import requireAll from "require-all";
 import { log } from "./core"

@@ -11,14 +11,18 @@ process.on("unhandledRejection", (error) => {
   log.err(error);
 });
 
-if (major < 18) {
-  log.err(
-    `You are running Node ${currentNodeVersion}.\n` +
+function checkNodeVersion() {
+  if (major < 18) {
+    log.err(
+      `You are running Node ${currentNodeVersion}.\n` +
       `boomerang-worker-cli requires Node 18 or higher, please update your ` +
       `version of Node.`
-  );
-  process.exit(1);
+    );
+    process.exit(1);
+  }
 }
+
+checkNodeVersion();
 
 cli(process).catch((error) => {
   log.err(error);
