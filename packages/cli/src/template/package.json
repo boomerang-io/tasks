@@ -1,6 +1,6 @@
 {
   "name": "boomerang-worker-template",
-  "version": "1.0.0",
+  "version": "0.9.4",
   "description": "Boomerang Worker Template",
   "repository": "git@github.com:boomerang-io/boomerang.worker.template.git",
   "author": "Boomerang Joe <>",
@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@boomerang-io/worker-cli": "latest",
+    "@boomerang-io/worker-cli": "latest"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=local boomerang-worker-cli",
