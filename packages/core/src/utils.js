@@ -1,7 +1,7 @@
 import * as log  from "./log.js";
 import properties from "properties";
 import fs from "fs";
-import { workflowProps, PROPS_FILES_CONFIG } from "./config";
+import { workflowProps, PROPS_FILES_CONFIG } from "./config.js";
 
 /**
  * Use IIFE to encapsulate parameters

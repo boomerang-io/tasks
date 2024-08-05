@@ -1,56 +1,42 @@
-# Boomerang Worker Interface
+# Welcome to the Boomerang Tasks
 
-The following interface provide an opinionated CLI for the the Boomerang Workers, in particular for Boomerang Flow, by providing an easy to leverage CLI with core functionality
+This repository is the monorepo for anything to do with the Boomerang Tasks, in particular for Boomerang Flow.
 
-- Provides task developers the ease of just having to write a `.js` file to do a specific command.
-- Provides a set of utilities to help task developers speed up their development
-  - Common methods that can be used by task developers to enhance and speed the ease of their development
-  - Logging utilities using chalk to output nice values in the log for the user
-  - Collection of utility functions to help plugin authors retrieve, resolve, and set params
+For documentation about Boomerang Flow and its Tasks, please visit our [website](https://usebooemrang.io).
+
+Also, please join our community on [Slack](https://join.slack.com/t/boomerang-io/shared_invite/zt-pxo2yw2o-c3~6YvWkKNrKIwhIBAKhaw).
+
+## Node Packages
+
+Provide an opinionated set of core methods as well as an opinionated CLI for the the Boomerang Task containers.
+
+To learn more about the packages, please refer to the [packages README](./packages/README.md).
+
+### CLI
+
+Main execution script providing task developers the ease of just having to write a `.js` file to do a specific command.
+
+### Core
+
+Provides a set of utilities to help task developers speed up their development
+
+| Method | Purpose                                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------------------- |
+| common | Collection of common methods that can be used by task developers to enhance and speed the ease of their development |
+| log    | Collection of logging utilities using chalk to output nice values in the log for the user                           |
+| utils  | Collection of utility functions to help plugin authors retrieve, resolve, and set properties.                       |
+
+## Tasks
+
+There are a number of tasks that are used by Boomerang Flow, including SendGrid, Slack, Artifactory, Box, etc.
+
+Generally the tasks will run using the Task CLI, however they can be any container that can run as a Job or Tekton Task, i.e.  short lived and single execution focus.
+
+These are all located in the [`./tasks` folder](./tasks). To learn more about Tasks, please refer to the [README](./tasks/README.md).
 
 ## Contributing
 
 We welcome all contributions. Please read the [Contributing Guidelines](./CONTRIBUTING.md).
 
-Do you want to contribute your own worker? Follow our [Contributing a Worker Guidelines](./CONTRIBUTING_WORKER.md) for initializing a project to get started quickly.
+Do you want to contribute your own Task? Follow our [Contributing a Task Guidelines](./CONTRIBUTING_TASKS.md) for initializing a project to get started quickly.
 
-## Design
-
-The CLI has a main `cli.js` which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the Task. A command and sub command are required for all runs.
-
-### Handling Failure
-
-When a method fails, we need to set or return (depending on the type of method) by catching the error to log and then return process.exit(1). This allows the container to fail the Kubernetes Pod which will in turn eventually bubble up the failure to the UI.
-
-## Packaging
-
-The following command will use lerna to release new versions of the modules. It determines minor and iteration release numbers and the changelog based on git commit messages.
-
-`pnpm release`
-
-## Local Development
-
-_TBA_
-
-## Troubleshooting
-
-### Cleaning up jobs in Kubernetes
-
-When running against the non production cluster. You will need to clean up your runs using `kubectl delete job -l "app=bmrg-flow"`
-
-### ESLint not working in VSCode
-
-Try adding the following to your VSCode `settings.json` file
-
-```json
-"eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
-  ],
-```
-
-## References
-
-- https://medium.com/nmc-techblog/building-a-cli-with-node-js-in-2024-c278802a3ef5
-- https://scotch.io/tutorials/build-an-interactive-command-line-application-with-nodejs

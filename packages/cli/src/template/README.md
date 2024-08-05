@@ -1,8 +1,8 @@
-# Boomerang Flow Worker Template
+# Boomerang Flow Task Template
 
-Starter template for creating Boomerang Flow Workers
+Starter template for creating Boomerang Flow Tasks
 
-## Understanding the Worker
+## Understanding the template
 
 ### Basic Hello
 
@@ -20,7 +20,7 @@ npm start -- greetings helloFriend
 This will return with
 
 ```
-01/01/21 10:11:12 🤖  Boomerang Worker CLI 2.0.0
+01/01/21 10:11:12 🤖  Boomerang Task CLI 2.0.0
 01/01/21 10:11:12 🤖  Executing command helloFriend
 01/01/21 10:11:12 🤖  Hello Joe, welcome to Boomerang Flow!
 ```
@@ -32,7 +32,7 @@ This will return with
 
 ### How it works
 
-The `boomerang-worker-cli` imports all the `*.js` modules in the `./commands` directory. The file name of the exported module becomes the `commmand` and any functions on the exported object are executable methods.
+The `boomerang-task-cli` imports all the `*.js` modules in the `./commands` directory. The file name of the exported module becomes the `commmand` and any functions on the exported object are executable methods.
 
 ## Folder Structure
 
@@ -50,19 +50,19 @@ The `boomerang-worker-cli` imports all the `*.js` modules in the `./commands` di
 
 ### Key Files and Directories
 
-`.npmrc` - necessary to install `@boomerang-worker` scoped npm modules  
+`.npmrc` - necessary to install `@boomerang-io` scoped npm modules  
 `Dockerfile` - containerize and execute commands in a kubernetes environments  
-`commands` - where all of your modules are located to be registered and executed by `boomerang-worker-cli`
+`commands` - where all of your modules are located to be registered and executed by `boomerang-task-cli`
 
 ## Available Scripts
 
 ### `npm run dev`
 
-Execute `boomerang-worker-cli` in local mode. Used for local development.
+Execute `boomerang-task-cli` in local mode. Used for local development.
 
 ### `pnpm run dev:debug`
 
-Execute `boomerang-worker-cli` in local and debug mode
+Execute `boomerang-task-cli` in local and debug mode
 
 ### `pnpm run format`
 
@@ -74,7 +74,7 @@ Lint your `.js` files with [ESLint](https://eslint.org/)
 
 ### `pnpm start`
 
-Execute `boomerang-worker-cli`. Used for execution in worker environment. There are assumptions made about files and directories available.
+Execute `boomerang-task-cli`. Used for execution in worker environment. There are assumptions made about files and directories available.
 
 ### `pnpm run test`
 
@@ -113,4 +113,4 @@ Enable commit standards via [Conventional Commits](https://www.conventionalcommi
 
 ## Further Reading
 
-- [Boomerang Worker CLI and Core](https://github.ibm.com/Boomerang-Workers/worker.interfaces)
+- [Boomerang Tasks](https://github.com/boomerang-io/tasks)

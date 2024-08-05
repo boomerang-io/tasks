@@ -1,8 +1,8 @@
 {
-  "name": "boomerang-worker-template",
-  "version": "1.1.0",
-  "description": "Boomerang Worker Template",
-  "repository": "git@github.com:boomerang-io/boomerang.worker.template.git",
+  "name": "boomerang-task-template",
+  "version": "2.0.0",
+  "description": "Boomerang Task Template",
+  "repository": "git@github.com:boomerang-io/tasks",
   "author": "Boomerang Joe",
   "type": "module",
   "engines": {
@@ -10,14 +10,15 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@boomerang-io/task-core": "latest",
     "@boomerang-io/worker-cli": "latest"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=local boomerang-worker-cli",
-    "dev:debug": "cross-env NODE_ENV=local DEBUG=true boomerang-worker-cli",
+    "dev": "cross-env NODE_ENV=local boomerang-task-cli",
+    "dev:debug": "cross-env NODE_ENV=local DEBUG=true boomerang-task-cli",
     "format": "prettier --write \"**/*.{js,json,md,yml}\"",
     "lint": "eslint **/*.js",
-    "start": "boomerang-worker-cli",
+    "start": "boomerang-task-cli",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },

@@ -1,4 +1,4 @@
-import * as log  from "./log.js";
+import * as log from "./log.js";
 import utils from "./utils.js";
 import filePath from "path";
 import fs from "fs";

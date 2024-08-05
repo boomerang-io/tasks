@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import cli from '../src/cli.js';
-import * as log  from "../src/core/log.js";
+import * as log from "@boomerang-io/task-core";
 
 const { node: currentNodeVersion } = process.versions;
 const semver = currentNodeVersion.split(".");
@@ -15,7 +15,7 @@ function checkNodeVersion() {
   if (major < 18) {
     log.err(
       `You are running Node ${currentNodeVersion}.\n` +
-      `boomerang-worker-cli requires Node 18 or higher, please update your ` +
+      `boomerang-task-cli requires Node 18 or higher, please update your ` +
       `version of Node.`
     );
     process.exit(1);

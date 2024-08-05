@@ -2,7 +2,7 @@ import { program } from "commander";
 import fs from 'fs';
 import filePath from 'path';
 import inquirer from "inquirer";
-import * as log  from "./core/log.js"
+import * as log  from "@boomerang-io/task-core"
 import init from './scripts/init.js'
 import 'dotenv/config';
 
@@ -12,9 +12,9 @@ import 'dotenv/config';
 const askInitQuestions = async () => {
   const question = [
     {
-      name: "workerName",
+      name: "taskName",
       type: "input",
-      message: `Enter worker name (used to name the project in package.json)`,
+      message: `Enter Task name (used to name the project in package.json)`,
       default: "template",
       validate: (input) => {
         if (/^([.a-z\-_\d])+$/.test(input)) {
@@ -88,15 +88,15 @@ async function importAll(directory) {
  * @param {EventEmitter} process - global Node.js process object for the current process
  */
 export default async function cli(process) {
-  program.version("4.0.0").description("Boomerang Worker CLI");
+  program.version("4.0.0").description("Boomerang Task CLI");
   log.sys(program.description(), program.version());
 
   /**
-   * Command to initialize a project
+   * Command to initialize a task
    */
   program
     .command("init")
-    .description("Initialize a Boomerang Worker project")
+    .description("Initialize a Boomerang Task from template")
     .action(async () => {
       const { workerName, commmandName, directory } = await askInitQuestions();
       init(workerName, commmandName, directory);

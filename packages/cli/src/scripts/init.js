@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import spawn from "cross-spawn";
 import { fileURLToPath } from 'url';
-import * as log  from "../core/log.js";
+import * as log from "@boomerang-io/task-core";
 
 const CURR_DIR = process.cwd();
 
@@ -54,7 +54,7 @@ function tryGitCommit(projectPath) {
     execSync("git add -A", { cwd: projectPath, stdio: "ignore" });
 
     // first commit must be done without commitlint verification
-    execSync('git commit -m "feat: initialize project using Boomerang worker cli" --no-verify', {
+    execSync('git commit -m "feat: initialize project using Boomerang Task cli" --no-verify', {
       cwd: projectPath,
       stdio: "ignore",
     });
@@ -97,7 +97,7 @@ function installDependencies(projectPath) {
  */
 function installBoomerangWorkerDependencies(projectPath) {
   const command = "pnpm";
-  const args = ["install", "@boomerang-io/worker-cli"];
+  const args = ["install", "@boomerang-io/task-cli"];
   const proc = spawn.sync(command, args, { cwd: projectPath, stdio: "inherit" });
   if (proc.status !== 0) {
     log.err(`${command} ${args.join(" ")} failed`);
@@ -114,7 +114,7 @@ function updatePackageJson(fileContent, projectName) {
   const packageJson = JSON.parse(fileContent);
   packageJson.name = projectName;
   packageJson.description = projectName.split(".").map(capitalize).join(" ");
-  packageJson.repository = `git@github.com:boomerang-io/${projectName}.git`;
+  packageJson.repository = `git@github.com:boomerang-io/task-${projectName}.git`;
   packageJson.dependencies = {}; // Set to empty so latest versions of @boomerang-worker are installed
   return JSON.stringify(packageJson);
 }
@@ -229,7 +229,7 @@ export default function init(projectName, commandName, directory) {
     tryGitCommit(fullProjectPath);
     log.sys(`Made initial commit`);
 
-    log.good(`All done! Your project has been initialized with Boomerang Worker CLI at ${fullProjectName}`);
+    log.good(`All done! Your project has been initialized with Boomerang Task CLI at ${fullProjectName}`);
   } catch (err) {
     log.err("Something went wrong", err);
   }
