@@ -4,7 +4,7 @@
   "description": "Boomerang Worker Template",
   "repository": "git@github.com:boomerang-io/boomerang.worker.template.git",
   "author": "Boomerang Joe",
-  "type": "commonjs",
+  "type": "module",
   "engines": {
     "node": ">=18"
   },
