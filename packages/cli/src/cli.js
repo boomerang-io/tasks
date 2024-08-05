@@ -1,6 +1,6 @@
 import { program } from "commander";
 import inquirer from "inquirer";
-import requireAll from "require-all";
+import * as requireAll from "require-all";
 import * as log  from "./core/log.js"
 import init from './scripts/init.js'
 import 'dotenv/config';
@@ -83,7 +83,7 @@ export default async function cli(process) {
     // Import all Command Modules
     let commands = {};
     try {
-      // TODO: filter out test and other non-compliant .js files
+      // Filter out test and other non-compliant .js files
       commands = requireAll({
         dirname: `${process.cwd()}/commands`,
         filter: /(.+)\.js$/,
