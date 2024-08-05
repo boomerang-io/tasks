@@ -46,7 +46,7 @@ const askInitQuestions = async () => {
       message: `Where should we create your new worker?`,
       default: "./",
       validate: (input) => {
-        if (/^(?:@[a-z\d\-*~][a-z\d\-*._~]*\/)?[a-z\d\-~][a-z\d\-._~]*$/.test(input)) {
+        if (/^[a-zA-Z0-9._\-\/]+$/.test(input)) {
           return true;
         } else {
           return "Directory is required. Enter './' for current location.";
