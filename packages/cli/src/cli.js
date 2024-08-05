@@ -1,4 +1,6 @@
 import { program } from "commander";
+import { readdirSync, statSync } from 'fs';
+import { join, basename } from 'path';
 import inquirer from "inquirer";
 import * as log  from "./core/log.js"
 import init from './scripts/init.js'
