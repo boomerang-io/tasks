@@ -105,7 +105,7 @@ export default async function cli(process) {
   /**
    * Command to run user command methods
    */
-  program.arguments("<cmd> <method>").action((cmd, method) => {
+  program.arguments("<cmd> <method>").action(async (cmd, method) => {
     // Import all Command Modules
     let commands = {};
     try {
@@ -115,6 +115,8 @@ export default async function cli(process) {
       log.err("Failed to register commands", err);
       return;
     }
+
+    log.debug("Registered commands:", commands);
 
     // Check that command exists
     const registeredCommand = commands[cmd];
