@@ -68,4 +68,4 @@ class CICDError extends Error {
   }
 }
 
-module.exports = CICDError;
+export default CICDError;

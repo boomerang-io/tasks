@@ -1,10 +1,8 @@
-"use strict";
-
-const execSync = require("child_process").execSync;
-const fs = require("fs");
-const path = require("path");
-const spawn = require("cross-spawn");
-const { log } = require("@boomerang-io/worker-core");
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import spawn from "cross-spawn";
+import { log } from "./core";
 
 const CURR_DIR = process.cwd();
 

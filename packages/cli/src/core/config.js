@@ -46,7 +46,7 @@ const PROPS_FILES_CONFIG = {
   INPUT_PROPS_FILENAME_PATTERN: /^.+\.output\.properties$/,
 };
 
-module.exports = {
+export {
   inputOptions,
   workflowProps,
   outputOptions,

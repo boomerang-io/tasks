@@ -1,11 +1,9 @@
-"use strict";
-
-const program = require("commander");
-const inquirer = require("inquirer");
-const requireAll = require("require-all");
-const { log } = require("@boomerang-io/worker-core");
-const { init } = require("./scripts");
-require("dotenv").config();
+import program from "commander";
+import inquirer from "inquirer";
+import requireAll from "require-all";
+import { log } from "./core"
+import { init } from './scripts'
+import 'dotenv/config';
 
 /**
  * Prompt user for questions to initialize a project
@@ -50,8 +48,8 @@ const askInitQuestions = async () => {
  * Boomerang Worker CLI
  * @param {EventEmitter} process - global Node.js process object for the current process
  */
-async function cli(process) {
-  program.version("2.0.0").description("Boomerang Worker CLI");
+export default async function cli(process) {
+  program.version("4.0.0").description("Boomerang Worker CLI");
   log.sys(program.description(), program.version());
 
   /**
@@ -105,5 +103,3 @@ async function cli(process) {
 
   program.parse(process.argv);
 }
-
-module.exports = cli;
