@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-io/worker-cli",
-  "version": "0.9.4",
+  "version": "1.0.0-alpha.0",
   "description": "Boomerang Worker CLI",
   "homepage": "https://useboomerang.io",
   "bin": {
@@ -27,17 +27,17 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "app-root-path": "^3.1.0",
+    "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "cross-spawn": "^7.0.3",
+    "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "inquirer": "^10.1.7",
-    "require-all": "^3.0.0",
-    "shelljs": "^0.8.5",
-    "chalk": "^5.3.0",
-    "app-root-path": "^3.1.0",
     "path": "^0.12.7",
     "properties": "^1.2.1",
-    "date-fns": "^3.6.0"
+    "require-all": "^3.0.0",
+    "shelljs": "^0.8.5"
   },
   "preferGlobal": true,
   "devDependencies": {
