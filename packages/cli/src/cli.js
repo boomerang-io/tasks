@@ -1,6 +1,6 @@
 import { program } from "commander";
-import { readdirSync, statSync } from 'fs';
-import { join, basename } from 'path';
+import fs from 'fs';
+import filePath from 'path';
 import inquirer from "inquirer";
 import * as log  from "./core/log.js"
 import init from './scripts/init.js'
@@ -63,16 +63,16 @@ async function importAll(directory) {
   const excludePattern = /^\.(git|svn|test|tests|__tests__)$/;
   const modules = {};
 
-  const files = readdirSync(directory);
+  const files = fs.readdirSync(directory);
   for (const file of files) {
     if (excludePattern.test(file)) {
       continue; // Skip files or directories that match the exclusion pattern
     }
-    const fullPath = join(directory, file);
-    const stat = statSync(fullPath);
+    const fullPath = filePath.join(directory, file);
+    const stat = fs.statSync(fullPath);
 
     if (stat.isFile() && file.endsWith('.js')) {
-      const moduleName = basename(file, '.js');
+      const moduleName = filePath.basename(file, '.js');
       const module = await import(fullPath);
       modules[moduleName] = module;
     } else if (stat.isDirectory()) {
