@@ -2,6 +2,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import spawn from "cross-spawn";
+import { fileURLToPath } from 'url';
 import * as log  from "../core/log.js";
 
 const CURR_DIR = process.cwd();
@@ -203,7 +204,9 @@ export default function init(projectName, commandName) {
   }
 
   try {
-    const templatePath = path.join(process.cwd(), "../template");
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const templatePath = path.resolve(__dirname, "../template");
 
     // create directory and add contents to directory
     fs.mkdirSync(fullProjectPath);

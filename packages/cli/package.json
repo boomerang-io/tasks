@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-io/worker-cli",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "description": "Boomerang Worker CLI",
   "homepage": "https://useboomerang.io",
   "bin": {
@@ -37,7 +37,8 @@
     "path": "^0.12.7",
     "properties": "^1.2.1",
     "require-all": "^3.0.0",
-    "shelljs": "^0.8.5"
+    "shelljs": "^0.8.5",
+    "url": "^0.11.4"
   },
   "preferGlobal": true,
   "devDependencies": {
