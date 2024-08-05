@@ -203,7 +203,7 @@ export default function init(projectName, commandName) {
   }
 
   try {
-    const templatePath = path.resolve(__dirname, "../template");
+    const templatePath = path.join(process.cwd(), "../template");
 
     // create directory and add contents to directory
     fs.mkdirSync(fullProjectPath);
