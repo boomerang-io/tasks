@@ -212,7 +212,7 @@ export default function init(projectName, commandName, directory) {
     const templatePath = path.resolve(__dirname, "../template");
 
     // create directory and add contents to directory
-    fs.mkdirSync(fullProjectPath);
+    fs.mkdirSync(fullProjectPath, { recursive: true });
     createDirectoryContents(templatePath, fullProjectName, commandName, fullProjectPath);
     log.sys(`Created project directory ${fullProjectName}`);
 
