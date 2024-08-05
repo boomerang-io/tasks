@@ -1,3 +1,3 @@
-import * as init  from "./init.js";
+import init from "./init.js";
 
 export { init };

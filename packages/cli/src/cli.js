@@ -2,7 +2,7 @@ import { program } from "commander";
 import inquirer from "inquirer";
 import requireAll from "require-all";
 import * as log  from "./core/log.js"
-import * as init  from './scripts/init.js'
+import init from './scripts/init.js'
 import 'dotenv/config';
 
 /**

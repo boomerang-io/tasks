@@ -81,7 +81,7 @@ function tryGitCommit(projectPath) {
  * @param {string} projectPath - path to project directory
  */
 function installDependencies(projectPath) {
-  const command = "npm";
+  const command = "pnpm";
   const args = ["install"];
   const proc = spawn.sync(command, args, { cwd: projectPath, stdio: "inherit" });
   if (proc.status !== 0) {
@@ -95,8 +95,8 @@ function installDependencies(projectPath) {
  * @param {string} projectPath - path to project directory
  */
 function installBoomerangWorkerDependencies(projectPath) {
-  const command = "npm";
-  const args = ["install", "@boomerang-io/worker-cli", "@boomerang-io/worker-core"];
+  const command = "pnpm";
+  const args = ["install", "@boomerang-io/worker-cli"];
   const proc = spawn.sync(command, args, { cwd: projectPath, stdio: "inherit" });
   if (proc.status !== 0) {
     log.err(`${command} ${args.join(" ")} failed`);
@@ -187,7 +187,7 @@ function createDirectoryContents(templatePath, projectName, commandName) {
  * @param {string} projectName
  * @param {string} commandName
  */
-function init(projectName, commandName) {
+export default function init(projectName, commandName) {
   let fullProjectName = projectName;
 
   // Harcoded check for format
