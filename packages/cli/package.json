@@ -32,7 +32,12 @@
     "dotenv": "^16.4.5",
     "inquirer": "^10.1.7",
     "require-all": "^3.0.0",
-    "shelljs": "^0.8.5"
+    "shelljs": "^0.8.5",
+    "chalk": "^5.3.0",
+    "app-root-path": "^3.1.0",
+    "path": "^0.12.7",
+    "properties": "^1.2.1",
+    "date-fns": "^3.6.0"
   },
   "preferGlobal": true,
   "devDependencies": {

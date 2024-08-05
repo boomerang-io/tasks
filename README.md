@@ -49,3 +49,8 @@ Try adding the following to your VSCode `settings.json` file
     }
   ],
 ```
+
+## References
+
+- https://medium.com/nmc-techblog/building-a-cli-with-node-js-in-2024-c278802a3ef5
+- https://scotch.io/tutorials/build-an-interactive-command-line-application-with-nodejs

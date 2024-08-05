@@ -2,7 +2,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import spawn from "cross-spawn";
-import { log } from "./core";
+import * as log  from "../core/log.js";
 
 const CURR_DIR = process.cwd();
 
@@ -228,5 +228,3 @@ function init(projectName, commandName) {
     log.err("Something went wrong", err);
   }
 }
-
-module.exports = init;

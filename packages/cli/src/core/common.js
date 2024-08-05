@@ -1,7 +1,7 @@
-const log = require("./log");
-const utils = require("./utils");
-const filePath = require("path");
-const fs = require("fs");
+import * as log  from "./log.js";
+import utils from "./utils.js";
+import filePath from "path";
+import fs from "fs";
 
 export function createFile() {
   //Create file on file system

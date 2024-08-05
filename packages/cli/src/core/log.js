@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { format } from "date-fns";
-import { isDebug } from "./config";
+import { isDebug } from "./config.js";
 
 const formatted = format(new Date(), "yyyy-MM-dd HH:mm:ss");
 

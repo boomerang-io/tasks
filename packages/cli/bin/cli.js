@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import cli from './src/cli';
-import { log } from "../src/core";
+import cli from '../src/cli.js';
+import * as log  from "../src/core/log.js";
 
 const { node: currentNodeVersion } = process.versions;
 const semver = currentNodeVersion.split(".");
