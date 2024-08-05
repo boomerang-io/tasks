@@ -54,7 +54,7 @@ function tryGitCommit(projectPath) {
     execSync("git add -A", { cwd: projectPath, stdio: "ignore" });
 
     // first commit must be done without commitlint verification
-    execSync('git commit -m "feat: initialize project using boomerang worker cli" --no-verify', {
+    execSync('git commit -m "feat: initialize project using Boomerang worker cli" --no-verify', {
       cwd: projectPath,
       stdio: "ignore",
     });
@@ -136,8 +136,9 @@ function updateReadme(fileContent, commandName) {
  * @param {string} templatePath - path to worker template
  * @param {string} projectName
  * @param {string} commandName
+ * @param {string} directory - path to folder where project will be created
  */
-function createDirectoryContents(templatePath, projectName, commandName) {
+function createDirectoryContents(templatePath, projectName, commandName, directory) {
   const filesToCreate = fs.readdirSync(templatePath);
 
   filesToCreate.forEach((file) => {
@@ -172,13 +173,13 @@ function createDirectoryContents(templatePath, projectName, commandName) {
         fileContent = updateReadme(fileContent, commandName);
       }
 
-      const writePath = `${CURR_DIR}/${projectName}/${file}`;
+      const writePath = `${directory}/${file}`;
       fs.writeFileSync(writePath, fileContent, "utf8");
     } else if (stats.isDirectory()) {
-      fs.mkdirSync(`${CURR_DIR}/${projectName}/${file}`);
+      fs.mkdirSync(`${directory}/${file}`);
 
       // recursive call if in directory
-      createDirectoryContents(`${templatePath}/${file}`, `${projectName}/${file}`, commandName);
+      createDirectoryContents(`${templatePath}/${file}`, projectName, commandName, `${directory}/${file}`);
     }
   });
 }
@@ -187,16 +188,18 @@ function createDirectoryContents(templatePath, projectName, commandName) {
  * Initialize project given user input
  * @param {string} projectName
  * @param {string} commandName
+ * @param {string} directory
  */
-export default function init(projectName, commandName) {
+export default function init(projectName, commandName, directory) {
   let fullProjectName = projectName;
 
   // Harcoded check for format
-  if (!projectName.startsWith(`boomerang.worker.`)) {
-    fullProjectName = `boomerang.worker.${projectName}`;
-  }
+  // 2024/08/04 - Deprecated. No longer needs to start with a specific opinionated name
+  // if (!projectName.startsWith(`boomerang.worker.`)) {
+  //   fullProjectName = `boomerang.worker.${projectName}`;
+  // }
 
-  const fullProjectPath = `${CURR_DIR}/${fullProjectName}`;
+  const fullProjectPath = `${CURR_DIR}/${directory}`;
 
   if (isInGitRepository(CURR_DIR)) {
     log.err("You are currently in a .git repo. Aborting...");
@@ -210,7 +213,7 @@ export default function init(projectName, commandName) {
 
     // create directory and add contents to directory
     fs.mkdirSync(fullProjectPath);
-    createDirectoryContents(templatePath, fullProjectName, commandName);
+    createDirectoryContents(templatePath, fullProjectName, commandName, fullProjectPath);
     log.sys(`Created project directory ${fullProjectName}`);
 
     // initialize git repo

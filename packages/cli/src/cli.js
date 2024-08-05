@@ -13,7 +13,7 @@ const askInitQuestions = async () => {
     {
       name: "workerName",
       type: "input",
-      message: `Enter worker name (used to name the project with boomerang.worker.<workerName> convention)`,
+      message: `Enter worker name (used to name the project in package.json)`,
       default: "template",
       validate: (input) => {
         if (/^([.a-z\-_\d])+$/.test(input)) {
@@ -40,6 +40,19 @@ const askInitQuestions = async () => {
         }
       },
     },
+    {
+      name: "directory",
+      type: "input",
+      message: `Where should we create your new worker?`,
+      default: "./",
+      validate: (input) => {
+        if (/^(?:@[a-z\d\-*~][a-z\d\-*._~]*\/)?[a-z\d\-~][a-z\d\-._~]*$/.test(input)) {
+          return true;
+        } else {
+          return "Directory is required. Enter './' for current location.";
+        }
+      },
+    },
   ];
   return await inquirer.prompt(question);
 };
@@ -58,10 +71,9 @@ export default async function cli(process) {
   program
     .command("init")
     .description("Initialize a Boomerang Worker project")
-
     .action(async () => {
-      const { workerName, commmandName } = await askInitQuestions();
-      init(workerName, commmandName);
+      const { workerName, commmandName, directory } = await askInitQuestions();
+      init(workerName, commmandName, directory);
     });
 
   /**
