@@ -12,7 +12,7 @@ export default (function () {
   try {
     files = fs.readdirSync(workflowProps.WF_PROPS_PATH);
   } catch (err) {
-    log.warn("Failed to get parameters", err);
+    log.warn("Failed to get parameters - ", err);
     return;
   }
 

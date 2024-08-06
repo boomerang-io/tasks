@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@boomerang-io/task-core": "latest",
-    "@boomerang-io/worker-cli": "latest"
+    "@boomerang-io/task-cli": "latest"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=local boomerang-task-cli",

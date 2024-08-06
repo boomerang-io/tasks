@@ -30,7 +30,7 @@ Provides a set of utilities to help task developers speed up their development
 
 There are a number of tasks that are used by Boomerang Flow, including SendGrid, Slack, Artifactory, Box, etc.
 
-Generally the tasks will run using the Task CLI, however they can be any container that can run as a Job or Tekton Task, i.e.  short lived and single execution focus.
+Generally the tasks will run using the Task CLI, however they can be any container that can run as a Kubernetes Job or Tekton Task, i.e.  short lived and single execution focus.
 
 These are all located in the [`./tasks` folder](./tasks). To learn more about Tasks, please refer to the [README](./tasks/README.md).
 
@@ -40,3 +40,6 @@ We welcome all contributions. Please read the [Contributing Guidelines](./CONTRI
 
 Do you want to contribute your own Task? Follow our [Contributing a Task Guidelines](./CONTRIBUTING_TASKS.md) for initializing a project to get started quickly.
 
+### Commits
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) to ensure that the commit messages are easy to read and follow a standard format that can then be used in automated changelog generation.

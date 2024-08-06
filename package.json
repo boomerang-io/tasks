@@ -18,7 +18,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "prepare": "husky"
+    "prepare": "husky",
+    "pub:packages": "pnpm publish --access public --tag alpha --no-git-checks --filter '@boomerang-io/*'"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.2.0",
