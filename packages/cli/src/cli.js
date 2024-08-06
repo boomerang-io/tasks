@@ -2,7 +2,7 @@ import { program } from "commander";
 import fs from 'fs';
 import filePath from 'path';
 import inquirer from "inquirer";
-import * as log  from "@boomerang-io/task-core"
+import { log } from "@boomerang-io/task-core"
 import init from './scripts/init.js'
 import 'dotenv/config';
 
