@@ -54,6 +54,12 @@ const askInitQuestions = async () => {
         }
       },
     },
+    {
+      name: "initGit",
+      type: "confirm",
+      message: `Would you like to initialise Git?`,
+      default: true,
+    },
   ];
   return await inquirer.prompt(question);
 };
@@ -98,8 +104,8 @@ export default async function cli(process) {
     .command("init")
     .description("Initialize a Boomerang Task from template")
     .action(async () => {
-      const { workerName, commmandName, directory } = await askInitQuestions();
-      init(workerName, commmandName, directory);
+      const { taskName, commmandName, directory, initGit } = await askInitQuestions();
+      init(taskName, commmandName, directory, initGit);
     });
 
   /**

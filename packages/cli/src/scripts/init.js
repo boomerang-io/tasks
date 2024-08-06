@@ -186,12 +186,13 @@ function createDirectoryContents(templatePath, projectName, commandName, directo
 
 /**
  * Initialize project given user input
- * @param {string} projectName
+ * @param {string} taskName
  * @param {string} commandName
  * @param {string} directory
+ * @param {boolean} initGit
  */
-export default function init(projectName, commandName, directory) {
-  let fullProjectName = projectName;
+export default function init(taskName, commandName, directory, initGit) {
+  let fullProjectName = taskName;
 
   // Harcoded check for format
   // 2024/08/04 - Deprecated. No longer needs to start with a specific opinionated name
@@ -217,8 +218,10 @@ export default function init(projectName, commandName, directory) {
     log.sys(`Created project directory ${fullProjectName}`);
 
     // initialize git repo
-    tryGitInit(fullProjectPath);
-    log.sys(`Initialized git repo in ${fullProjectName}`);
+    if (initGit) {
+      tryGitInit(fullProjectPath);
+      log.sys(`Initialized git repo in ${fullProjectName}`);
+    }
 
     // install dependencies
     log.sys(`Installing project dependencies for ${fullProjectName}`);
@@ -226,10 +229,12 @@ export default function init(projectName, commandName, directory) {
     installDependencies(fullProjectPath);
 
     // initial commit
-    tryGitCommit(fullProjectPath);
-    log.sys(`Made initial commit`);
+    if (initGit) {
+      tryGitCommit(fullProjectPath);
+      log.sys(`Made initial commit`);
+    }
 
-    log.good(`All done! Your project has been initialized with Boomerang Task CLI at ${fullProjectName}`);
+    log.good(`All done! Your project has been initialized at ${fullProjectName}`);
   } catch (err) {
     log.err("Something went wrong", err);
   }
