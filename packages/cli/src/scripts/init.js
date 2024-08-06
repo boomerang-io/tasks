@@ -202,7 +202,7 @@ export default function init(taskName, commandName, directory, initGit) {
 
   const fullProjectPath = `${CURR_DIR}/${directory}`;
 
-  if (isInGitRepository(CURR_DIR)) {
+  if (initGit & isInGitRepository(CURR_DIR)) {
     log.err("You are currently in a .git repo. Aborting...");
     return;
   }
