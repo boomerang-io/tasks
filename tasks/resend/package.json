@@ -1,8 +1,8 @@
 {
-  "name": "boomerang-task-template",
+  "name": "boomerang-task-resend",
   "version": "1.0.0",
-  "description": "Boomerang Task Template",
-  "repository": "git@github.com:boomerang-io/tasks",
+  "description": "Boomerang-task-resend",
+  "repository": "git@github.com:boomerang-io/task-boomerang-task-resend.git",
   "author": "Boomerang Joe",
   "type": "module",
   "engines": {
@@ -10,8 +10,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@boomerang-io/task-core": "latest",
-    "@boomerang-io/task-cli": "latest"
+    "@boomerang-io/task-cli": "^1.0.0-alpha.24",
+    "@boomerang-io/task-core": "^2.0.0-alpha.2",
+    "resend": "^3.5.0"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=local boomerang-task-cli",

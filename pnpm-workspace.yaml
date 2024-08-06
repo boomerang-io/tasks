@@ -1,3 +1,4 @@
 packages:
   - 'packages/cli'
   - 'packages/core'
+  - 'tasks/resend'

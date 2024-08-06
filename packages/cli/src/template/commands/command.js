@@ -1,4 +1,4 @@
-import { log } from "@boomerang-io/task-cli";
+import { log } from "@boomerang-io/task-core";
 
 export function hello() {
   log.sys("Hello from Boomerang Flow!");
