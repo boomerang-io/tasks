@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import cli from '../src/cli.js';
-import * as log from "@boomerang-io/task-core";
+import { log } from "@boomerang-io/task-core";
 
 const { node: currentNodeVersion } = process.versions;
 const semver = currentNodeVersion.split(".");

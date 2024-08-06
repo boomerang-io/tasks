@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import spawn from "cross-spawn";
 import { fileURLToPath } from 'url';
-import * as log from "@boomerang-io/task-core";
+import { log } from "@boomerang-io/task-core";
 
 const CURR_DIR = process.cwd();
 
