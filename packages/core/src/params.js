@@ -10,19 +10,16 @@ const { NODE_ENV } = process.env;
  * - An alternative to the Tekton params available via ENV variables or content replacement
  * - Especially useful if using an alternate non Tekton handler
  */
-const paramProps = {
-  PATH:
-    NODE_ENV === "local" || NODE_ENV === "test"
-      ? `${process.cwd()}/tests/params`
-      : "/flow/params",
-  FILENAME: "",
-};
+const __path =
+  NODE_ENV === "local" || NODE_ENV === "test"
+    ? `${process.cwd()}/tests/params`
+    : "/params";
 
 export default (function () {
   // Read in parameter property files
   let files = [];
   try {
-    files = fs.readdirSync(paramProps.PATH);
+    files = fs.readdirSync(__path);
   } catch (err) {
     log.warn("Failed to get parameters - ", err);
     return;
@@ -38,7 +35,7 @@ export default (function () {
    * - No longer need to parse file as a properties file. It will be the entire contents of the file.
    */
   const params = files.reduce((accum, file) => {
-    const contents = fs.readFileSync(`${paramProps.PATH}/${file}`, "utf8");
+    const contents = fs.readFileSync(`${__path}/${file}`, "utf8");
     log.debug("  Param: " + file + " Content: " + contents.toString());
     accum[file] = contents.toString();
     return accum;
