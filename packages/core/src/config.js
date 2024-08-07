@@ -21,6 +21,11 @@ const workflowProps = {
   WF_PROPS_PATTERN: /\$\{p:([\w\ \.]*\/){0,2}([\w\.]+)\}/,
   WF_PROPS_PATTERN_GLOBAL: /\$\{p:([\w\ \.]*\/){0,2}([\w\.]+)\}/g,
 };
+// For the new v4 parameter substitution
+const paramProps = {
+  PATH: NODE_ENV === "local" || NODE_ENV === "test" ? `${appRoot}/params` : "/flow/params",
+  FILENAME: "",
+};
 
 const outputOptions = {
   path: `${workflowProps.WF_PROPS_PATH}/output.properties`,
@@ -49,6 +54,7 @@ const PROPS_FILES_CONFIG = {
 export {
   inputOptions,
   workflowProps,
+  paramProps,
   outputOptions,
   PROPS_FILES_CONFIG,
   isDebug,
