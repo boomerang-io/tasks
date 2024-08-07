@@ -101,8 +101,8 @@ importers:
         specifier: ^1.0.0-alpha.24
         version: 1.0.0-alpha.24
       '@boomerang-io/task-core':
-        specifier: ^2.0.0-alpha.3
-        version: 2.0.0-alpha.3
+        specifier: ^2.0.0-alpha.4
+        version: 2.0.0-alpha.4
       resend:
         specifier: ^3.5.0
         version: 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -301,8 +301,8 @@ packages:
     resolution: {integrity: sha512-6tXxEpn1WEK7p0UIrBKx8Kk7uGgNvsowwp4Iow1dUkkldvsjNThsboCNqNXRPOpIeeODGxxSjDgyl8Kr63hTFw==}
     engines: {node: '>=18'}
 
-  '@boomerang-io/task-core@2.0.0-alpha.3':
-    resolution: {integrity: sha512-sBJ12QXFWxVL+JBcuJVIAvks5ivCRZ0dextssblzXkpCWY9fjhEOzmpmfN6n3T47QMvGFGdiqw2HUx605L4vhw==}
+  '@boomerang-io/task-core@2.0.0-alpha.4':
+    resolution: {integrity: sha512-EvwXR8Yq6+PYkGvZuEEndIR55YwKrrNPoULylZYEqmpnXt/uce44Gy9Daj8MGa8hPnJ30fQ1oRUcKcAXrpm9Iw==}
     engines: {node: '>=18'}
 
   '@commitlint/cli@19.3.0':
@@ -4314,7 +4314,7 @@ snapshots:
 
   '@boomerang-io/task-cli@1.0.0-alpha.24':
     dependencies:
-      '@boomerang-io/task-core': 2.0.0-alpha.3
+      '@boomerang-io/task-core': 2.0.0-alpha.4
       commander: 12.1.0
       cross-spawn: 7.0.3
       dotenv: 16.4.5
@@ -4330,7 +4330,7 @@ snapshots:
       date-fns: 3.6.0
       properties: 1.2.1
 
-  '@boomerang-io/task-core@2.0.0-alpha.3':
+  '@boomerang-io/task-core@2.0.0-alpha.4':
     dependencies:
       app-root-path: 3.1.0
       chalk: 5.3.0

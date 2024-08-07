@@ -1,6 +1,7 @@
 import * as log  from "./log.js";
-import properties from "properties";
+// import properties from "properties";
 import appRoot from "app-root-path";
+const { NODE_ENV } = process.env;
 import fs from "fs";
 
 /**
