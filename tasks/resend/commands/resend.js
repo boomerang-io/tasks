@@ -5,7 +5,7 @@ export async function send() {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   //Retrieve params
-  log.debug("Params: ", params);
+  log.debug("Params: ", JSON.stringify(params, null, 2));
   const { from, to, subject, message } = params;
 
   log.debug("Started sendMail Resend Task");

@@ -21,11 +21,11 @@ export default (function () {
   try {
     files = fs.readdirSync(__path);
   } catch (err) {
-    log.warn("Failed to get parameters - ", err);
+    log.warn("Failed to get params - ", err);
     return;
   }
 
-  log.debug("Parameter Files Found:", files);
+  // log.debug("Param Files:", files);
   //TODO, provide the Environment Variables in the response? Do we need to do this anymore or can developers just pull from ENV
   // log.debug("Environment Variables\n", process.env);
 
@@ -35,11 +35,13 @@ export default (function () {
    * - No longer need to parse file as a properties file. It will be the entire contents of the file.
    */
   const params = files.reduce((accum, file) => {
-    const __filepath = `${__path}/${file}`;
-    log.debug("  Param File: " + __filepath);
-    const contents = fs.readFileSync(__filepath, "utf8");
-    log.debug("  Param: " + file + " Content: " + contents.toString());
-    accum[file] = contents.toString();
+    const stat = fs.statSync(fullPath);
+    if (stat.isFile()) {
+      const __filepath = `${__path}/${file}`;
+      const contents = fs.readFileSync(__filepath, "utf8");
+      log.debug("  Param: " + file + " Content: " + contents.toString());
+      accum[file] = contents.toString();
+    }
     return accum;
   }, {});
   return params;
