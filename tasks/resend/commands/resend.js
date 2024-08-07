@@ -1,28 +1,25 @@
 import { Resend } from "resend";
-import { log, params, results } from "@boomerang-io/task-core";
+import { log, params, results, result } from "@boomerang-io/task-core";
 
 export async function send() {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   //Retrieve params
-  const { to, message } = params;
+  log.debug("Params: ", params);
+  const { from, to, subject, message } = params;
 
-  log.debug("To: ", to);
-  log.debug("Message: ", message);
+  log.debug("Started sendMail Resend Task");
+  const { data, error } = await resend.emails.send({
+    from: from,
+    to: [to],
+    subject: subject,
+    html: message,
+  });
 
-  await results({ ["success"]: true });
+  if (error) {
+    // result("error", { error });
+    return console.error({ error });
+  }
 
-  // log.debug("Started sendMail Resend Task");
-  // const { data, error } = await resend.emails.send({
-  //   from: 'noreply@backstop.dev>',
-  //   to: ['tyson@lawrie.com.au'],
-  //   subject: 'Testing Resend',
-  //   html: '<strong>It works!</strong>',
-  // });
-
-  // if (error) {
-  //   return console.error({ error });
-  // }
-
-  // console.log({ data });
+  result("data", { data });
 }

@@ -35,7 +35,9 @@ export default (function () {
    * - No longer need to parse file as a properties file. It will be the entire contents of the file.
    */
   const params = files.reduce((accum, file) => {
-    const contents = fs.readFileSync(`${__path}/${file}`, "utf8");
+    const __filepath = `${__path}/${file}`;
+    log.debug("  Param File: " + __filepath);
+    const contents = fs.readFileSync(__filepath, "utf8");
     log.debug("  Param: " + file + " Content: " + contents.toString());
     accum[file] = contents.toString();
     return accum;
