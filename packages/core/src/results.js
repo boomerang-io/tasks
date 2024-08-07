@@ -15,10 +15,7 @@ const __path =
     ? `${process.cwd()}/tests/results`
     : "/tekton/results";
 
-export async function set(key, value) {
-  await setAll({ [key]: value });
-}
-export default async function setAll(results) {
+export default async function set(results) {
   /**
    * Read in param files
    * - Reduce to build up one object with all of the parameters

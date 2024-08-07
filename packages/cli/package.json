@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-io/task-cli",
-  "version": "1.0.0-alpha.29",
+  "version": "1.0.0-alpha.30",
   "description": "Boomerang Task CLI",
   "homepage": "https://useboomerang.io",
   "bin": {
@@ -27,7 +27,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@boomerang-io/task-core": "^2.0.0-alpha.12",
+    "@boomerang-io/task-core": "^2.0.0-alpha.13",
     "commander": "^12.1.0",
     "cross-spawn": "^7.0.3",
     "dotenv": "^16.4.5",

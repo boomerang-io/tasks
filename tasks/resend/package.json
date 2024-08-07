@@ -10,8 +10,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@boomerang-io/task-cli": "^1.0.0-alpha.28",
-    "@boomerang-io/task-core": "^2.0.0-alpha.11",
+    "@boomerang-io/task-cli": "^1.0.0-alpha.29",
+    "@boomerang-io/task-core": "^2.0.0-alpha.12",
     "resend": "^3.5.0"
   },
   "scripts": {
