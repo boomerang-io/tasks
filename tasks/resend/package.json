@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@boomerang-io/task-cli": "^1.0.0-alpha.24",
-    "@boomerang-io/task-core": "^2.0.0-alpha.5",
+    "@boomerang-io/task-core": "^2.0.0-alpha.6",
     "resend": "^3.5.0"
   },
   "scripts": {
