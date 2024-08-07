@@ -1,5 +1,5 @@
-import { Resend } from 'resend';
-import { log, params } from "@boomerang-io/task-core"
+import { Resend } from "resend";
+import { log, params, results } from "@boomerang-io/task-core";
 
 export async function send() {
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -7,8 +7,10 @@ export async function send() {
   //Retrieve params
   const { to, message } = params;
 
-  console.log("To: ", to);
-  console.log("Message: ", message);
+  log.debug("To: ", to);
+  log.debug("Message: ", message);
+
+  await results({ [success]: true });
 
   // log.debug("Started sendMail Resend Task");
   // const { data, error } = await resend.emails.send({
@@ -23,4 +25,4 @@ export async function send() {
   // }
 
   // console.log({ data });
-};
+}

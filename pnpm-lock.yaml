@@ -45,8 +45,8 @@ importers:
   packages/cli:
     dependencies:
       '@boomerang-io/task-core':
-        specifier: ^2.0.0-alpha.2
-        version: 2.0.0-alpha.2
+        specifier: ^2.0.0-alpha.8
+        version: 2.0.0-alpha.10
       commander:
         specifier: ^12.1.0
         version: 12.1.0
@@ -98,11 +98,11 @@ importers:
   tasks/resend:
     dependencies:
       '@boomerang-io/task-cli':
-        specifier: ^1.0.0-alpha.24
-        version: 1.0.0-alpha.24
+        specifier: ^1.0.0-alpha.27
+        version: 1.0.0-alpha.27
       '@boomerang-io/task-core':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0-alpha.10
+        version: 2.0.0-alpha.10
       resend:
         specifier: ^3.5.0
         version: 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -292,17 +292,13 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
-  '@boomerang-io/task-cli@1.0.0-alpha.24':
-    resolution: {integrity: sha512-4BD5+n0OuiusRPfduQGyC2Jm21Q1XZ97PEQdYAeHeP9L3/snbDVMCC9+Q8v90qMFOOQeosv6NrZt/vCLCPEHzw==}
+  '@boomerang-io/task-cli@1.0.0-alpha.27':
+    resolution: {integrity: sha512-/TH7c9A70YHxx+eTnI0/3nzmuOn7NCAjgNC7MEW3Ex6ddDEHCKmUSovYmPeAEzTD3+Zb2Mk4sie8AWsIHbXxhw==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  '@boomerang-io/task-core@2.0.0-alpha.2':
-    resolution: {integrity: sha512-6tXxEpn1WEK7p0UIrBKx8Kk7uGgNvsowwp4Iow1dUkkldvsjNThsboCNqNXRPOpIeeODGxxSjDgyl8Kr63hTFw==}
-    engines: {node: '>=18'}
-
-  '@boomerang-io/task-core@2.0.0-alpha.6':
-    resolution: {integrity: sha512-mUUUvYj6gC0aITbjzQeeaDsK1b/juN7atXaYvaxSIdnMoEQuH6QVzTxNnMgzfdMDPXC/zmCxlTxChZ5lYoDN4Q==}
+  '@boomerang-io/task-core@2.0.0-alpha.10':
+    resolution: {integrity: sha512-dxt+u/aarjrqOzDIaZGF10FItE4OUtgKm+YHHnvmtFc45kQ/8NgupKxPj1Jdxj8Gb6bLKsD3Abj/+mdcfI+Q8Q==}
     engines: {node: '>=18'}
 
   '@commitlint/cli@19.3.0':
@@ -4312,9 +4308,9 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@boomerang-io/task-cli@1.0.0-alpha.24':
+  '@boomerang-io/task-cli@1.0.0-alpha.27':
     dependencies:
-      '@boomerang-io/task-core': 2.0.0-alpha.6
+      '@boomerang-io/task-core': 2.0.0-alpha.10
       commander: 12.1.0
       cross-spawn: 7.0.3
       dotenv: 16.4.5
@@ -4323,14 +4319,7 @@ snapshots:
       shelljs: 0.8.5
       url: 0.11.4
 
-  '@boomerang-io/task-core@2.0.0-alpha.2':
-    dependencies:
-      app-root-path: 3.1.0
-      chalk: 5.3.0
-      date-fns: 3.6.0
-      properties: 1.2.1
-
-  '@boomerang-io/task-core@2.0.0-alpha.6':
+  '@boomerang-io/task-core@2.0.0-alpha.10':
     dependencies:
       app-root-path: 3.1.0
       chalk: 5.3.0

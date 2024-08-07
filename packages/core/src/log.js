@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { format } from "date-fns";
-import { isDebug } from "./config.js";
+const { DEBUG } = process.env;
 
 const formatted = format(new Date(), "yyyy-MM-dd HH:mm:ss");
 
@@ -9,7 +9,7 @@ export function out(...args) {
 }
 
 export function debug(...args) {
-  if (isDebug) {
+  if (DEBUG === "true") {
     console.log(chalk.gray(formatted, "🔍 ", ...args));
   }
 }
