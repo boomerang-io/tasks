@@ -10,7 +10,7 @@ export async function send() {
   log.debug("To: ", to);
   log.debug("Message: ", message);
 
-  await results({ [success]: true });
+  await results({ ["success"]: true });
 
   // log.debug("Started sendMail Resend Task");
   // const { data, error } = await resend.emails.send({
