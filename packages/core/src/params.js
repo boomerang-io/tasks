@@ -36,13 +36,11 @@ export default (function () {
    */
   const params = files.reduce((accum, file) => {
     const __filepath = `${__path}/${file}`;
-    log.debug("Inspecting Param File: " + __filepath);
+    log.debug("Inspecting potential param file: " + file);
     const stat = fs.statSync(__filepath);
     if (stat.isFile()) {
       const contents = fs.readFileSync(__filepath, "utf8");
-      log.sys(
-        "Retrieving Param: " + file + ", Content: " + contents.toString()
-      );
+      log.sys("Retrieving param: " + file + ", value: " + contents.toString());
       accum[file] = contents.toString();
     }
     return accum;

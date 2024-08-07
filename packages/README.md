@@ -1,5 +1,9 @@
 # Boomerang Task Packages
 
+This repository contains the node packages for the Boomerang Flow Tasks.
+
+> Note: the packages were previously @boomerang-io/worker-core and @boomerang-io/worker-cli. These have been deprecated in favor of the new packages.
+
 ## Design
 
 The CLI has a main `cli.js` which imports all the `*.js` files under `./commands` folder. These are then mapped to the task / plugins command that are sent through as arguments on the Task. A command and sub command are required for all runs.
@@ -12,7 +16,12 @@ When a method fails, we need to set or return (depending on the type of method) 
 
 The following command will use lerna to release new versions of the modules. It determines minor and iteration release numbers and the changelog based on git commit messages.
 
-`pnpm release`
+```sh
+git tag @boomerang-io/task-core@x.y.z
+git tag @boomerang-io/task-cli@x.y.z
+git push --tags
+pnpm release
+```
 
 ## Local Development
 
