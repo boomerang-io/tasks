@@ -35,11 +35,14 @@ export default (function () {
    * - No longer need to parse file as a properties file. It will be the entire contents of the file.
    */
   const params = files.reduce((accum, file) => {
-    const stat = fs.statSync(fullPath);
+    const __filepath = `${__path}/${file}`;
+    log.debug("Inspecting Param File: " + __filepath);
+    const stat = fs.statSync(__filepath);
     if (stat.isFile()) {
-      const __filepath = `${__path}/${file}`;
       const contents = fs.readFileSync(__filepath, "utf8");
-      log.debug("  Param: " + file + " Content: " + contents.toString());
+      log.sys(
+        "Retrieving Param: " + file + ", Content: " + contents.toString()
+      );
       accum[file] = contents.toString();
     }
     return accum;
