@@ -31,6 +31,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: tasks/flow
-          file: Dockerfile
+          file: tasks/flow/Dockerfile
           push: true
           tags: boomerangio/task-flow:latest,boomerangio/task-flow:${{ steps.get_version.outputs.VERSION }}
