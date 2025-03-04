@@ -1,0 +1,36 @@
+name: CI Tasks Flow
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - 'main'
+    tags:
+      - 'flow/**'
+    paths:
+      - 'tasks/flow/**'
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/*\//}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: tasks/flow
+          file: Dockerfile
+          push: true
+          tags: boomerangio/task-flow:latest,boomerangio/task-flow:${{ steps.get_version.outputs.VERSION }}

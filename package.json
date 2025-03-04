@@ -1,8 +1,8 @@
 {
-  "name": "@boomerang-io/boomerang-worker",
+  "name": "@boomerang-io/tasks",
   "version": "1.0.0",
   "private": true,
-  "repository": "git@github.com:boomerang-io/boomerang.worker.main.git",
+  "repository": "git@github.com:boomerang-io/tasks.git",
   "author": "Tyson Lawrie <twlawrie@us.ibm.com>",
   "license": "MIT",
   "type": "commonjs",

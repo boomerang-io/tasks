@@ -1,10 +1,10 @@
 import { program } from "commander";
-import fs from 'fs';
-import filePath from 'path';
+import fs from "fs";
+import filePath from "path";
 import inquirer from "inquirer";
-import { log } from "@boomerang-io/task-core"
-import init from './scripts/init.js'
-import 'dotenv/config';
+import { log } from "@boomerang-io/task-core";
+import init from "./scripts/init.js";
+import "dotenv/config";
 
 /**
  * Prompt user for questions to initialize a project
@@ -77,8 +77,8 @@ async function importAll(directory) {
     const fullPath = filePath.join(directory, file);
     const stat = fs.statSync(fullPath);
 
-    if (stat.isFile() && file.endsWith('.js')) {
-      const moduleName = filePath.basename(file, '.js');
+    if (stat.isFile() && file.endsWith(".js")) {
+      const moduleName = filePath.basename(file, ".js");
       const module = await import(fullPath);
       modules[moduleName] = module;
     } else if (stat.isDirectory()) {
@@ -104,7 +104,8 @@ export default async function cli(process) {
     .command("init")
     .description("Initialize a Boomerang Task from template")
     .action(async () => {
-      const { taskName, commmandName, directory, initGit } = await askInitQuestions();
+      const { taskName, commmandName, directory, initGit } =
+        await askInitQuestions();
       init(taskName, commmandName, directory, initGit);
     });
 
@@ -122,7 +123,7 @@ export default async function cli(process) {
       return;
     }
 
-    log.debug("Registered commands:", commands);
+    log.debug("Registered commands:", JSON.stringify(commands));
 
     // Check that command exists
     const registeredCommand = commands[cmd];
