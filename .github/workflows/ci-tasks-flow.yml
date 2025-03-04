@@ -8,6 +8,7 @@ on:
       - 'flow/**'
     paths:
       - 'tasks/flow/**'
+      - '.github/workflows/ci-tasks-flow.yml'
 jobs:
   publish:
     name: Publish
