@@ -1,0 +1,20 @@
+name: CI Task Flow
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - 'main'
+    tags:
+      - '@boomerang-io/task-flow@**'
+    paths:
+      - 'tasks/flow/**'
+      - '.github/workflows/ci-task-flow.yml'
+
+jobs:
+  call-template:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: 'task-flow'
+      dockerfile_path: 'tasks/flow/Dockerfile'
+      context_path: 'tasks/flow'

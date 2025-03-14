@@ -1,0 +1,20 @@
+name: CI Task Resend
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - 'main'
+    tags:
+      - '@boomerang-io/task-resend@**'
+    paths:
+      - 'tasks/resend/**'
+      - '.github/workflows/ci-task-resend.yml'
+
+jobs:
+  call-template:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: 'task-resend'
+      dockerfile_path: 'tasks/resend/Dockerfile'
+      context_path: 'tasks/resend'

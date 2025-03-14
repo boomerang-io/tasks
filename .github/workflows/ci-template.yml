@@ -1,14 +1,21 @@
-name: CI Tasks Flow
+name: CI Template
+
 on:
-  workflow_dispatch:
-  push:
-    branches: 
-      - 'main'
-    tags:
-      - '@boomerang-io/task-flow@**'
-    paths:
-      - 'tasks/flow/**'
-      - '.github/workflows/ci-tasks-flow.yml'
+  workflow_call:
+    inputs:
+      service:
+        description: 'The service name'
+        required: true
+        type: string
+      dockerfile_path:
+        description: 'The path to the Dockerfile'
+        required: true
+        type: string
+      context_path:
+        description: 'The build context path'
+        required: true
+        type: string
+
 jobs:
   publish:
     name: Publish
@@ -31,7 +38,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: tasks/flow
-          file: tasks/flow/Dockerfile
+          context: ${{ inputs.context_path }}
+          file: ${{ inputs.dockerfile_path }}
           push: true
-          tags: boomerangio/task-flow:latest,boomerangio/task-flow:${{ env.VERSION }}
+          tags: boomerangio/${{ inputs.service }}:latest,boomerangio/${{ inputs.service }}:${{ env.VERSION }}
