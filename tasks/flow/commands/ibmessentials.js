@@ -1,5 +1,4 @@
 import { log, params } from "@boomerang-io/task-core";
-import fetch from "node-fetch";
 import { CloudEvent, HTTP } from "cloudevents";
 
 /**

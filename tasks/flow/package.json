@@ -1,9 +1,8 @@
 {
-  "name": "boomerang-task-flow",
+  "name": "@boomerang-io/task-flow",
   "version": "3.0.0",
   "description": "Default Boomerang Flow Task encapsulating all the out of the box Tasks",
-  "main": "cli.js",
-  "repository": "git@github.com:boomerang-io/worker.flow.git",
+  "repository": "git@github.com:boomerang-io/tasks.git",
   "license": "Apache-2.0",
   "type": "module",
   "dependencies": {
@@ -25,7 +24,7 @@
     "path": "^0.12.7",
     "postmark": "^4.0.4",
     "properties": "^1.2.1",
-    "shelljs": "^0.8.5",
+    "shelljs": "^0.9.1",
     "twilio": "^5.2.2",
     "url": "^0.11.0",
     "wait-on": "^7.2.0",

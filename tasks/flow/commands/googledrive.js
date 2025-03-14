@@ -7,7 +7,7 @@ import { google } from "googleapis";
  * checkParameters - Validates all attributes of the supplied object. Returns true if all parameters are valid.
  * checkForJson - Validates the payload is JSON
  */
-import { checkIfEmpty } from "../libs/utilities";
+import { checkIfEmpty } from "../libs/utilities.js";
 
 //Internal helper function
 function assertExists(value, message) {

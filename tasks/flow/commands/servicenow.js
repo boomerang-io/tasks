@@ -1,5 +1,4 @@
 import { log, params, results } from "@boomerang-io/task-core";
-import fetch from "node-fetch";
 import HttpsProxyAgent from "https-proxy-agent";
 
 async function getTagID(instance, username, password, tag) {

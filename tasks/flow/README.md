@@ -68,7 +68,7 @@ These files are designed to replicate the properties that would be mounted in co
 
 ### Manual
 
-`VERSION=<tag> && docker build -t boomerangio/worker-flow:$VERSION . && docker push boomerangio/worker-flow:$VERSION`
+`VERSION=<tag> && docker build -t boomerangio/task-flow:$VERSION . && docker push boomerangio/task-flow:$VERSION`
 
 ## Clean up
 

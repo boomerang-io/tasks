@@ -21,7 +21,7 @@ function protectAgainstEmpty(input) {
   return input;
 }
 
-function setOutputs(outputFilePath, outputProperties) {
+async function setOutputs(outputFilePath, outputProperties) {
   if (
     outputFilePath &&
     outputFilePath.length &&
@@ -258,7 +258,7 @@ export async function findReposInOrg() {
         type: visibility,
         per_page: numToRetrieve,
       })
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         log.good("Successful retrieval of repositories.");
         log.debug("Repositories to skip:", skipReposArray);
         filteredRepos = Object.entries(data)
@@ -273,7 +273,7 @@ export async function findReposInOrg() {
         outputProperties["repositoriesPrettyPrint"] =
           "- " + filteredRepos.join("\n- ");
 
-        setOutputs(outputFilePath, outputProperties);
+        await setOutputs(outputFilePath, outputProperties);
       });
   } catch (error) {
     log.err(error);
@@ -381,7 +381,7 @@ export async function addUserToOrg() {
         org: org,
         type: "public",
       })
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         log.good("Successful retrieval of public repositories");
         log.debug("Repositories to skip:", skipReposArray);
         filteredRepos = Object.entries(data)
@@ -396,7 +396,7 @@ export async function addUserToOrg() {
         outputProperties["repositoriesPrettyPrint"] =
           "- " + filteredRepos.join("\n- ");
 
-        setOutputs(outputFilePath, outputProperties);
+        await setOutputs(outputFilePath, outputProperties);
       });
   } catch (error) {
     log.err(error);
