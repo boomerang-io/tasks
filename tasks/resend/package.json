@@ -1,8 +1,8 @@
 {
-  "name": "boomerang-task-resend",
+  "name": "@boomerang-io/task-resend",
   "version": "1.0.0",
-  "description": "Boomerang-task-resend",
-  "repository": "git@github.com:boomerang-io/task-boomerang-task-resend.git",
+  "description": "Boomerang Resend Task",
+  "repository": "git@github.com:boomerang-io/tasks.git",
   "author": "Boomerang Joe",
   "type": "module",
   "engines": {

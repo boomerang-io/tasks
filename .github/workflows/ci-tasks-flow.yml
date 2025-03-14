@@ -5,7 +5,7 @@ on:
     branches: 
       - 'main'
     tags:
-      - 'flow/**'
+      - '@boomerang-io/task-flow@**'
     paths:
       - 'tasks/flow/**'
       - '.github/workflows/ci-tasks-flow.yml'
@@ -27,11 +27,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/*\//}
+        run: echo "VERSION=$(echo ${GITHUB_REF} | sed -E 's/.*@([^@]+)$/\1/')" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: tasks/flow
           file: tasks/flow/Dockerfile
           push: true
-          tags: boomerangio/task-flow:latest,boomerangio/task-flow:${{ steps.get_version.outputs.VERSION }}
+          tags: boomerangio/task-flow:latest,boomerangio/task-flow:${{ env.VERSION }}
