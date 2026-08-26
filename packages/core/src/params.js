@@ -1,22 +1,44 @@
 import * as log from "./log.js";
 import fs from "fs";
-const { NODE_ENV } = process.env;
+const { NODE_ENV, PARAM_NAMES } = process.env;
 
 /**
- * Param retrieval as a utility for v4
+ * Param retrieval as a utility for v4/v5
  *
  * - Param resolution is already completed in the Workflow Engine prior to execution
- *   - In difference to prior versions, this utitlity no longer needs to resolve parameters
- * - An alternative to the Tekton params available via ENV variables or content replacement
- * - Especially useful if using an alternate non Tekton handler
+ * - v5 agents deliver every param as an environment variable PARAM_<NAME> (name upper-cased,
+ *   any character outside [A-Za-z0-9_] replaced by "_"; non-string values JSON-encoded) and
+ *   list the original names in PARAM_NAMES so they can be mapped back exactly.
+ * - The /params file-per-param directory is the v4 (Tekton projected ConfigMap) channel and
+ *   stays as the fallback so one task-core works against both agents.
  */
 const __path =
   NODE_ENV === "local" || NODE_ENV === "test"
     ? `${process.cwd()}/tests/params`
     : "/params";
 
-export default (function () {
-  // Read in parameter property files
+function envName(name) {
+  return "PARAM_" + name.toUpperCase().replace(/[^A-Za-z0-9_]/g, "_");
+}
+
+function fromEnv() {
+  if (PARAM_NAMES === undefined) {
+    return undefined;
+  }
+  const names = PARAM_NAMES === "" ? [] : PARAM_NAMES.split(",");
+  const params = names.reduce((accum, name) => {
+    const value = process.env[envName(name)];
+    if (value !== undefined) {
+      log.sys("Retrieving param: " + name + ", value: " + value);
+      accum[name] = value;
+    }
+    return accum;
+  }, {});
+  log.debug("Retrieved params from PARAM_* environment variables");
+  return params;
+}
+
+function fromFiles() {
   let files = [];
   try {
     files = fs.readdirSync(__path);
@@ -25,16 +47,12 @@ export default (function () {
     return;
   }
 
-  // log.debug("Param Files:", files);
-  //TODO, provide the Environment Variables in the response? Do we need to do this anymore or can developers just pull from ENV
-  // log.debug("Environment Variables\n", process.env);
-
   /**
    * Read in param files
    * - Reduce to build up one object with all of the parameters
-   * - No longer need to parse file as a properties file. It will be the entire contents of the file.
+   * - The entire contents of the file is the value.
    */
-  const params = files.reduce((accum, file) => {
+  return files.reduce((accum, file) => {
     const __filepath = `${__path}/${file}`;
     log.debug("Inspecting potential param file: " + file);
     const stat = fs.statSync(__filepath);
@@ -45,5 +63,8 @@ export default (function () {
     }
     return accum;
   }, {});
-  return params;
+}
+
+export default (function () {
+  return fromEnv() ?? fromFiles();
 })();
