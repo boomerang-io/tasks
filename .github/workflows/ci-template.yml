@@ -41,7 +41,14 @@ jobs:
           password: ${{ secrets.docker_password }}
       - name: Get the version
         id: get_version
-        run: echo "VERSION=$(echo ${GITHUB_REF} | sed -E 's/.*@([^@]+)$/\1/')" >> $GITHUB_ENV
+        # A semver only exists on @-tag pushes; a branch push (e.g. main) gets the short sha,
+        # so images stay traceable and the tag is always a valid Docker reference.
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/*@* ]]; then
+            echo "VERSION=$(echo ${GITHUB_REF} | sed -E 's/.*@([^@]+)$/\1/')" >> $GITHUB_ENV
+          else
+            echo "VERSION=${GITHUB_SHA::7}" >> $GITHUB_ENV
+          fi
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
