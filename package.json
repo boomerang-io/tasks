@@ -6,6 +6,7 @@
   "author": "Tyson Lawrie <twlawrie@us.ibm.com>",
   "license": "MIT",
   "type": "commonjs",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=18"
   },
@@ -18,7 +19,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "pub:packages": "pnpm publish --access public --tag alpha --no-git-checks --filter '@boomerang-io/*'"
   },
   "devDependencies": {
