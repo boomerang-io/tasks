@@ -10,18 +10,25 @@ jobs:
   publish:
     name: Publish @boomerang-io/task-core
     runs-on: ubuntu-latest
+    # npm Trusted Publishing (OIDC): the id-token permission lets npm exchange a GitHub
+    # OIDC token for a short-lived publish credential - no NPM_TOKEN secret anywhere.
+    # The trusted publisher on npmjs.com pins this repo + this workflow filename.
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing requires npm >= 11.5.1; the runner's bundled npm is older.
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest && npm --version
 
       - name: Check tag version matches package.json
         # A semver only exists on tag pushes (task-core@1.1.0); workflow_dispatch
@@ -35,10 +42,10 @@ jobs:
             exit 1
           fi
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      # task-core is a leaf package (no workspace dependencies, no build step), so it
+      # publishes directly with npm - which performs the OIDC exchange and generates
+      # provenance automatically under trusted publishing. pnpm is not used here because
+      # its publish path does not perform the npm OIDC token exchange.
       - name: Publish
-        run: pnpm publish --filter @boomerang-io/task-core --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        working-directory: packages/core
+        run: npm publish --access public
