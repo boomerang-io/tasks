@@ -11,6 +11,7 @@ on:
       - 'tasks/resend/**'
       - 'packages/core/**'
       - '.github/workflows/ci-task-resend.yml'
+      - '.github/workflows/ci-template.yml'
 
 jobs:
   call-template:
