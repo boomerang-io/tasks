@@ -19,5 +19,6 @@ jobs:
       service: 'task-resend'
       dockerfile_path: 'tasks/resend/Dockerfile'
       context_path: '.'
+    secrets:
       docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
       docker_password: ${{ secrets.DOCKERHUB_TOKEN }}
