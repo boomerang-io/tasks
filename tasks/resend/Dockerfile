@@ -1,4 +1,38 @@
-#Import the base Alpine image
+# syntax=docker/dockerfile:1
+#
+# Build context is the REPO ROOT (not tasks/resend) so pnpm can resolve
+# @boomerang-io/task-core as an internal pnpm-workspace dependency instead of
+# fetching it from the npm registry. See CONTRIBUTING_TASKS.md.
+
+# ---- deps: resolve/install this task's workspace deps with pnpm ----
+FROM alpine:3.20.2 AS deps
+
+RUN apk add --no-cache bash coreutils nodejs npm
+
+WORKDIR /workspace
+
+# pnpm itself, pinned to the version declared in the root package.json's
+# "packageManager" field (matches the pnpm-lock.yaml lockfileVersion).
+# Alpine's `nodejs`/`npm` packages don't ship corepack, so install pnpm
+# directly at the pinned version instead of relying on `corepack enable`.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN npm install -g pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")
+
+# Only the workspace members this task actually needs: task-core (the
+# internal dependency being resolved) and the task's own directory.
+COPY packages/core ./packages/core
+COPY tasks/resend ./tasks/resend
+
+# --filter <pkg>... resolves @boomerang-io/task-resend plus its workspace
+# dependencies (task-core); --prod skips devDependencies.
+RUN pnpm install --prod --frozen-lockfile --filter @boomerang-io/task-resend...
+
+# pnpm deploy produces a flat, self-contained, npm-compatible install for
+# just this task (pruned of devDependencies and unrelated workspace
+# packages) so the runtime stage doesn't need pnpm/corepack at all.
+RUN pnpm --filter @boomerang-io/task-resend deploy --prod /out
+
+# ---- runtime: small alpine image, no pnpm/corepack, no build toolchain ----
 FROM alpine:3.20.2
 
 WORKDIR /opt/bin
@@ -7,9 +41,6 @@ WORKDIR /opt/bin
 RUN apk add --no-cache bash sed grep curl coreutils nodejs npm
 
 WORKDIR /cli
-# 'package-lock.json' contains `*` to not enforce file existance
-ADD ./package.json ./package-lock*.json ./ 
-ADD ./commands ./commands
-RUN npm install --production
+COPY --from=deps /out ./
 
 ENTRYPOINT [ "npm", "start" ]

@@ -7,7 +7,7 @@
   "type": "module",
   "dependencies": {
     "@boomerang-io/task-cli": "^1.0.0",
-    "@boomerang-io/task-core": "^1.0.0",
+    "@boomerang-io/task-core": "workspace:*",
     "@octokit/graphql": "^8.1.1",
     "@octokit/rest": "^21.0.1",
     "@sendgrid/client": "^8.1.3",
