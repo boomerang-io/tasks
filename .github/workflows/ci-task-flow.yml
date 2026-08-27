@@ -11,6 +11,7 @@ on:
       - 'tasks/flow/**'
       - 'packages/core/**'
       - '.github/workflows/ci-task-flow.yml'
+      - '.github/workflows/ci-template.yml'
 
 jobs:
   call-template:
