@@ -11,7 +11,7 @@ variables and files — is the supported integration surface for a task written 
 (Go, Python, a shell script, ...). `task-core` is an optional convenience wrapper for Node.js
 tasks; it is kept working and published, but new capability lands in the contract doc first.
 
-`1.1.0` speaks both contract generations:
+`3.0.0` speaks both contract generations:
 
 - **v5**: `PARAM_NAMES` / `PARAM_<NAME>` env vars, `RESULTS_PATH` (directory or file, detected
   with `stat`).

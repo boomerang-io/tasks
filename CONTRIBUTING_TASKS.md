@@ -224,5 +224,5 @@ def write_results(results: dict) -> None:
 
 Each publishable artifact in this repo releases off its own tag, `<name>@<version>`, matched by
 that artifact's workflow. The short form `<name>@<version>` (e.g. `task-flow@3.1.0`,
-`task-core@1.1.0`) is the current scheme; the older `@boomerang-io/<name>@<version>` form is
+`task-core@3.0.0`) is the current scheme; the older `@boomerang-io/<name>@<version>` form is
 still accepted on the image workflows for back-compat but new tags should use the short form.

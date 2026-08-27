@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-io/task-core",
-  "version": "1.1.0",
+  "version": "3.0.0",
   "description": "Boomerang Task Core",
   "main": "src/index.js",
   "repository": {
