@@ -14,14 +14,22 @@ When a method fails, we need to set or return (depending on the type of method) 
 
 ## Packaging
 
-The following command will use lerna to release new versions of the modules. It determines minor and iteration release numbers and the changelog based on git commit messages.
+The following command will use lerna to determine minor and iteration release numbers and the
+changelog based on git commit messages.
 
 ```sh
-git tag @boomerang-io/task-core@x.y.z
-git tag @boomerang-io/task-cli@x.y.z
+git tag task-core@x.y.z
+git tag task-cli@x.y.z
 git push --tags
 pnpm release
 ```
+
+Pushing a `task-core@x.y.z` tag also triggers `.github/workflows/publish-task-core.yml`, which
+publishes `@boomerang-io/task-core` to npm automatically — the manual `pnpm release`/lerna flow
+above is for cutting the version bump and changelog, not for the npm publish step itself. The
+tag version must match `packages/core/package.json`'s `version` or the publish workflow fails.
+The older `@boomerang-io/task-core@x.y.z` tag form still works for the image workflows but is no
+longer the documented convention — see `CONTRIBUTING_TASKS.md`.
 
 ## Local Development
 
