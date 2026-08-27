@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "repository": "git@github.com:boomerang-io/tasks",
+    "url": "git+https://github.com/boomerang-io/tasks.git",
     "directory": "packages/core"
   },
   "license": "Apache-2.0",
