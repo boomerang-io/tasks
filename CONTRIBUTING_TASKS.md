@@ -68,7 +68,16 @@ Follow the guide for pushing your local project to the newly created repository.
 **not** the contract itself. The actual contract between the platform and a task container is
 plain environment variables and files, so a task written in any language (Go, Python, a shell
 script, ...) can implement it directly without depending on `task-core` at all. This section
-documents that contract.
+documents that contract. `task-core` is published to npm as `@boomerang-io/task-core`
+independently of the platform, tagged `task-core@<version>` (see "Release tags" below); the
+package's own README documents which contract generations a given release speaks.
+
+### Platform version: `FLOW_VERSION`
+
+`FLOW_VERSION` is set to the running platform's semver string (e.g. `5.0.0`). Use it to branch
+on capability when a task needs to behave differently across platform versions — e.g. detecting
+whether `RESULTS_PATH` (v5) will be present versus falling back to the v4 `/tekton/results`
+default.
 
 ### Reading params: `PARAM_NAMES` / `PARAM_<NAME>`
 
@@ -80,10 +89,11 @@ Every resolved param is delivered as an environment variable:
 
 Param names are restricted platform-side to `^[a-zA-Z_][a-zA-Z0-9-_]*$` (letters, digits, `-`,
 `_`; must start with a letter or underscore — no dots, since `.` is the reference-path separator
-in `$(params.x)` expressions). Given that charset, the fold to an env var name is just:
+in `$(params.x)` expressions). Given that charset, the fold to an env var name is exactly *upper-case + `-` → `_`*:
 
-1. Upper-case the name.
-2. Replace every `-` with `_`.
+- Shell: `echo "$name" | tr 'a-z-' 'A-Z_'`
+- JavaScript: `name.toUpperCase().replaceAll('-', '_')`
+- Python: `name.upper().replace('-', '_')`
 
 So a param named `retry-Count` is delivered as `PARAM_RETRY_COUNT`. Name matching is
 **case-insensitive** platform-side, and case/separator-variant duplicates (e.g. `retryCount` and
@@ -209,3 +219,10 @@ def write_results(results: dict) -> None:
     with open(path, "w") as f:
         json.dump(existing, f)
 ```
+
+### Release tags
+
+Each publishable artifact in this repo releases off its own tag, `<name>@<version>`, matched by
+that artifact's workflow. The short form `<name>@<version>` (e.g. `task-flow@3.1.0`,
+`task-core@3.0.0`) is the current scheme; the older `@boomerang-io/<name>@<version>` form is
+still accepted on the image workflows for back-compat but new tags should use the short form.

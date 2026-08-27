@@ -7,6 +7,7 @@ on:
       - 'main'
     tags:
       - '@boomerang-io/task-flow@**'
+      - 'task-flow@**'
     paths:
       - 'tasks/flow/**'
       - 'packages/core/**'

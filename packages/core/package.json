@@ -1,16 +1,15 @@
 {
   "name": "@boomerang-io/task-core",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Boomerang Task Core",
   "main": "src/index.js",
   "repository": {
     "type": "git",
     "repository": "git@github.com:boomerang-io/tasks",
-    "directory": "packages/cli"
+    "directory": "packages/core"
   },
   "license": "Apache-2.0",
   "type": "module",
-  "private": true,
   "engines": {
     "node": ">=18"
   },
