@@ -1,5 +1,6 @@
 packages:
   - 'packages/cli'
   - 'packages/core'
+  - 'tasks/ai'
   - 'tasks/resend'
   - 'tasks/flow'
