@@ -1,0 +1,22 @@
+{
+  "name": "@boomerang-io/task-ai",
+  "version": "1.0.0",
+  "description": "Boomerang AI Task - the worker behind Flow's `ai` task type",
+  "repository": "git@github.com:boomerang-io/tasks.git",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "prompt": "./bin/prompt.js"
+  },
+  "dependencies": {
+    "@boomerang-io/task-core": "workspace:*",
+    "openai": "^7.15.0"
+  },
+  "scripts": {
+    "start": "node bin/prompt.js",
+    "test": "bash tests/run.sh"
+  }
+}

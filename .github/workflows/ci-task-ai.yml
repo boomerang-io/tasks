@@ -1,0 +1,25 @@
+name: CI Task AI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - 'main'
+    tags:
+      - 'task-ai@**'
+    paths:
+      - 'tasks/ai/**'
+      - 'packages/core/**'
+      - '.github/workflows/ci-task-ai.yml'
+      - '.github/workflows/ci-template.yml'
+
+jobs:
+  call-template:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: 'task-ai'
+      dockerfile_path: 'tasks/ai/Dockerfile'
+      context_path: '.'
+    secrets:
+      docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_password: ${{ secrets.DOCKERHUB_TOKEN }}
