@@ -54,5 +54,6 @@ jobs:
         with:
           context: ${{ inputs.context_path }}
           file: ${{ inputs.dockerfile_path }}
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: boomerangio/${{ inputs.service }}:latest,boomerangio/${{ inputs.service }}:${{ env.VERSION }}
