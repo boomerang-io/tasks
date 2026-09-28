@@ -223,4 +223,47 @@ describe("artifact upload/download commands", () => {
     expect(result.stdout).to.include("SHA-256 mismatch");
     expect(fsSync.existsSync(destinationPath)).to.equal(false);
   });
+
+  it("resolves a relative upload path against the workspace root", async () => {
+    await fs.mkdir(path.join(tmpDir, "workflowrun", "reports"), { recursive: true });
+    const content = "relative upload\n";
+    await fs.writeFile(path.join(tmpDir, "workflowrun", "reports", "sbom.json"), content);
+    let received = "";
+    const server = http.createServer((req, res) => {
+      req.on("data", (chunk) => (received += chunk));
+      req.on("end", () => {
+        res.writeHead(200);
+        res.end();
+      });
+    });
+    const port = await listen(server);
+
+    const result = await runCommand("upload", {
+      ARTIFACT_WORKSPACE_ROOT: tmpDir,
+      ...paramEnv({ name: "sbom", path: "workflowrun/reports/sbom.json", url: `http://127.0.0.1:${port}/upload`, headers: "{}" }),
+    });
+    server.close();
+
+    expect(result.code, result.stdout + result.stderr).to.equal(0);
+    expect(received).to.equal(content);
+  });
+
+  it("resolves a relative download destination against the workspace root", async () => {
+    const content = "relative download\n";
+    const sha256 = crypto.createHash("sha256").update(content).digest("hex");
+    const server = http.createServer((req, res) => {
+      res.writeHead(200);
+      res.end(content);
+    });
+    const port = await listen(server);
+
+    const result = await runCommand("download", {
+      ARTIFACT_WORKSPACE_ROOT: tmpDir,
+      ...paramEnv({ name: "sbom.json", path: "workflow/inputs/", url: `http://127.0.0.1:${port}/download`, headers: "{}", sha256, contentType: "application/octet-stream" }),
+    });
+    server.close();
+
+    expect(result.code, result.stdout + result.stderr).to.equal(0);
+    expect(await fs.readFile(path.join(tmpDir, "workflow", "inputs", "sbom.json"), "utf8")).to.equal(content);
+  });
 });

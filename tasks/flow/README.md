@@ -67,12 +67,14 @@ These files are designed to replicate the properties that would be mounted in co
 | Param            | Used by  | Meaning                                                                                                                                                |
 | ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `name`           | both     | The artifact's name.                                                                                                                                   |
-| `path`           | both     | Upload: a file or directory in the run workspace. Download: the destination.                                                                           |
+| `path`           | both     | Upload: a file or directory. Download: the destination. Absolute, or relative to `/workspace` (e.g. `workflowrun/reports/sbom.json`). |
 | `url`            | both     | A presigned URL (PUT for upload, GET for download), valid ~15 minutes, for exactly one object.                                                         |
 | `headers`        | both     | A JSON object string of headers the request must send, possibly empty or missing (`{}` if so); e.g. Azure Blob needs `{"x-ms-blob-type":"BlockBlob"}`. |
 | `retention-days` | upload   | Applied by Flow, not read by this worker.                                                                                                              |
 | `sha256`         | download | Lowercase hex SHA-256 of the file as stored, checked after download.                                                                                   |
 | `contentType`    | download | The stored object's content type; drives whether the download is unpacked as a folder.                                                                 |
+
+A relative `path` resolves against `/workspace`, the parent of every default workspace mount, so it names its workspace: `workflowrun/...` or `workflow/...`. An absolute path (e.g. `/data/...` or a custom `mountPath`) is used as-is.
 
 Like every task param, these arrive as `PARAM_<NAME>` environment variables resolved by `@boomerang-io/task-core`'s `params` (see `packages/core/src/params.js`): the name is upper-cased and every character outside `[A-Za-z0-9_]` becomes `_`. For this task that resolves to `PARAM_NAME`, `PARAM_PATH`, `PARAM_URL`, `PARAM_HEADERS`, `PARAM_RETENTION_DAYS`, `PARAM_SHA256`, and `PARAM_CONTENTTYPE` (no separator — `contentType` upper-cases to `CONTENTTYPE`), alongside `PARAM_NAMES` listing which of them are set.
 

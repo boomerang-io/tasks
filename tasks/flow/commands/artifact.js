@@ -55,6 +55,13 @@ async function truncatedBody(data, max = MAX_ERROR_BODY_BYTES) {
 }
 
 // Renames across filesystems too, falling back to copy+remove when the temp dir and destination differ in mount.
+// A relative path names a workspace under /workspace (workflowrun/..., workflow/...), the parent of every default mount; an absolute path is used as-is.
+const WORKSPACE_ROOT = process.env.ARTIFACT_WORKSPACE_ROOT || "/workspace";
+
+function resolvePath(taskPath) {
+  return path.isAbsolute(taskPath) ? taskPath : path.resolve(WORKSPACE_ROOT, taskPath);
+}
+
 function moveFile(sourcePath, destinationPath) {
   try {
     fs.renameSync(sourcePath, destinationPath);
@@ -71,18 +78,19 @@ export async function upload() {
   log.debug("Started Artifact Upload Command");
 
   // params["retention-days"] is read and applied by Flow, not the worker; nothing to do with it here.
-  const { name: artifactName, path: sourcePath, url: artifactUrl, headers: headersParam } = params;
+  const { name: artifactName, path: sourceParam, url: artifactUrl, headers: headersParam } = params;
 
   if (!artifactUrl) {
     log.err("The parameter 'url' is not defined or empty");
     process.exit(1);
     return;
   }
-  if (!sourcePath) {
+  if (!sourceParam) {
     log.err("The parameter 'path' is not defined or empty");
     process.exit(1);
     return;
   }
+  const sourcePath = resolvePath(sourceParam);
   if (!fs.existsSync(sourcePath)) {
     log.err(`Path does not exist: ${sourcePath}`);
     process.exit(1);
@@ -140,7 +148,7 @@ export async function upload() {
 export async function download() {
   log.debug("Started Artifact Download Command");
 
-  const { name: artifactName, path: destinationPath, url: artifactUrl, headers: headersParam, sha256: artifactSha256, contentType: artifactContentType } = params;
+  const { name: artifactName, path: destinationParam, url: artifactUrl, headers: headersParam, sha256: artifactSha256, contentType: artifactContentType } = params;
 
   if (!artifactUrl) {
     log.err("The parameter 'url' is not defined or empty");
@@ -152,11 +160,12 @@ export async function download() {
     process.exit(1);
     return;
   }
-  if (!destinationPath) {
+  if (!destinationParam) {
     log.err("The parameter 'path' is not defined or empty");
     process.exit(1);
     return;
   }
+  const destinationPath = resolvePath(destinationParam);
 
   const tempFile = path.join(os.tmpdir(), `${crypto.randomUUID()}.download`);
   try {
@@ -200,7 +209,7 @@ export async function download() {
       fs.rmSync(tempFile, { force: true });
     } else {
       const isDirectory = fs.existsSync(destinationPath) && fs.statSync(destinationPath).isDirectory();
-      const target = isDirectory || destinationPath.endsWith("/") ? path.join(destinationPath, artifactName) : destinationPath;
+      const target = isDirectory || destinationParam.endsWith("/") ? path.join(destinationPath, artifactName) : destinationPath;
       fs.mkdirSync(path.dirname(target), { recursive: true });
       moveFile(tempFile, target);
     }
