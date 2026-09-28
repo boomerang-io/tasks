@@ -23,11 +23,11 @@ function proxyAgent() {
   return new HttpsProxyAgent(process.env.HTTP_PROXY);
 }
 
-// ARTIFACT_HEADERS is a JSON object string; every header it lists must be sent as-is.
+// params.headers is a JSON object string, possibly empty or missing; every header it lists must be sent as-is.
 function parseHeaders(json) {
   const headers = json ? JSON.parse(json) : {};
   if (typeof headers !== "object" || headers === null || Array.isArray(headers)) {
-    throw new Error("ARTIFACT_HEADERS is not a JSON object");
+    throw new Error("The parameter 'headers' is not a JSON object");
   }
   return headers;
 }
@@ -70,12 +70,11 @@ function moveFile(sourcePath, destinationPath) {
 export async function upload() {
   log.debug("Started Artifact Upload Command");
 
-  const artifactUrl = process.env.ARTIFACT_URL;
-  const artifactName = process.env.ARTIFACT_NAME;
-  const { path: sourcePath } = params;
+  // params["retention-days"] is read and applied by Flow, not the worker; nothing to do with it here.
+  const { name: artifactName, path: sourcePath, url: artifactUrl, headers: headersParam } = params;
 
   if (!artifactUrl) {
-    log.err("ARTIFACT_URL is not set");
+    log.err("The parameter 'url' is not defined or empty");
     process.exit(1);
     return;
   }
@@ -92,7 +91,7 @@ export async function upload() {
 
   let tempTarball;
   try {
-    const headers = parseHeaders(process.env.ARTIFACT_HEADERS);
+    const headers = parseHeaders(headersParam);
     const isDirectory = fs.statSync(sourcePath).isDirectory();
 
     let uploadPath = sourcePath;
@@ -141,19 +140,15 @@ export async function upload() {
 export async function download() {
   log.debug("Started Artifact Download Command");
 
-  const artifactUrl = process.env.ARTIFACT_URL;
-  const artifactName = process.env.ARTIFACT_NAME;
-  const artifactSha256 = process.env.ARTIFACT_SHA256;
-  const artifactContentType = process.env.ARTIFACT_CONTENT_TYPE;
-  const { path: destinationPath } = params;
+  const { name: artifactName, path: destinationPath, url: artifactUrl, headers: headersParam, sha256: artifactSha256, contentType: artifactContentType } = params;
 
   if (!artifactUrl) {
-    log.err("ARTIFACT_URL is not set");
+    log.err("The parameter 'url' is not defined or empty");
     process.exit(1);
     return;
   }
   if (!artifactSha256) {
-    log.err("ARTIFACT_SHA256 is not set");
+    log.err("The parameter 'sha256' is not defined or empty");
     process.exit(1);
     return;
   }
@@ -165,7 +160,7 @@ export async function download() {
 
   const tempFile = path.join(os.tmpdir(), `${crypto.randomUUID()}.download`);
   try {
-    const headers = parseHeaders(process.env.ARTIFACT_HEADERS);
+    const headers = parseHeaders(headersParam);
     const response = await axios.get(artifactUrl, {
       headers,
       responseType: "stream",

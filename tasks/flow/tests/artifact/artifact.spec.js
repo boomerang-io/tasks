@@ -33,6 +33,16 @@ function runCommand(command, env) {
   });
 }
 
+// Turns { name: value } task params into the PARAM_NAMES / PARAM_<NAME> env vars task-core resolves
+// them from, using the same normalisation as packages/core/src/params.js's envName().
+function paramEnv(values) {
+  const env = { PARAM_NAMES: Object.keys(values).join(",") };
+  for (const [name, value] of Object.entries(values)) {
+    env["PARAM_" + name.toUpperCase().replace(/[^A-Za-z0-9_]/g, "_")] = value;
+  }
+  return env;
+}
+
 describe("artifact upload/download commands", () => {
   let tmpDir;
 
@@ -61,13 +71,16 @@ describe("artifact upload/download commands", () => {
     });
     const port = await listen(server);
 
-    const result = await runCommand("upload", {
-      ARTIFACT_URL: `http://127.0.0.1:${port}/upload`,
-      ARTIFACT_HEADERS: JSON.stringify({ "x-test-header": "abc" }),
-      ARTIFACT_NAME: "upload-source.txt",
-      PARAM_NAMES: "path",
-      PARAM_PATH: sourcePath,
-    });
+    const result = await runCommand(
+      "upload",
+      paramEnv({
+        name: "upload-source.txt",
+        path: sourcePath,
+        url: `http://127.0.0.1:${port}/upload`,
+        headers: JSON.stringify({ "x-test-header": "abc" }),
+        "retention-days": "30", // set by Flow on every run; the worker must ignore it
+      }),
+    );
     server.close();
 
     expect(result.code, result.stdout + result.stderr).to.equal(0);
@@ -98,13 +111,15 @@ describe("artifact upload/download commands", () => {
     });
     const port = await listen(server);
 
-    const result = await runCommand("upload", {
-      ARTIFACT_URL: `http://127.0.0.1:${port}/upload`,
-      ARTIFACT_HEADERS: "{}",
-      ARTIFACT_NAME: "upload-dir",
-      PARAM_NAMES: "path",
-      PARAM_PATH: sourceDir,
-    });
+    const result = await runCommand(
+      "upload",
+      paramEnv({
+        name: "upload-dir",
+        path: sourceDir,
+        url: `http://127.0.0.1:${port}/upload`,
+        headers: "{}",
+      }),
+    );
     server.close();
 
     expect(result.code, result.stdout + result.stderr).to.equal(0);
@@ -131,15 +146,17 @@ describe("artifact upload/download commands", () => {
     const port = await listen(server);
 
     const destinationPath = path.join(tmpDir, "downloaded.txt");
-    const result = await runCommand("download", {
-      ARTIFACT_URL: `http://127.0.0.1:${port}/download`,
-      ARTIFACT_HEADERS: "{}",
-      ARTIFACT_NAME: "downloaded.txt",
-      ARTIFACT_SHA256: sha256,
-      ARTIFACT_CONTENT_TYPE: "text/plain",
-      PARAM_NAMES: "path",
-      PARAM_PATH: destinationPath,
-    });
+    const result = await runCommand(
+      "download",
+      paramEnv({
+        name: "downloaded.txt",
+        path: destinationPath,
+        url: `http://127.0.0.1:${port}/download`,
+        headers: "{}",
+        sha256,
+        contentType: "text/plain",
+      }),
+    );
     server.close();
 
     expect(result.code, result.stdout + result.stderr).to.equal(0);
@@ -162,15 +179,17 @@ describe("artifact upload/download commands", () => {
     const port = await listen(server);
 
     const destinationDir = path.join(tmpDir, "dl-dest");
-    const result = await runCommand("download", {
-      ARTIFACT_URL: `http://127.0.0.1:${port}/download`,
-      ARTIFACT_HEADERS: "{}",
-      ARTIFACT_NAME: "dl-src",
-      ARTIFACT_SHA256: sha256,
-      ARTIFACT_CONTENT_TYPE: "application/vnd.boomerang.artifact.tar+gzip",
-      PARAM_NAMES: "path",
-      PARAM_PATH: destinationDir,
-    });
+    const result = await runCommand(
+      "download",
+      paramEnv({
+        name: "dl-src",
+        path: destinationDir,
+        url: `http://127.0.0.1:${port}/download`,
+        headers: "{}",
+        sha256,
+        contentType: "application/vnd.boomerang.artifact.tar+gzip",
+      }),
+    );
     server.close();
 
     expect(result.code, result.stdout + result.stderr).to.equal(0);
@@ -186,15 +205,17 @@ describe("artifact upload/download commands", () => {
     const port = await listen(server);
 
     const destinationPath = path.join(tmpDir, "mismatch.txt");
-    const result = await runCommand("download", {
-      ARTIFACT_URL: `http://127.0.0.1:${port}/download`,
-      ARTIFACT_HEADERS: "{}",
-      ARTIFACT_NAME: "mismatch.txt",
-      ARTIFACT_SHA256: "0".repeat(64),
-      ARTIFACT_CONTENT_TYPE: "text/plain",
-      PARAM_NAMES: "path",
-      PARAM_PATH: destinationPath,
-    });
+    const result = await runCommand(
+      "download",
+      paramEnv({
+        name: "mismatch.txt",
+        path: destinationPath,
+        url: `http://127.0.0.1:${port}/download`,
+        headers: "{}",
+        sha256: "0".repeat(64),
+        contentType: "text/plain",
+      }),
+    );
     server.close();
 
     // log.err writes through console.log (chalk), so the message lands on stdout.
