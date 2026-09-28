@@ -58,6 +58,30 @@ These files are designed to replicate the properties that would be mounted in co
 - _checkParameters_: Validates all attributes of the supplied object. Returns true if all parameters are valid;
 - _checkForJson_: Try to check if valid JSON and convert it to JS Object.
 
+#### **Artifact commands** [commands/artifact.js](./commands/artifact.js)
+
+**_Descriptions_**: `artifact upload` and `artifact download` move a file or folder between the run workspace and object storage through a presigned URL. The file bytes never pass through Flow — the engine fills the link fields on the task run when it hands the task to the dispatcher, so these commands talk directly to the object store using ordinary task params.
+
+**_Task params_**
+
+| Param            | Used by  | Meaning                                                                                                                                                |
+| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`           | both     | The artifact's name.                                                                                                                                   |
+| `path`           | both     | Upload: a file or directory. Download: the destination. Absolute, or relative to `/workspace` (e.g. `workflowrun/reports/sbom.json`). |
+| `url`            | both     | A presigned URL (PUT for upload, GET for download), valid ~15 minutes, for exactly one object.                                                         |
+| `headers`        | both     | A JSON object string of headers the request must send, possibly empty or missing (`{}` if so); e.g. Azure Blob needs `{"x-ms-blob-type":"BlockBlob"}`. |
+| `retention-days` | upload   | Applied by Flow, not read by this worker.                                                                                                              |
+| `sha256`         | download | Lowercase hex SHA-256 of the file as stored, checked after download.                                                                                   |
+| `contentType`    | download | The stored object's content type; drives whether the download is unpacked as a folder.                                                                 |
+
+A relative `path` resolves against `/workspace`, the parent of every default workspace mount, so it names its workspace: `workflowrun/...` or `workflow/...`. An absolute path (e.g. `/data/...` or a custom `mountPath`) is used as-is.
+
+Like every task param, these arrive as `PARAM_<NAME>` environment variables resolved by `@boomerang-io/task-core`'s `params` (see `packages/core/src/params.js`): the name is upper-cased and every character outside `[A-Za-z0-9_]` becomes `_`. For this task that resolves to `PARAM_NAME`, `PARAM_PATH`, `PARAM_URL`, `PARAM_HEADERS`, `PARAM_RETENTION_DAYS`, `PARAM_SHA256`, and `PARAM_CONTENTTYPE` (no separator — `contentType` upper-cases to `CONTENTTYPE`), alongside `PARAM_NAMES` listing which of them are set.
+
+**_Folder handling_**: uploading a directory packs its _contents_ (not the directory itself) into a gzipped tarball with `Content-Type: application/vnd.boomerang.artifact.tar+gzip`, using the platform `tar` binary, so it unpacks flat into whatever destination directory the download side picks. Downloading an artifact stored with that content type creates the destination directory and extracts the tarball into it; any other content type is written as a single file, placed under `path` if it names a directory (or ends with `/`), or at `path` directly otherwise.
+
+**_Verification_**: uploads stream the file straight from disk with `Content-Length` set to its size (files can be gigabytes, so nothing is buffered in memory); downloads stream to a temp file while hashing it, and a SHA-256 mismatch against `sha256` deletes the temp file and fails the task rather than leaving a corrupt file in place.
+
 ## Packaging
 
 ### Automatic
