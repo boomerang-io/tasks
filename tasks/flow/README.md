@@ -58,6 +58,26 @@ These files are designed to replicate the properties that would be mounted in co
 - _checkParameters_: Validates all attributes of the supplied object. Returns true if all parameters are valid;
 - _checkForJson_: Try to check if valid JSON and convert it to JS Object.
 
+#### **Artifact commands** [commands/artifact.js](./commands/artifact.js)
+
+**_Descriptions_**: `artifact upload` and `artifact download` move a file or folder between the run workspace and object storage through a presigned URL. The file bytes never pass through Flow — the dispatcher only hands the pod a presigned link, so these commands talk directly to the object store.
+
+**_Environment contract set by the dispatcher_**
+
+| Variable                | Set for  | Meaning                                                                                                                       |
+| ----------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `ARTIFACT_NAME`         | both     | The artifact's name.                                                                                                          |
+| `ARTIFACT_URL`          | both     | A presigned URL (PUT for upload, GET for download), valid ~15 minutes, for exactly one object.                                |
+| `ARTIFACT_HEADERS`      | both     | A JSON object string of headers the request must send (often `"{}"`; e.g. Azure Blob needs `{"x-ms-blob-type":"BlockBlob"}`). |
+| `ARTIFACT_SHA256`       | download | Lowercase hex SHA-256 of the file as stored, checked after download.                                                          |
+| `ARTIFACT_CONTENT_TYPE` | download | The stored object's content type; drives whether the download is unpacked as a folder.                                        |
+
+Both commands take the task parameter `path`: for upload, a file or directory in the run workspace; for download, the destination.
+
+**_Folder handling_**: uploading a directory packs its _contents_ (not the directory itself) into a gzipped tarball with `Content-Type: application/vnd.boomerang.artifact.tar+gzip`, using the platform `tar` binary, so it unpacks flat into whatever destination directory the download side picks. Downloading an artifact stored with that content type creates the destination directory and extracts the tarball into it; any other content type is written as a single file, placed under `path` if it names a directory (or ends with `/`), or a `path` created new file otherwise.
+
+**_Verification_**: uploads stream the file straight from disk with `Content-Length` set to its size (files can be gigabytes, so nothing is buffered in memory); downloads stream to a temp file while hashing it, and a SHA-256 mismatch against `ARTIFACT_SHA256` deletes the temp file and fails the task rather than leaving a corrupt file in place.
+
 ## Packaging
 
 ### Automatic
