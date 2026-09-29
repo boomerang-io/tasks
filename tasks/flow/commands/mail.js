@@ -1,5 +1,5 @@
 import { log, params, results } from "@boomerang-io/task-core";
-import HttpsProxyAgent from "https-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import filePath from "path";
 import fs from "fs";
 import client from "@sendgrid/client";

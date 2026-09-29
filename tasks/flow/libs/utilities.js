@@ -39,7 +39,7 @@ export function unsetField(object, fieldName) {
       object[key] instanceof Object &&
       Object.keys(object[key]).length
     ) {
-      module.exports.unsetField(object[key], fieldName);
+      unsetField(object[key], fieldName);
     } else {
       if (key === fieldName) {
         delete object[key];
@@ -54,7 +54,7 @@ export function unsetField(object, fieldName) {
  */
 export function checkParameters(params) {
   let invalidParams = Object.entries(params).filter(([key, value]) =>
-    module.exports.checkIfEmpty(value)
+    checkIfEmpty(value)
   );
   invalidParams.forEach(([key, value]) =>
     log.warn(`The parameter '${key}' is not defined or empty`)
@@ -70,7 +70,7 @@ export function checkParameters(params) {
  *
  */
 export function checkForJson(input) {
-  if (!module.exports.checkIfEmpty(input)) {
+  if (!checkIfEmpty(input)) {
     try {
       return JSON.parse(input);
     } catch (err) {
@@ -88,7 +88,7 @@ export function checkForJson(input) {
  *
  */
 export function isValidJson(input) {
-  if (!module.exports.checkIfEmpty(input)) {
+  if (!checkIfEmpty(input)) {
     try {
       return JSON.parse(input);
     } catch (err) {

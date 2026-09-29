@@ -1,5 +1,5 @@
 import { log, params, results } from "@boomerang-io/task-core";
-import HttpsProxyAgent from "https-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 async function getTagID(instance, username, password, tag) {
   log.debug("Inside ServiceNow Get Tag ID Plugin");

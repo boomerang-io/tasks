@@ -1,5 +1,5 @@
 import { log, params, result } from "@boomerang-io/task-core";
-import HttpsProxyAgent from "https-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import { IncomingWebhook } from "@slack/webhook";
 import { WebClient } from "@slack/web-api";
 import axios from "axios";
