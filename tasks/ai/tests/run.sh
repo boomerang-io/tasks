@@ -118,6 +118,7 @@ param_name_for() {
     PARAM_TEMPERATURE) echo "temperature" ;;
     PARAM_MAXTOKENS) echo "maxTokens" ;;
     PARAM_RESPONSEFORMAT) echo "responseFormat" ;;
+    PARAM_JSONSCHEMA) echo "jsonSchema" ;;
     PARAM_SEED) echo "seed" ;;
     PARAM_FILES) echo "files" ;;
     PARAM_MAXCONTEXTBYTES) echo "maxContextBytes" ;;
@@ -403,6 +404,70 @@ mkdir -p "$TMP/results14"
 run_prompt "$TMP/results14" PARAM_RESPONSEFORMAT="json"
 check "exits non-zero" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
 check_contains "says why" "$STDERR_TXT" "INVALID_RESPONSE"
+
+#
+# 9. jsonSchema: strict json_schema in the request, the reply checked against it on the way out,
+#    and a bad schema or a schema without responseFormat=json refused before any request.
+#
+readonly SCHEMA='{"type":"object","properties":{"ok":{"type":"boolean"},"n":{"type":"integer"}},"required":["ok","n"],"additionalProperties":false}'
+
+echo
+echo "jsonSchema sends response_format json_schema with strict decoding"
+start_mock "$(json_completion '"{\"ok\": true, \"n\": 2}"')"
+mkdir -p "$TMP/results15"
+run_prompt "$TMP/results15" PARAM_RESPONSEFORMAT="json" PARAM_JSONSCHEMA="$SCHEMA"
+check "exits zero" "$RC" "0"
+REQ="$(head -1 "$REQUESTS")"
+check "response_format type" "$(printf '%s' "$REQ" | jq -r '.body.response_format.type')" "json_schema"
+check "strict is on" "$(printf '%s' "$REQ" | jq -r '.body.response_format.json_schema.strict')" "true"
+check "the schema is named" "$(printf '%s' "$REQ" | jq -r '.body.response_format.json_schema.name')" "output"
+check "the schema is sent as given" \
+  "$(printf '%s' "$REQ" | jq -c '.body.response_format.json_schema.schema')" \
+  "$(printf '%s' "$SCHEMA" | jq -c .)"
+check "output is the conforming JSON" "$(cat "$TMP/results15/output")" '{"ok": true, "n": 2}'
+check_contains "the log says a schema was sent" "$TASK_STDOUT" "responseFormat=json+schema"
+
+echo
+echo "jsonSchema still strips a code fence around a conforming reply"
+start_mock "$(json_completion '"```json\n{\"ok\": false, \"n\": 0}\n```"')"
+mkdir -p "$TMP/results16"
+run_prompt "$TMP/results16" PARAM_RESPONSEFORMAT="json" PARAM_JSONSCHEMA="$SCHEMA"
+check "exits zero" "$RC" "0"
+check "output is the bare JSON" "$(cat "$TMP/results16/output")" '{"ok": false, "n": 0}'
+
+echo
+echo "jsonSchema rejects valid JSON that does not match the schema"
+start_mock "$(json_completion '"{\"ok\": \"yes\"}"')"
+mkdir -p "$TMP/results17"
+run_prompt "$TMP/results17" PARAM_RESPONSEFORMAT="json" PARAM_JSONSCHEMA="$SCHEMA"
+check "exits non-zero" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
+check_contains "says why" "$STDERR_TXT" "INVALID_RESPONSE - the model's JSON does not match jsonSchema"
+check_contains "names the failing keyword" "$STDERR_TXT" "must be boolean"
+check_contains "quotes what the model said" "$TASK_STDOUT" '{\"ok\": \"yes\"}'
+check "no output result was written" "$([ -e "$TMP/results17/output" ] && echo yes || echo no)" "no"
+
+echo
+echo "a malformed jsonSchema fails before any request"
+start_mock "$(completion_response)"
+mkdir -p "$TMP/results18"
+
+run_prompt "$TMP/results18" PARAM_RESPONSEFORMAT="json" PARAM_JSONSCHEMA="not json"
+check "non-JSON schema fails" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
+check_contains "says why" "$STDERR_TXT" "INVALID_PARAM - jsonSchema must be a JSON Schema object, but it is not valid JSON"
+
+run_prompt "$TMP/results18" PARAM_RESPONSEFORMAT="json" PARAM_JSONSCHEMA='["not", "an", "object"]'
+check "a non-object schema fails" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
+check_contains "says why" "$STDERR_TXT" "jsonSchema must be a JSON Schema object, got a non-object"
+
+run_prompt "$TMP/results18" PARAM_RESPONSEFORMAT="json" PARAM_JSONSCHEMA='{"type":"object","properties":{"ok":{"type":"no-such-type"}}}'
+check "an uncompilable schema fails" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
+check_contains "says why" "$STDERR_TXT" "jsonSchema is not a valid JSON Schema"
+
+run_prompt "$TMP/results18" PARAM_JSONSCHEMA="$SCHEMA"
+check "a schema without responseFormat=json fails" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
+check_contains "says why" "$STDERR_TXT" "jsonSchema requires responseFormat=json, got 'text'"
+
+check "nothing was sent to the endpoint" "$(wc -l < "$REQUESTS" | tr -d ' ')" "0"
 
 echo
 echo "-----"
