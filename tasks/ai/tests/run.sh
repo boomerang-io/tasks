@@ -343,13 +343,64 @@ check_contains "says what is expected" "$STDERR_TXT" "maxTokens must be an integ
 check "nothing was sent to the endpoint" "$(wc -l < "$REQUESTS" | tr -d ' ')" "0"
 
 #
-# 8. responseFormat=json but the model did not return JSON.
+# 8. responseFormat=json: bare JSON passes through, a code fence around it is stripped, and
+#    anything else fails the task with the model's reply quoted in the log.
 #
+json_completion() {
+  # json_completion <content-as-json-string-literal>
+  printf '[{"status":200,"body":{"model":"m","choices":[{"finish_reason":"stop","message":{"content":%s}}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}}]' "$1"
+}
+
 echo
-echo "responseFormat=json rejects a non-JSON completion"
-start_mock '[{"status":200,"body":{"model":"m","choices":[{"finish_reason":"stop","message":{"content":"sorry, prose"}}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}}]'
+echo "responseFormat=json passes bare JSON through unchanged"
+start_mock "$(json_completion '"{\"ok\": true, \"n\": 2}"')"
 mkdir -p "$TMP/results9"
 run_prompt "$TMP/results9" PARAM_RESPONSEFORMAT="json"
+check "exits zero" "$RC" "0"
+check "output is the JSON as the model sent it" "$(cat "$TMP/results9/output")" '{"ok": true, "n": 2}'
+
+echo
+echo "responseFormat=json strips a code fence with a json language tag"
+start_mock "$(json_completion '"```json\n{\"ok\": true}\n```"')"
+mkdir -p "$TMP/results10"
+run_prompt "$TMP/results10" PARAM_RESPONSEFORMAT="json"
+check "exits zero" "$RC" "0"
+check "output is the bare JSON, not the fenced text" "$(cat "$TMP/results10/output")" '{"ok": true}'
+check_contains "says the fence was stripped" "$TASK_STDOUT" "stripped a code fence"
+
+echo
+echo "responseFormat=json strips a code fence with no language tag"
+start_mock "$(json_completion '"```\n{\n  \"ok\": true\n}\n```"')"
+mkdir -p "$TMP/results11"
+run_prompt "$TMP/results11" PARAM_RESPONSEFORMAT="json"
+check "exits zero" "$RC" "0"
+check "output is the bare JSON with its formatting kept" \
+  "$(cat "$TMP/results11/output")" "$(printf '{\n  "ok": true\n}')"
+
+echo
+echo "responseFormat=json rejects a non-JSON completion and quotes it in the log"
+start_mock "$(json_completion '"sorry, prose"')"
+mkdir -p "$TMP/results12"
+run_prompt "$TMP/results12" PARAM_RESPONSEFORMAT="json"
+check "exits non-zero" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
+check_contains "says why" "$STDERR_TXT" "INVALID_RESPONSE"
+check_contains "quotes what the model said" "$TASK_STDOUT" "sorry, prose"
+check_not_contains "the token is not in the task's stdout" "$TASK_STDOUT" "$TOKEN"
+check "no output result was written" "$([ -e "$TMP/results12/output" ] && echo yes || echo no)" "no"
+
+echo
+echo "responseFormat=json rejects a fenced completion that is still not JSON"
+start_mock "$(json_completion '"```json\nnot json either\n```"')"
+mkdir -p "$TMP/results13"
+run_prompt "$TMP/results13" PARAM_RESPONSEFORMAT="json"
+check "exits non-zero" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
+check_contains "says why" "$STDERR_TXT" "INVALID_RESPONSE"
+
+echo
+echo "responseFormat=json does not hunt for JSON inside prose"
+start_mock "$(json_completion '"Here you go:\n```json\n{\"ok\": true}\n```"')"
+mkdir -p "$TMP/results14"
+run_prompt "$TMP/results14" PARAM_RESPONSEFORMAT="json"
 check "exits non-zero" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
 check_contains "says why" "$STDERR_TXT" "INVALID_RESPONSE"
 
