@@ -22,7 +22,7 @@ function listen(server) {
 // Runs commands/artifact.js's upload or download in its own process, the way the dispatcher does.
 function runCommand(command, env) {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [runnerPath, command], {
+    const child = spawn(process.execPath, [runnerPath, "artifact", command], {
       env: { ...process.env, ...env },
     });
     let stdout = "";

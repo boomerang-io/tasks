@@ -4,7 +4,7 @@ import { graphql } from "@octokit/graphql";
 import moment from "moment";
 import fs from "fs";
 // https://octokit.github.io/rest.js/
-import HttpsProxyAgent from "https-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 //Internal helper function
 function validateMandatoryParameter(parameterValue, errorMessage) {
