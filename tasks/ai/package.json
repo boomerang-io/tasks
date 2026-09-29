@@ -1,6 +1,6 @@
 {
   "name": "@boomerang-io/task-ai",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Boomerang AI Task - the worker behind Flow's `ai` task type",
   "repository": "git@github.com:boomerang-io/tasks.git",
   "license": "Apache-2.0",

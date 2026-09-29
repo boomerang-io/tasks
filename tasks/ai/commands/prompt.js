@@ -30,6 +30,15 @@ const MAX_ATTEMPTS = 3;
 // log with a stack of HTML from a proxy that answered instead of the endpoint.
 const ERROR_BODY_CHARS = 512;
 
+// How much of a rejected completion to quote when responseFormat=json and the model did not return
+// JSON. Enough to see what it said instead, without printing a whole essay into the pod log.
+const INVALID_RESPONSE_CHARS = 200;
+
+// A Markdown code fence around the whole reply, with or without a language tag: "```json\n{...}\n```".
+// Some models (gemini-2.5-flash-lite through OpenRouter, for one) wrap their JSON in one now and
+// then even under json_object mode and a prompt that forbids it.
+const CODE_FENCE = /^```[A-Za-z0-9_+-]*[ \t]*\r?\n([\s\S]*?)\r?\n?```$/;
+
 /**
  * A failure the task author can act on. The reason is prefixed so it is greppable in a run log.
  */
@@ -124,6 +133,17 @@ function errorBody(error) {
   return (text ?? "").slice(0, ERROR_BODY_CHARS);
 }
 
+/**
+ * The reply with a surrounding code fence removed, if it has one; otherwise the reply as it came,
+ * trimmed. Only a fence around the whole reply is recognised: JSON buried inside prose is left
+ * alone, so the strict check below still fails it rather than guessing at braces.
+ */
+export function unfence(text) {
+  const trimmed = text.trim();
+  const fenced = CODE_FENCE.exec(trimmed);
+  return fenced ? fenced[1].trim() : trimmed;
+}
+
 function failedRequest(url, error) {
   // No status: the endpoint was never reached. The SDK has already used every attempt.
   if (error.status === undefined) {
@@ -202,13 +222,24 @@ export async function run() {
     );
   }
 
-  const output = choice.message.content;
+  let output = choice.message.content;
   if (responseFormat === "json") {
+    // Strip a code fence the model wrapped its JSON in, and hand downstream the bare JSON rather
+    // than the fenced text. Anything else that is not JSON still fails the task.
+    const candidate = unfence(output);
     try {
-      JSON.parse(output);
+      JSON.parse(candidate);
     } catch {
+      log.warn(
+        `responseFormat=json but the model returned content that is not JSON; ` +
+          `the first ${INVALID_RESPONSE_CHARS} chars were: ${JSON.stringify(output.slice(0, INVALID_RESPONSE_CHARS))}`,
+      );
       throw new TaskError("INVALID_RESPONSE", "responseFormat=json but the model returned content that is not JSON");
     }
+    if (candidate !== output.trim()) {
+      log.sys("stripped a code fence from the JSON completion");
+    }
+    output = candidate;
   }
 
   const usage = completion.usage ?? {};

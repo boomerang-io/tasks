@@ -77,7 +77,7 @@ which is how `task-core` hands back `maxTokens` rather than `MAXTOKENS`.
 | `systemPrompt` | `PARAM_SYSTEMPROMPT` | no | none | Prepended as a `system` message when non-empty |
 | `temperature` | `PARAM_TEMPERATURE` | no | `0.7` | Number |
 | `maxTokens` | `PARAM_MAXTOKENS` | no | `1024` | Integer, sent as `max_tokens` |
-| `responseFormat` | `PARAM_RESPONSEFORMAT` | no | `text` | `json` sends `response_format: {"type": "json_object"}` and fails the task if the completion is not JSON |
+| `responseFormat` | `PARAM_RESPONSEFORMAT` | no | `text` | `json` sends `response_format: {"type": "json_object"}` and fails the task if the completion is not JSON. A Markdown code fence around the whole reply (```` ```json ... ``` ````), which some models add even in this mode, is stripped and `output` carries the bare JSON |
 | `seed` | `PARAM_SEED` | no | none | Integer, for reproducible sampling where the provider supports it |
 | `files` | `PARAM_FILES` | no | none | Comma-separated paths on the run workspace; each is appended to the user message as a fenced block under a `## <path>` heading |
 | `maxContextBytes` | `PARAM_MAXCONTEXTBYTES` | no | `65536` | Byte budget for the file context; files that would exceed it are skipped and named in the prompt so the model knows the context is partial |
