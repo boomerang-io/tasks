@@ -91,6 +91,9 @@ importers:
       '@boomerang-io/task-core':
         specifier: workspace:*
         version: link:../../packages/core
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       openai:
         specifier: ^7.15.0
         version: 7.15.0
