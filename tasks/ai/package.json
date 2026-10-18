@@ -15,7 +15,7 @@
   "dependencies": {
     "@boomerang-io/task-core": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.32.1",
-    "ajv": "^8.17.1",
+    "ajv": "^8.20.0",
     "openai": "^7.15.0"
   },
   "scripts": {

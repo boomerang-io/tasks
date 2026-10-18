@@ -20,6 +20,8 @@ jobs:
       service: 'task-ai'
       dockerfile_path: 'tasks/ai/Dockerfile'
       context_path: '.'
+      # task-ai's dependency tree is clean at high, so it stays that way.
+      fail_on_severity: 'high'
     secrets:
       docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
       docker_password: ${{ secrets.DOCKERHUB_TOKEN }}
