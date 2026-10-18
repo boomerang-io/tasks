@@ -1,0 +1,52 @@
+{
+  "description": "reasoning_tokens, cached_tokens and cost populate the three optional results when the endpoint reports them",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 100,
+          "completion_tokens": 30,
+          "total_tokens": 130,
+          "completion_tokens_details": {
+            "reasoning_tokens": 12
+          },
+          "prompt_tokens_details": {
+            "cached_tokens": 64
+          },
+          "cost": 0.00123
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "promptTokens": "100",
+      "completionTokens": "30",
+      "totalTokens": "130",
+      "reasoningTokens": "12",
+      "cachedPromptTokens": "64",
+      "cost": "0.00123"
+    }
+  }
+}

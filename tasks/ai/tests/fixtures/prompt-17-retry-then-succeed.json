@@ -1,0 +1,53 @@
+{
+  "description": "429 and 5xx are retried; the eventual 200 is the answer",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 429,
+      "body": {
+        "error": "slow down"
+      }
+    },
+    {
+      "status": 500,
+      "body": {
+        "error": "boom"
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "eventually"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requestCount": 3,
+    "results": {
+      "output": "eventually"
+    }
+  }
+}

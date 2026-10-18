@@ -1,0 +1,67 @@
+{
+  "description": "systemPrompt, temperature, maxTokens, seed and responseFormat=json shape the request body",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "systemPrompt": "You are terse.",
+    "temperature": "0.1",
+    "maxTokens": "256",
+    "seed": "42",
+    "responseFormat": "json"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "{\"ok\":true}"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "output": "{\"ok\":true}"
+    },
+    "requests": [
+      {
+        "body": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are terse."
+            },
+            {
+              "role": "user",
+              "content": "How did the run go?"
+            }
+          ],
+          "temperature": 0.1,
+          "max_tokens": 256,
+          "seed": 42,
+          "response_format": {
+            "type": "json_object"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "description": "a response without choices[0].message.content is NO_COMPLETION",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "model": "m",
+        "choices": []
+      }
+    }
+  ],
+  "expect": {
+    "exit": "nonzero",
+    "stderr": [
+      "NO_COMPLETION"
+    ]
+  }
+}

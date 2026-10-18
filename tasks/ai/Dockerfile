@@ -1,13 +1,12 @@
 # syntax=docker/dockerfile:1
 #
-# task-ai - the worker image behind Boomerang Flow's `ai` task type.
+# task-ai - the image behind Boomerang Flow's `ai-prompt` and `ai-agent` catalogue tasks.
 #
-# An `ai` task author never builds a container: Flow's dispatcher resolves this image and the
-# `prompt` command for every TaskRun of type `ai` (the `flow.dispatcher.ai.image` property, read by
-# `TaskImageResolver` in the flow monorepo's service-dispatcher). The image is built and published
-# from this repository as `boomerangio/task-ai:latest` and `boomerangio/task-ai:<version>` by
-# `.github/workflows/ci-task-ai.yml`, so Flow's `flow.dispatcher.ai.image` and this repository's
-# tags have to be kept in step.
+# An AI task author never builds a container: each catalogue revision (tasks/ai/catalog) names this
+# image by exact tag and one of its two commands, `prompt` or `agent`, and Flow's dispatcher runs
+# that pair. The image is built and published from this repository as `boomerangio/task-ai:latest`
+# and `boomerangio/task-ai:<version>` by `.github/workflows/ci-task-ai.yml`; a revision's
+# `spec.image` and the tag it was written against are kept in step by the catalog files.
 #
 # Build context is the REPO ROOT (not tasks/ai) so pnpm can resolve @boomerang-io/task-core as an
 # internal pnpm-workspace dependency instead of fetching it from the npm registry. See
@@ -56,11 +55,12 @@ RUN apk upgrade --no-cache \
 WORKDIR /opt/boomerang
 COPY --from=deps /out ./
 
-# The dispatcher sets the container command to the bare name `prompt`, so it has to be on PATH.
-# wolfi-base ships no /usr/local/bin, hence /usr/bin. Node resolves the link to its real path, so
-# the command still finds /opt/boomerang/node_modules.
-RUN chmod +x /opt/boomerang/bin/prompt.js \
-    && ln -s /opt/boomerang/bin/prompt.js /usr/bin/prompt
+# The dispatcher sets the container command to the bare name `prompt` or `agent`, so both have to
+# be on PATH. wolfi-base ships no /usr/local/bin, hence /usr/bin. Node resolves the link to its real
+# path, so the command still finds /opt/boomerang/node_modules.
+RUN chmod +x /opt/boomerang/bin/prompt.js /opt/boomerang/bin/agent.js \
+    && ln -s /opt/boomerang/bin/prompt.js /usr/bin/prompt \
+    && ln -s /opt/boomerang/bin/agent.js /usr/bin/agent
 
 # Non-root. 2000 matches the numeric user the Flow service images run as; OpenShift requires a
 # numeric USER rather than a name.
@@ -68,6 +68,6 @@ RUN addgroup -g 2000 flow \
     && adduser -D -u 2000 -G flow flow
 USER 2000
 
-# No ENTRYPOINT: the dispatcher sets the container command (`prompt`), and leaving the entrypoint
-# empty keeps a future second command (`embed`, `classify`) a one-line change.
+# No ENTRYPOINT: the dispatcher sets the container command (`prompt` or `agent`), and leaving the
+# entrypoint empty keeps a further command (`embed`, `retrieve`) a one-line change.
 CMD ["prompt"]

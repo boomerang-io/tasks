@@ -1,0 +1,50 @@
+{
+  "description": "responseFormat=json rejects prose and quotes it in the log",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "responseFormat": "json"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "sorry, prose"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": "nonzero",
+    "stderr": [
+      "INVALID_RESPONSE"
+    ],
+    "noResults": [
+      "output"
+    ],
+    "stdout": [
+      "sorry, prose"
+    ],
+    "stdoutNot": [
+      "sk-test-do-not-log-me"
+    ]
+  }
+}

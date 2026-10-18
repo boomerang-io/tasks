@@ -1,0 +1,50 @@
+{
+  "description": "blank endpoint and token fall back to OPENAI_BASE_URL and OPENAI_API_KEY from the executor",
+  "command": "prompt",
+  "params": {
+    "endpoint": "",
+    "token": "",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "env": {
+    "OPENAI_BASE_URL": "${PROVIDER}",
+    "OPENAI_API_KEY": "sk-from-env"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requests": [
+      {
+        "path": "/v1/chat/completions",
+        "authorization": "Bearer sk-from-env"
+      }
+    ],
+    "stdoutNot": [
+      "sk-from-env"
+    ]
+  }
+}

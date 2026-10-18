@@ -1,0 +1,94 @@
+{
+  "description": "a turn that takes the total over maxToolCalls fails MAX_TURNS_EXCEEDED before executing it",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "mcpServers": "[{\"name\": \"tools\", \"url\": \"${MCP:tools}\"}]",
+    "maxToolCalls": "1"
+  },
+  "mcp": {
+    "tools": {
+      "tools": [
+        {
+          "name": "weather",
+          "description": "Current weather for a city",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "city"
+            ]
+          },
+          "result": "Sunny, 24C"
+        },
+        {
+          "name": "clock",
+          "description": "The current time",
+          "inputSchema": {
+            "type": "object",
+            "properties": {}
+          },
+          "result": "12:00"
+        }
+      ]
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "c1",
+                  "type": "function",
+                  "function": {
+                    "name": "clock",
+                    "arguments": "{}"
+                  }
+                },
+                {
+                  "id": "c2",
+                  "type": "function",
+                  "function": {
+                    "name": "weather",
+                    "arguments": "{\"city\": \"X\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": "nonzero",
+    "requestCount": 1,
+    "mcpCallCount": 0,
+    "stderr": [
+      "MAX_TURNS_EXCEEDED",
+      "maxToolCalls=1"
+    ]
+  }
+}

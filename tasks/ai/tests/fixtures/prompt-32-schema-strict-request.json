@@ -1,0 +1,74 @@
+{
+  "description": "jsonSchema sends response_format json_schema, strict, named output, the schema as given",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "responseFormat": "json",
+    "jsonSchema": "{\"type\": \"object\", \"properties\": {\"ok\": {\"type\": \"boolean\"}, \"n\": {\"type\": \"integer\"}}, \"required\": [\"ok\", \"n\"], \"additionalProperties\": false}"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "{\"ok\": true, \"n\": 2}"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "output": "{\"ok\": true, \"n\": 2}"
+    },
+    "requests": [
+      {
+        "body": {
+          "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+              "name": "output",
+              "strict": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "n": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "ok",
+                  "n"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    ],
+    "stdout": [
+      "responseFormat=json+schema"
+    ]
+  }
+}

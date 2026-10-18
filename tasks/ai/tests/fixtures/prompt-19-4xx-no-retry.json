@@ -1,0 +1,35 @@
+{
+  "description": "a 4xx fails REQUEST_REJECTED at once with the provider's reason and never the token",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 401,
+      "body": {
+        "error": {
+          "message": "Incorrect API key provided"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": "nonzero",
+    "requestCount": 1,
+    "stderr": [
+      "REQUEST_REJECTED",
+      "HTTP 401",
+      "Incorrect API key provided"
+    ],
+    "stderrNot": [
+      "sk-test-do-not-log-me"
+    ],
+    "stdoutNot": [
+      "sk-test-do-not-log-me"
+    ]
+  }
+}

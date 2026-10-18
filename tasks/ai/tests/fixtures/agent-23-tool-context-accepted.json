@@ -1,0 +1,52 @@
+{
+  "description": "toolContext is validated as an object and otherwise unused on a container run, never shown to the model",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "toolContext": "{\"tenant\":\"t1\"}"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "x"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requests": [
+      {
+        "body": {
+          "messages": [
+            {
+              "content": "How did the run go?"
+            }
+          ]
+        }
+      }
+    ],
+    "stdoutNot": [
+      "t1"
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "description": "parameters is merged last: its keys replace the convenience params and max_completion_tokens suppresses max_tokens",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "temperature": "0.7",
+    "maxTokens": "256",
+    "parameters": "{\"reasoning_effort\": \"high\", \"max_completion_tokens\": 2000, \"temperature\": 0.2, \"top_p\": 0.9}"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requests": [
+      {
+        "body": {
+          "reasoning_effort": "high",
+          "max_completion_tokens": 2000,
+          "temperature": 0.2,
+          "top_p": 0.9,
+          "max_tokens": "$absent"
+        }
+      }
+    ],
+    "stdout": [
+      "parameters=reasoning_effort/max_completion_tokens/temperature/top_p"
+    ]
+  }
+}

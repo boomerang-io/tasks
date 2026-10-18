@@ -1,0 +1,26 @@
+{
+  "description": "a persistent 5xx fails REQUEST_FAILED after three attempts",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 503,
+      "body": {
+        "error": "unavailable"
+      }
+    }
+  ],
+  "expect": {
+    "exit": "nonzero",
+    "requestCount": 3,
+    "stderr": [
+      "REQUEST_FAILED",
+      "HTTP 503"
+    ]
+  }
+}
