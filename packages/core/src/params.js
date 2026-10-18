@@ -29,7 +29,8 @@ function fromEnv() {
   const params = names.reduce((accum, name) => {
     const value = process.env[envName(name)];
     if (value !== undefined) {
-      log.sys("Retrieving param: " + name + ", value: " + value);
+      // The name only: a value may be a credential, and a pod log is not filtered by param type.
+      log.sys("Retrieving param: " + name);
       accum[name] = value;
     }
     return accum;
@@ -58,7 +59,7 @@ function fromFiles() {
     const stat = fs.statSync(__filepath);
     if (stat.isFile()) {
       const contents = fs.readFileSync(__filepath, "utf8");
-      log.sys("Retrieving param: " + file + ", value: " + contents.toString());
+      log.sys("Retrieving param: " + file);
       accum[file] = contents.toString();
     }
     return accum;

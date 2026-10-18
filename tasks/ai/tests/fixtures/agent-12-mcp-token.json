@@ -1,0 +1,98 @@
+{
+  "description": "mcpTokens supplies the bearer token for a server that requires one",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "mcpServers": "[{\"name\": \"tools\", \"url\": \"${MCP:tools}\"}]",
+    "mcpTokens": "{\"tools\": \"mcp-secret-token\"}"
+  },
+  "mcp": {
+    "tools": {
+      "token": "mcp-secret-token",
+      "tools": [
+        {
+          "name": "clock",
+          "description": "The current time",
+          "inputSchema": {
+            "type": "object",
+            "properties": {}
+          },
+          "result": "12:00"
+        }
+      ]
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "c",
+                  "type": "function",
+                  "function": {
+                    "name": "clock",
+                    "arguments": "{}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "noon"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "output": "noon",
+      "toolCalls": "1"
+    },
+    "mcpCallCount": 1,
+    "stdoutNot": [
+      "mcp-secret-token"
+    ],
+    "stderrNot": [
+      "mcp-secret-token"
+    ]
+  }
+}

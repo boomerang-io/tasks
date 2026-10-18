@@ -1,0 +1,78 @@
+{
+  "description": "parallelToolCalls=false is sent as parallel_tool_calls false, only because tools are present",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "mcpServers": "[{\"name\": \"tools\", \"url\": \"${MCP:tools}\"}]",
+    "parallelToolCalls": "false"
+  },
+  "mcp": {
+    "tools": {
+      "tools": [
+        {
+          "name": "weather",
+          "description": "Current weather for a city",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "city"
+            ]
+          },
+          "result": "Sunny, 24C"
+        },
+        {
+          "name": "clock",
+          "description": "The current time",
+          "inputSchema": {
+            "type": "object",
+            "properties": {}
+          },
+          "result": "12:00"
+        }
+      ]
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "done"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requests": [
+      {
+        "body": {
+          "parallel_tool_calls": false,
+          "tools": "$present"
+        }
+      }
+    ]
+  }
+}

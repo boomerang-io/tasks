@@ -1,0 +1,47 @@
+{
+  "description": "outputFile writes the full reply to the workspace, creating directories, while output still carries it",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "outputFile": "${WORKSPACE}/out/reply.txt"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "full reply"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "output": "full reply"
+    },
+    "workspace": {
+      "out/reply.txt": "full reply"
+    },
+    "stdout": [
+      "wrote 10 chars to"
+    ]
+  }
+}

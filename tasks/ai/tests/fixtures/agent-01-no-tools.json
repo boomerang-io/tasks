@@ -1,0 +1,67 @@
+{
+  "description": "with no tools at all the agent is one completion: no tools key, no parallel_tool_calls, turns=1, toolCalls=0, eleven results",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "just an answer"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "resultKeys": [
+      "output",
+      "finishReason",
+      "model",
+      "promptTokens",
+      "completionTokens",
+      "totalTokens",
+      "reasoningTokens",
+      "cachedPromptTokens",
+      "cost",
+      "turns",
+      "toolCalls"
+    ],
+    "results": {
+      "output": "just an answer",
+      "turns": "1",
+      "toolCalls": "0",
+      "totalTokens": "50"
+    },
+    "requests": [
+      {
+        "body": {
+          "tools": "$absent",
+          "parallel_tool_calls": "$absent"
+        }
+      }
+    ],
+    "stdout": [
+      "\"event\":\"turn\""
+    ]
+  }
+}

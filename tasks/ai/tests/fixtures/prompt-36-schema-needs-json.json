@@ -1,0 +1,42 @@
+{
+  "description": "jsonSchema without responseFormat=json is INVALID_PARAM",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "jsonSchema": "{\"type\": \"object\", \"properties\": {\"ok\": {\"type\": \"boolean\"}, \"n\": {\"type\": \"integer\"}}, \"required\": [\"ok\", \"n\"], \"additionalProperties\": false}"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": "nonzero",
+    "stderr": [
+      "INVALID_PARAM - jsonSchema requires responseFormat=json, got 'text'"
+    ],
+    "requestCount": 0
+  }
+}

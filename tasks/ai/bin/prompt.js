@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 //
-// The entry point the Flow dispatcher runs. It sets the container command to the bare name
-// `prompt`, which the image puts on PATH as a link to this file.
+// The entry point for the `ai-prompt` catalogue task. Its revision names the command `prompt`,
+// which the image puts on PATH as a link to this file.
 //
 // A failure goes to stderr and exits non-zero, so the engine ends the task `failed` with a reason
 // the task author can act on. The task's own logging goes to stdout.

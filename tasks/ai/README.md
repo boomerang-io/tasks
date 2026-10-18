@@ -1,9 +1,17 @@
-# `task-ai` — the worker image behind Boomerang Flow's `ai` task type
+# `task-ai` — the image behind Boomerang Flow's `ai-prompt` and `ai-agent` tasks
 
-An `ai` task runs one prompt against an OpenAI-compatible endpoint and returns the completion as a
-task result. Its author never builds a container and never names an image: Flow's dispatcher
-resolves the image from `flow.dispatcher.ai.image` and runs the `prompt` command for every TaskRun
-of type `ai` (`TaskImageResolver` in the flow monorepo's `service-dispatcher`).
+One image, two commands:
+
+| Catalogue task | Command | What it does |
+| --- | --- | --- |
+| `ai-prompt` | `prompt` | one chat completion against an OpenAI-compatible endpoint, optionally held to a JSON Schema |
+| `ai-agent` | `agent` | a tool-calling loop against the same kind of endpoint, with tools served over MCP, to a final answer shaped the same way |
+
+The task author never builds a container and never names an image. Each catalogue revision in
+[`catalog/`](catalog/) pins this image by exact tag and names its command; Flow's dispatcher runs
+that pair for every run of the task, and an embedding product that runs the family in-process
+honours the same param and result contract. The definition files in `catalog/` are the source of
+truth for that contract; Flow's seed is a copy.
 
 The image is built and published from this repository, not from the flow monorepo:
 
@@ -12,12 +20,15 @@ boomerangio/task-ai:latest
 boomerangio/task-ai:<version>
 ```
 
-`<version>` is whatever follows the `@` in the git tag — pushing `task-ai@1.0.0` publishes
-`boomerangio/task-ai:1.0.0` (`.github/workflows/ci-task-ai.yml` →
-`.github/workflows/ci-template.yml`). Because the two live in different repositories,
-**`flow.dispatcher.ai.image` and the tag published here must be kept in step**: pin the deployed
-Flow to an exact tag (`flow.dispatcher.ai.image=boomerangio/task-ai:1.0.0`) rather than trusting
-`:latest` to stay compatible with the parameter and result contract below.
+`<version>` is whatever follows the `@` in the git tag — pushing `task-ai@2.0.0` publishes
+`boomerangio/task-ai:2.0.0` for linux/amd64 and linux/arm64 (`.github/workflows/ci-task-ai.yml` →
+`ci-template.yml`). A revision's `spec.image` and the tag it was written against move together, in
+the same PR as the image change.
+
+`2.0.0` is a major release: the `prompt` command implements the `ai-prompt` contract and drops the
+contract of the original `ai` task (endpoint and token were required, temperature and maxTokens had
+defaults, six results). A deployment on the `ai` task stays on its pinned 1.x tag until its nodes
+move to `ai-prompt`; the param names they already use are unchanged.
 
 Everything else is the ordinary task contract documented in
 [`CONTRIBUTING_TASKS.md`](../../CONTRIBUTING_TASKS.md#task-contract): params arrive as
@@ -27,125 +38,172 @@ and written by `@boomerang-io/task-core` rather than by this task.
 
 ## Implementation
 
-Node, against the official [`openai`](https://www.npmjs.com/package/openai) package, speaking
-OpenAI chat-completions.
+Node, against the official [`openai`](https://www.npmjs.com/package/openai) package for
+chat-completions and [`@modelcontextprotocol/sdk`](https://www.npmjs.com/package/@modelcontextprotocol/sdk)
+for the agent's tools.
+
+```
+bin/prompt.js  bin/agent.js      the two entry points, linked onto PATH as `prompt` and `agent`
+commands/prompt.js               ai-prompt
+commands/agent.js                ai-agent: the loop, the trace, the limits
+lib/params.js                    param parsing, prompt sources, workspace files, file context
+lib/completion.js                connection, request body, retries, usage, JSON and schema handling
+lib/mcp.js                       MCP servers: connect, list tools, call tools
+catalog/                         the catalogue definitions (Flow's seed shape)
+tests/                           the fixture runner, the mocks, and the fixtures
+```
 
 **Why that protocol.** The chat-completions shape reaches the whole practical field directly, with
 no gateway in between: OpenAI, OpenRouter, LiteLLM, Azure AI Foundry, Ollama, vLLM, Groq, Together —
-and Anthropic, which publishes its own OpenAI-compatible endpoint (`api.anthropic.com/v1/`, with an
-Anthropic key). The only real gaps are Bedrock and Vertex in their native shapes, and both are
-normally fronted by a gateway anyway. So a single `endpoint` param covers the field, and the task
-needs no `provider` switch.
+and Anthropic, which publishes its own OpenAI-compatible endpoint. Tool calling and structured
+output ride on the same shape (`tools`, `tool_calls`, `response_format`). So a single `endpoint`
+param covers the field, and the task needs no `provider` switch. The only real gaps are Bedrock and
+Vertex in their native shapes, and both are normally fronted by a gateway anyway.
 
-Anthropic's compatibility layer accepts and then ignores some things — prompt caching controls,
-extended thinking, citations and document blocks, and some sampling params (`frequency_penalty`,
-`logit_bias`, `n>1`, possibly `seed`). None of them is in this task's param surface, and `usage`
-maps cleanly, so the token-count results still populate. Check Anthropic's compatibility page before
-adding a param that one of them would touch.
+**Why nothing is sent unless set.** A catalogue default is copied onto every run's params when Flow
+materialises a task, so a handler cannot tell "set" from "defaulted". Newer reasoning models reject
+any non-default `temperature` and reject `max_tokens` in favour of `max_completion_tokens`. So
+`temperature`, `maxTokens` and `seed` have no default and are sent only when the param is
+non-empty; the open `parameters` map carries anything else and wins on conflict.
 
-**Why the SDK, and not the alternatives.** The Vercel AI SDK (`ai` + `@ai-sdk/*`) was only buying
-provider reach this already has, at the cost of a dependency tree and a `provider` param. Embabel
-and IBM's `beeai-framework` are agent and planning frameworks — the wrong layer for one prompt to
-one completion, when Flow is already the orchestrator. `@ibm-cloud/watsonx-ai` is a single provider
-rather than an abstraction.
-
-**Why Node, and not the bash implementation this replaces.** Consistency rather than capability: it
-matches the rest of this repository (`cli`, `core`, `flow`, `resend` are all Node), and the SDK owns
-retries, timeouts, structured output and any future tool-calling. The trade being accepted is a
-194 MB image and a dependency tree to keep patched, against ~15 MB and no CVE surface for the bash
-command that was here before.
-
-Where that 194 MB goes, measured rather than estimated: 15 MB of base, **139 MB of `nodejs`**, and
-~40 MB of `node_modules`. Node itself is the floor, so a Node task costs an order of magnitude more
-image than a `curl`-and-`jq` one however it is built. What *was* recoverable came to 41 MB: a
-single-stage build left npm (15 MB) and its cache (24 MB) in the runtime, so the Dockerfile
-installs in a build stage and copies only `node_modules` forward. That also leaves no package
-manager in the published image.
+**Why the SDKs, and not the alternatives.** The Vercel AI SDK was only buying provider reach this
+already has, at the cost of a dependency tree and a `provider` param. Agent frameworks (Embabel,
+beeai) are the wrong layer when Flow is already the orchestrator: the loop here is forty lines and
+the tools are MCP's. The MCP SDK is carried for the transport (streamable HTTP, sessions, SSE
+responses) rather than hand-rolled; it is the largest dependency in the image, which measures about
+214 MB: 139 MB of node, 90 MB of `node_modules`, the rest base.
 
 ## Params in
 
 A param named `maxTokens` reaches the container as `PARAM_MAXTOKENS` — the name upper-cased with
-`-` replaced by `_`, so camel case is simply flattened. `PARAM_NAMES` carries the original names,
-which is how `task-core` hands back `maxTokens` rather than `MAXTOKENS`.
+`-` replaced by `_`. `PARAM_NAMES` carries the original names, which is how `task-core` hands back
+`maxTokens` rather than `MAXTOKENS`. Every value is a string; a JSON param is JSON text, parsed here
+and failed with `INVALID_PARAM` naming the param when it does not parse (its value is never echoed).
 
-| Param | Environment variable | Required | Default | Meaning |
-| --- | --- | --- | --- | --- |
-| `endpoint` | `PARAM_ENDPOINT` | yes | — | OpenAI-compatible base URL; `/chat/completions` is appended (a trailing `/` is trimmed) |
-| `token` | `PARAM_TOKEN` | yes | — | Bearer token. Declare it `password`-typed so Flow filters it out of run reads and log streams |
-| `model` | `PARAM_MODEL` | yes | — | Model id to request |
-| `prompt` | `PARAM_PROMPT` | yes | — | The user message |
-| `systemPrompt` | `PARAM_SYSTEMPROMPT` | no | none | Prepended as a `system` message when non-empty |
-| `temperature` | `PARAM_TEMPERATURE` | no | `0.7` | Number |
-| `maxTokens` | `PARAM_MAXTOKENS` | no | `1024` | Integer, sent as `max_tokens` |
-| `responseFormat` | `PARAM_RESPONSEFORMAT` | no | `text` | `json` sends `response_format: {"type": "json_object"}` and fails the task if the completion is not JSON. A Markdown code fence around the whole reply (```` ```json ... ``` ````), which some models add even in this mode, is stripped and `output` carries the bare JSON |
-| `jsonSchema` | `PARAM_JSONSCHEMA` | no | none | A JSON Schema object, as a string. Requires `responseFormat=json`. Sends `response_format: {"type": "json_schema", "json_schema": {"name": "output", "strict": true, "schema": ...}}` so a provider that supports structured outputs constrains decoding to the schema, and the reply is validated against it here as well: a schema that does not compile fails with `INVALID_PARAM` before any request, and JSON that does not match fails with `INVALID_RESPONSE` naming the failing keyword. OpenAI-style strict mode needs `additionalProperties: false` and every property listed in `required`; a provider that rejects the schema answers HTTP 400, surfaced as `REQUEST_REJECTED` with its reason |
-| `seed` | `PARAM_SEED` | no | none | Integer, for reproducible sampling where the provider supports it |
-| `files` | `PARAM_FILES` | no | none | Comma-separated paths on the run workspace; each is appended to the user message as a fenced block under a `## <path>` heading |
-| `maxContextBytes` | `PARAM_MAXCONTEXTBYTES` | no | `65536` | Byte budget for the file context; files that would exceed it are skipped and named in the prompt so the model knows the context is partial |
+A path param is used as given when absolute and resolved against `/workspace` when relative.
 
-An unreadable path in `files` fails the task rather than quietly sending less context.
+### Shared by `ai-prompt` and `ai-agent`
+
+| Param | Required | Meaning |
+| --- | --- | --- |
+| `model` | yes | Model id to request |
+| `prompt` | one source | The user message |
+| `promptFile` | one source | A workspace file whose contents are the user message, for a prompt too large for a param (the engine caps params at 16 KB and a single environment string at 128 KB) |
+| `systemPrompt` | no | Prepended as a `system` message when non-empty |
+| `messages` | one source | A JSON array of `{role, content}` sent as the exact message array, replacing `systemPrompt` and `prompt` (which are then ignored, with a warning). For replays and evals |
+| `messagesFile` | one source | The same array, read from a workspace file |
+| `endpoint` | no | OpenAI-compatible base URL; `/chat/completions` is appended (a trailing `/` is trimmed). Blank means the executor's default, `OPENAI_BASE_URL` |
+| `token` | no | Bearer token. Declared `password`-typed so Flow filters it out of run reads and log streams. Blank means the executor's default, `OPENAI_API_KEY` |
+| `temperature` | no | Number; sent only when set |
+| `maxTokens` | no | Integer, sent as `max_tokens` only when set; a `max_completion_tokens` in `parameters` suppresses it |
+| `seed` | no | Integer; sent only when set |
+| `parameters` | no | A JSON object merged into the request last: `top_p`, `reasoning_effort`, `verbosity`, `max_completion_tokens`, `frequency_penalty`, `presence_penalty`, anything the endpoint accepts. Its keys win over the convenience params |
+| `responseFormat` | no | `text` (default, no `response_format` key) or `json` (`response_format: {"type": "json_object"}`, and the reply must parse as JSON) |
+| `jsonSchema` | no | A JSON Schema object. Requires `responseFormat=json`. Sends `response_format: {"type": "json_schema", "json_schema": {"name": "output", "strict": true, "schema": ...}}` and validates the reply here as well: a schema that does not compile fails with `INVALID_PARAM` before any request, JSON that does not match fails with `INVALID_RESPONSE` naming the failing keyword |
+| `files` | no | Comma-separated workspace paths; each is appended to the last user message as a fenced block under a `## <path>` heading |
+| `maxContextBytes` | no | Byte budget for the file context (default 65536); files that would exceed it are skipped and named in the prompt |
+| `outputFile` | no | A workspace path to write the full `output` to, for a following `uploadartifact` node; `output` still carries it up to the results cap |
+
+Exactly one of `prompt`, `promptFile`, `messages`, `messagesFile` must be given per kind: none is
+`MISSING_PARAM`, `prompt` with `promptFile` or `messages` with `messagesFile` is `INVALID_PARAM`.
+An explicit `endpoint` or `token` always wins over the environment; neither anywhere is
+`MISSING_PARAM` naming the variable.
+
+Under `responseFormat=json`, a leading `<think>…</think>` block and a Markdown code fence around
+the whole reply are stripped before parsing, and `output` carries the bare JSON. JSON buried inside
+prose is not hunted for; it fails `INVALID_RESPONSE`.
+
+### `ai-agent` only
+
+| Param | Default | Meaning |
+| --- | --- | --- |
+| `tools` | none | A JSON array of `{name, description, inputSchema}` tools an executor implements natively. A container has none, so every declared name must be served by an MCP server below, or the task fails `UNKNOWN_TOOL` before the first request |
+| `mcpServers` | none | A JSON array of `{name, url}` MCP servers (streamable HTTP). Only those two keys: a credential inside this param is `INVALID_PARAM`, because Flow filters secrets by param type and this is a text param |
+| `mcpTokens` | none | A `password`-typed JSON object `{serverName: bearerToken}` for the servers above |
+| `allowedTools` | all | A JSON array of tool names the model may call |
+| `toolContext` | none | A JSON object of opaque values for natively implemented tools, never shown to the model. Validated and otherwise unused on a container run |
+| `maxTurns` | `10` | Model calls before the loop fails `MAX_TURNS_EXCEEDED` |
+| `maxToolCalls` | none | Tool calls in total before the loop fails `MAX_TURNS_EXCEEDED`, checked before the turn that would exceed it is executed |
+| `parallelToolCalls` | `true` | Sent as `parallel_tool_calls: false` only when false and only when tools are present; `true` is the provider's default and is not sent, since OpenAI rejects the key without tools and some servers reject it outright |
+| `toolResultReinforcement` | none | Appended as a user message after each turn's tool messages |
+
+The loop: the model is called with the MCP tools as chat-completions functions; each tool call it
+makes is executed (together when `parallelToolCalls`, in order otherwise) and answered with a tool
+message; the loop ends when the model answers without calling a tool, and that answer is the
+output, shaped exactly as `ai-prompt` shapes its reply (`responseFormat`, `jsonSchema`,
+`outputFile` all apply, and `response_format` is sent on every turn). A tool that returns
+`isError`, or arguments the model did not write as valid JSON, go back to the model as `ERROR: …`
+and the loop continues; a tool the model names that is not available fails `UNKNOWN_TOOL`. A tool
+name served by two servers is `INVALID_PARAM`.
+
+Every turn and every tool call is traced to the task log as one JSON line, `{"trace":"ai-agent",
+"event":"turn"|"tool", …}`, with the running token totals, the tool name and server, the first 500
+characters of the arguments and the result size — not the result itself. The results stay a summary.
 
 ## Results out
 
-| Result | Source |
-| --- | --- |
-| `output` | `choices[0].message.content` |
-| `promptTokens` | `usage.prompt_tokens` |
-| `completionTokens` | `usage.completion_tokens` |
-| `totalTokens` | `usage.total_tokens` |
-| `finishReason` | `choices[0].finish_reason` |
-| `model` | `model` — the model as served, which may be more specific than the one asked for |
+| Result | Source | Empty when |
+| --- | --- | --- |
+| `output` | the reply text, or the bare JSON string under `responseFormat=json` | never |
+| `finishReason` | `choices[0].finish_reason` of the final turn | not reported |
+| `model` | `model` as served, which may be more specific than the one asked for | not reported |
+| `promptTokens` | `usage.prompt_tokens`, summed over turns | — (`0`) |
+| `completionTokens` | `usage.completion_tokens`, summed | — (`0`) |
+| `totalTokens` | `usage.total_tokens`, summed | — (`0`) |
+| `reasoningTokens` | `usage.completion_tokens_details.reasoning_tokens`, summed | not reported |
+| `cachedPromptTokens` | `usage.prompt_tokens_details.cached_tokens`, summed | not reported |
+| `cost` | `usage.cost` (OpenRouter), summed | not reported |
+| `turns` | `ai-agent` only: model calls made | — |
+| `toolCalls` | `ai-agent` only: tool calls made | — |
+
+Every declared result is always written, the optional counters as an empty string when the endpoint
+does not report them, so a results parser that filters by declared name always finds them.
 
 Both result channels are handled from the one image:
 
 | `RESULTS_PATH` is | Executor | What is written |
 | --- | --- | --- |
 | a directory (`/tekton/results`) | Tekton | one file per result, the file name being the result name |
-| a file (`/dev/termination-log`) | Kubernetes Jobs | one compact JSON object with the six keys |
+| a file (`/dev/termination-log`) | Kubernetes Jobs | one compact JSON object |
 
 `RESULTS_PATH` defaults to `/tekton/results` when the executor does not set it. All results
-together must not exceed 4096 bytes — enforced platform-side, and the native cap of the
-termination-message file the Kubernetes Jobs executor uses — so a long completion will exceed it.
-Nothing truncates the answer to fit. For long output, lower `maxTokens`, or have the model write to
-a workspace file and return the path.
+together must not exceed 4096 bytes on Kubernetes — the native cap of the termination-message file
+— so a long completion will exceed it. Nothing truncates the answer to fit. For long output, use
+`outputFile` and hand the file to a following `uploadartifact` node, or lower `maxTokens`.
 
 ## Failure
 
 Any failure exits non-zero with the reason on stderr, and the engine ends the task `failed`. The
 reasons are prefixed so they are greppable: `MISSING_PARAM`, `INVALID_PARAM`, `FILE_NOT_READABLE`,
-`REQUEST_FAILED`, `REQUEST_REJECTED`, `INVALID_RESPONSE`, `NO_COMPLETION`.
+`FILE_NOT_WRITABLE`, `REQUEST_FAILED`, `REQUEST_REJECTED`, `INVALID_RESPONSE`, `NO_COMPLETION`,
+and for the agent `UNKNOWN_TOOL` and `MAX_TURNS_EXCEEDED`.
 
 `429`, `5xx` and transport failures are retried, three attempts in total, on the SDK's exponential
-backoff with jitter (it also retries `408` and `409`). Any other `4xx` fails at once — a rejected
-token or an unknown model will be rejected again. The failure names the status and quotes the first
-512 characters of the provider's reason; the token is never printed, on any path, because nothing
-logs the request headers.
+backoff with jitter. Any other `4xx` fails at once — a rejected token or an unknown model will be
+rejected again. The failure names the status and quotes the first 512 characters of the provider's
+reason. An MCP server that cannot be connected or listed is `REQUEST_FAILED` naming the server.
+
+No credential is printed on any path: nothing logs request headers, a JSON param that fails to
+parse is not echoed, and `task-core` logs the names of the params it reads but not their values.
 
 ## Network zone
 
-The endpoint is usually the only thing this container needs to reach. A deployment that wants AI
-traffic confined registers a dispatcher for the `ai` type alone (`flow.dispatcher.task-types=ai`)
-in a namespace whose egress policy allows the endpoint and nothing else.
+The endpoint and the MCP servers are the only things this container needs to reach. A deployment
+that wants AI traffic confined registers a dispatcher for the `ai` type alone
+(`flow.dispatcher.task-types=ai`) in a namespace whose egress policy allows those and nothing else.
 
 ## Tests
 
 ```bash
-bash tasks/ai/tests/run.sh
+node tasks/ai/tests/run.js        # or: pnpm --filter @boomerang-io/task-ai test
 ```
 
-Runs `bin/prompt.js` against `tests/mock_openai.py`, a scripted stand-in for the endpoint, and
-asserts the request body, the six results on both results channels, the file-context truncation,
-the retry and failure paths, and that the command never puts the token in its own output. 58
-assertions, no image build and no network. Needs `node` with this package's dependencies installed
-(`pnpm install`), plus `bash`, `curl`, `jq` and `python3`.
-
-The harness delivers `PARAM_NAMES` alongside the `PARAM_<NAME>` variables exactly as the platform
-does, so the suite exercises the real param channel through `task-core` rather than a simplified
-one.
-
-The suite is black-box — it drives the command through its environment and reads what it writes —
-so it carried across from the bash implementation this replaces unchanged apart from the line that
-invokes it.
+66 cases in [`tests/fixtures/`](tests/), each a JSON file of params in, scripted endpoint and MCP
+replies, and the results, requests, log lines and workspace files expected out. The runner drives
+the real commands through their environment exactly as the platform does and stands in for the
+endpoint and the MCP servers in-process, so there is no network and no image build. The fixtures
+are the contract as data: an in-process implementation of `ai-prompt` and `ai-agent` replays the
+same files against itself. [`tests/README.md`](tests/README.md) describes the format.
 
 ## Build
 
@@ -154,10 +212,9 @@ docker build -f tasks/ai/Dockerfile -t boomerangio/task-ai:local .
 ```
 
 **The build context is the repository root**, not `tasks/ai`, so pnpm resolves
-`@boomerang-io/task-core` as a workspace dependency instead of fetching it from the npm registry —
-the same arrangement as `tasks/resend`. No task-core release has to happen before this image can be
-built or tagged.
+`@boomerang-io/task-core` as a workspace dependency instead of fetching it from the npm registry.
+No task-core release has to happen before this image can be built or tagged.
 
 Two stages: pnpm resolves and deploys the dependency tree in the first and stays behind, so the
-published image carries node, the deployed `node_modules` and the command — no pnpm, no npm, no
-build toolchain.
+published image carries node, the deployed `node_modules` and the two commands — no pnpm, no npm,
+no build toolchain. Non-root (uid 2000), no entrypoint: the dispatcher sets the command.
