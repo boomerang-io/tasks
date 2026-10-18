@@ -15,6 +15,14 @@ on:
         description: 'The build context path'
         required: true
         type: string
+      fail_on_severity:
+        # Vulnerabilities at or above this severity in the built image fail the job before anything
+        # is pushed. "critical" is the floor every task image must clear; a task whose dependency
+        # tree is already clean passes "high" to keep it that way.
+        description: 'Lowest grype severity that fails the build: negligible | low | medium | high | critical'
+        required: false
+        type: string
+        default: 'critical'
     secrets:
       docker_username:
         description: 'Dockerhub username'
@@ -27,14 +35,16 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to GitHub Container Registry
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.docker_username }}
@@ -49,6 +59,54 @@ jobs:
           else
             echo "VERSION=${GITHUB_SHA::7}" >> $GITHUB_ENV
           fi
+
+      # ---- scan before publish ----
+      # The runner's own architecture is built first and loaded into its Docker daemon, so the
+      # SBOM and the vulnerability scan see exactly what is about to be published. The multi-arch
+      # push below reuses this build through the GitHub Actions cache.
+      - name: Build for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context_path }}
+          file: ${{ inputs.dockerfile_path }}
+          platforms: linux/amd64
+          load: true
+          tags: ${{ inputs.service }}:scan
+          cache-from: type=gha,scope=${{ inputs.service }}
+          cache-to: type=gha,scope=${{ inputs.service }},mode=max
+      - name: SBOM (syft)
+        # The full package inventory of the image - base packages and node modules - as SPDX, kept
+        # with the run for 90 days. The published image carries the same inventory as an
+        # attestation (sbom: true below), readable with `docker buildx imagetools inspect`.
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ inputs.service }}:scan
+          format: spdx-json
+          artifact-name: ${{ inputs.service }}-${{ env.VERSION }}.spdx.json
+          output-file: ${{ inputs.service }}-${{ env.VERSION }}.spdx.json
+      - name: Vulnerability scan (grype)
+        id: scan
+        uses: anchore/scan-action@v7
+        with:
+          image: ${{ inputs.service }}:scan
+          fail-build: true
+          severity-cutoff: ${{ inputs.fail_on_severity }}
+          output-format: table
+          only-fixed: false
+      - name: Scan report
+        if: always() && steps.scan.outputs.table != ''
+        # The table in the job summary, so a reviewer sees what the image carries without opening
+        # the log, including findings below the failing severity.
+        run: |
+          {
+            echo "## ${{ inputs.service }}:${{ env.VERSION }} vulnerability scan"
+            echo
+            echo '```'
+            cat "${{ steps.scan.outputs.table }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ---- publish ----
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -56,4 +114,9 @@ jobs:
           file: ${{ inputs.dockerfile_path }}
           platforms: linux/amd64,linux/arm64
           push: true
+          # SBOM and SLSA provenance attestations attached to the published manifest.
+          sbom: true
+          provenance: mode=max
+          cache-from: type=gha,scope=${{ inputs.service }}
+          cache-to: type=gha,scope=${{ inputs.service }},mode=max
           tags: boomerangio/${{ inputs.service }}:latest,boomerangio/${{ inputs.service }}:${{ env.VERSION }}
