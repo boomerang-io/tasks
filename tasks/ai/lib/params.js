@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import Ajv from "ajv";
 import { log, params as rawParams } from "@boomerang-io/task-core";
+import { urlWithoutQuery } from "./telemetry.js";
 
 /**
  * Param reading shared by the prompt and agent commands.
@@ -202,15 +203,128 @@ export function appendFileContext(text, files, maxContextBytes) {
 
 const DEFAULT_MAX_CONTEXT_BYTES = 65536;
 
+// A conservative per-image budget across providers; the provider stays the authority and rejects
+// what it will not take with its own reason (REQUEST_REJECTED).
+const DEFAULT_MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const IMAGE_DETAILS = ["low", "high", "auto"];
+
+// Anything that starts with a URI scheme is treated as a URL rather than a workspace path.
+const URI_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
+
+/** The image type from the file's first bytes, not its name: PNG, JPEG, GIF or WEBP. */
+function sniffImage(bytes) {
+  if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return "image/png";
+  }
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
+  }
+  const head = bytes.subarray(0, 12).toString("latin1");
+  if (head.startsWith("GIF87a") || head.startsWith("GIF89a")) {
+    return "image/gif";
+  }
+  if (head.startsWith("RIFF") && head.slice(8, 12) === "WEBP") {
+    return "image/webp";
+  }
+  return undefined;
+}
+
+/**
+ * The `images` param as chat-completions image_url parts, in the order given. A workspace file is
+ * size-checked, type-sniffed and sent inline as a data URL; an https URL is passed through for the
+ * provider to fetch. Any other scheme is refused, so an image never travels inside a param.
+ */
+function imageParts(input) {
+  const entries = isSet(input.images)
+    ? input.images
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter((entry) => entry !== "")
+    : [];
+  const detail = isSet(input.imageDetail) ? input.imageDetail.trim() : undefined;
+  if (detail !== undefined && !IMAGE_DETAILS.includes(detail)) {
+    throw new TaskError("INVALID_PARAM", `imageDetail must be 'low', 'high' or 'auto', got '${input.imageDetail}'`);
+  }
+  if (entries.length === 0) {
+    // Not a failure: an images value fed from an upstream result can legitimately be empty.
+    if (detail !== undefined) {
+      log.warn("imageDetail is set but images is empty, so imageDetail is ignored");
+    }
+    return [];
+  }
+  const maxImageBytes = asInteger("maxImageBytes", isSet(input.maxImageBytes) ? input.maxImageBytes : DEFAULT_MAX_IMAGE_BYTES);
+  if (maxImageBytes < 1) {
+    throw new TaskError("INVALID_PARAM", `maxImageBytes must be at least 1, got ${maxImageBytes}`);
+  }
+
+  return entries.map((entry) => {
+    let url;
+    if (URI_SCHEME.test(entry)) {
+      let parsed;
+      try {
+        parsed = new URL(entry);
+      } catch {
+        throw new TaskError("INVALID_PARAM", `images has an entry that is not a valid URL: '${entry.slice(0, 80)}'`);
+      }
+      if (parsed.protocol !== "https:") {
+        // The entry itself is not quoted: a data: URL would be the whole image.
+        throw new TaskError(
+          "INVALID_PARAM",
+          `images entries must be workspace paths or https URLs, got a ${parsed.protocol} URL; put the image on the workspace instead`,
+        );
+      }
+      url = entry;
+      log.sys(`attaching image ${urlWithoutQuery(entry)} (URL, fetched by the provider)`);
+    } else {
+      const file = workspacePath(entry);
+      let stat;
+      try {
+        stat = fs.statSync(file);
+        if (!stat.isFile()) {
+          throw new Error("not a file");
+        }
+      } catch {
+        throw new TaskError("FILE_NOT_READABLE", `the 'images' param names '${file}', which is not a readable file on the workspace`);
+      }
+      if (stat.size > maxImageBytes) {
+        throw new TaskError(
+          "FILE_TOO_LARGE",
+          `the 'images' param names '${file}', which is ${stat.size} bytes, over maxImageBytes=${maxImageBytes}`,
+        );
+      }
+      let bytes;
+      try {
+        bytes = fs.readFileSync(file);
+      } catch {
+        throw new TaskError("FILE_NOT_READABLE", `the 'images' param names '${file}', which is not a readable file on the workspace`);
+      }
+      const mime = sniffImage(bytes);
+      if (!mime) {
+        throw new TaskError("INVALID_PARAM", `the 'images' param names '${file}', which is not a PNG, JPEG, GIF or WEBP image`);
+      }
+      url = `data:${mime};base64,${bytes.toString("base64")}`;
+      log.sys(`attaching image ${file} (${stat.size} bytes, ${mime})`);
+    }
+    return { type: "image_url", image_url: { url, ...(detail !== undefined ? { detail } : {}) } };
+  });
+}
+
+function lastUserMessage(messages) {
+  return [...messages].reverse().find((m) => m.role === "user");
+}
+
 /**
  * The conversation to send, from whichever source the author used:
  *
  * - `messages` or `messagesFile`: an exact [{role, content}] array, replacing systemPrompt and
- *   prompt (both are ignored with a warning if also given).
+ *   prompt (both are ignored with a warning if also given). Content may be a string or an array of
+ *   chat-completions content parts ([{type: "text"}, {type: "image_url"}]); either goes through
+ *   unchanged.
  * - otherwise `prompt` or `promptFile` as the user message, behind `systemPrompt` when non-empty.
  *
- * One source of each kind at most, and at least one of them. `files` are appended to the last
- * user message.
+ * One source of each kind at most, and at least one of them. `files` are appended to the text of
+ * the last user message and `images` are attached to it after that text. Without images, content
+ * stays exactly what the source gave.
  */
 export function resolveMessages(input) {
   const hasMessages = isSet(input.messages);
@@ -256,11 +370,38 @@ export function resolveMessages(input) {
       "maxContextBytes",
       isSet(input.maxContextBytes) ? input.maxContextBytes : DEFAULT_MAX_CONTEXT_BYTES,
     );
-    const last = [...messages].reverse().find((m) => m.role === "user" && typeof m.content === "string");
+    const last = lastUserMessage(messages);
     if (!last) {
-      throw new TaskError("INVALID_PARAM", "files needs a user message with text content to append to");
+      throw new TaskError("INVALID_PARAM", "files needs a user message to append to");
     }
-    last.content = appendFileContext(last.content, input.files, maxContextBytes);
+    if (typeof last.content === "string") {
+      last.content = appendFileContext(last.content, input.files, maxContextBytes);
+    } else if (Array.isArray(last.content)) {
+      // Content parts: the files go on the last text part, or on a text part of their own.
+      const textPart = [...last.content].reverse().find((part) => part?.type === "text" && typeof part.text === "string");
+      if (textPart) {
+        textPart.text = appendFileContext(textPart.text, input.files, maxContextBytes);
+      } else {
+        last.content = [...last.content, { type: "text", text: appendFileContext("", input.files, maxContextBytes).trimStart() }];
+      }
+    } else {
+      throw new TaskError("INVALID_PARAM", "files needs the last user message's content to be text or content parts");
+    }
+  }
+
+  const images = imageParts(input);
+  if (images.length) {
+    const last = lastUserMessage(messages);
+    if (!last) {
+      throw new TaskError("INVALID_PARAM", "images needs a user message to attach to");
+    }
+    if (typeof last.content === "string") {
+      last.content = [{ type: "text", text: last.content }, ...images];
+    } else if (Array.isArray(last.content)) {
+      last.content = [...last.content, ...images];
+    } else {
+      throw new TaskError("INVALID_PARAM", "images needs the last user message's content to be text or content parts");
+    }
   }
 
   return messages;

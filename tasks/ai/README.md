@@ -25,7 +25,8 @@ boomerangio/task-ai:<version>
 `ci-template.yml`). A revision's `spec.image` and the tag it was written against move together, in
 the same PR as the image change.
 
-`2.0.0` is a major release: the `prompt` command implements the `ai-prompt` contract and drops the
+`2.1.0` adds image input (revision 2 of both tasks) and optional OpenTelemetry spans; it is
+additive, and revision 1 of each task stays pinned to `2.0.0`. `2.0.0` was a major release: the `prompt` command implements the `ai-prompt` contract and drops the
 contract of the original `ai` task (endpoint and token were required, temperature and maxTokens had
 defaults, six results). A deployment on the `ai` task stays on its pinned 1.x tag until its nodes
 move to `ai-prompt`; the param names they already use are unchanged.
@@ -49,6 +50,8 @@ commands/agent.js                ai-agent: the loop, the trace, the limits
 lib/params.js                    param parsing, prompt sources, workspace files, file context
 lib/completion.js                connection, request body, retries, usage, JSON and schema handling
 lib/mcp.js                       MCP servers: connect, list tools, call tools
+lib/telemetry.js                 optional OpenTelemetry spans, loaded only when an endpoint is set
+lib/main.js                      the life of a command: telemetry, run, failure, flush, exit code
 catalog/                         the catalogue definitions (Flow's seed shape)
 tests/                           the fixture runner, the mocks, and the fixtures
 ```
@@ -90,7 +93,7 @@ A path param is used as given when absolute and resolved against `/workspace` wh
 | `prompt` | one source | The user message |
 | `promptFile` | one source | A workspace file whose contents are the user message, for a prompt too large for a param (the engine caps params at 16 KB and a single environment string at 128 KB) |
 | `systemPrompt` | no | Prepended as a `system` message when non-empty |
-| `messages` | one source | A JSON array of `{role, content}` sent as the exact message array, replacing `systemPrompt` and `prompt` (which are then ignored, with a warning). For replays and evals |
+| `messages` | one source | A JSON array of `{role, content}` sent as the exact message array, replacing `systemPrompt` and `prompt` (which are then ignored, with a warning). For replays and evals. `content` may be a string or an array of chat-completions content parts (`[{"type": "text", ...}, {"type": "image_url", ...}]`); either goes to the endpoint unchanged |
 | `messagesFile` | one source | The same array, read from a workspace file |
 | `endpoint` | no | OpenAI-compatible base URL; `/chat/completions` is appended (a trailing `/` is trimmed). Blank means the executor's default, `OPENAI_BASE_URL` |
 | `token` | no | Bearer token. Declared `password`-typed so Flow filters it out of run reads and log streams. Blank means the executor's default, `OPENAI_API_KEY` |
@@ -100,14 +103,25 @@ A path param is used as given when absolute and resolved against `/workspace` wh
 | `parameters` | no | A JSON object merged into the request last: `top_p`, `reasoning_effort`, `verbosity`, `max_completion_tokens`, `frequency_penalty`, `presence_penalty`, anything the endpoint accepts. Its keys win over the convenience params |
 | `responseFormat` | no | `text` (default, no `response_format` key) or `json` (`response_format: {"type": "json_object"}`, and the reply must parse as JSON) |
 | `jsonSchema` | no | A JSON Schema object. Requires `responseFormat=json`. Sends `response_format: {"type": "json_schema", "json_schema": {"name": "output", "strict": true, "schema": ...}}` and validates the reply here as well: a schema that does not compile fails with `INVALID_PARAM` before any request, JSON that does not match fails with `INVALID_RESPONSE` naming the failing keyword |
-| `files` | no | Comma-separated workspace paths; each is appended to the last user message as a fenced block under a `## <path>` heading |
+| `files` | no | Comma-separated workspace paths; each is appended to the last user message as a fenced block under a `## <path>` heading: to its text, or to its last text part when it has content parts (a text part is added if it has none) |
 | `maxContextBytes` | no | Byte budget for the file context (default 65536); files that would exceed it are skipped and named in the prompt |
+| `images` | no | Comma-separated images attached to the last user message after its text, in order. A workspace path is checked against `maxImageBytes`, typed from its first bytes (PNG, JPEG, GIF, WEBP; the file name is not trusted) and sent as a `data:` URL; an `https` URL is passed through for the provider to fetch. Any other scheme (`http:`, `data:`, `file:`) is `INVALID_PARAM`, so an image never travels inside a param. Needs a vision-capable model. A URL containing a comma encodes it as `%2C` |
+| `imageDetail` | no | `low`, `high` or `auto`, sent as `image_url.detail` on each image from `images` only when set. Set with no images, it is a warning and is ignored |
+| `maxImageBytes` | no | Largest workspace image, in bytes (default 5242880). A larger file is `FILE_TOO_LARGE`, never resized or skipped. Not sent; URLs are not checked, since the image never fetches them |
 | `outputFile` | no | A workspace path to write the full `output` to, for a following `uploadartifact` node; `output` still carries it up to the results cap |
 
 Exactly one of `prompt`, `promptFile`, `messages`, `messagesFile` must be given per kind: none is
 `MISSING_PARAM`, `prompt` with `promptFile` or `messages` with `messagesFile` is `INVALID_PARAM`.
 An explicit `endpoint` or `token` always wins over the environment; neither anywhere is
 `MISSING_PARAM` naming the variable.
+
+Without `images`, a message's content is exactly what its source gave: a prompt stays a plain
+string. With them, string content becomes `[{"type": "text"}, ...images]` and a content-parts array
+has the images appended. Each image is logged as its path, size and type, or as a URL's origin and
+path: the query string is dropped, so a presigned URL's signature never reaches the pod log.
+`images` is a text param, though, so Flow stores and shows a presigned URL with the run; private
+images belong on the workspace. The agent resends the images on every turn, since they stay in the
+conversation.
 
 Under `responseFormat=json`, a leading `<think>…</think>` block and a Markdown code fence around
 the whole reply are stripped before parsing, and `output` carries the bare JSON. JSON buried inside
@@ -175,7 +189,7 @@ together must not exceed 4096 bytes on Kubernetes — the native cap of the term
 
 Any failure exits non-zero with the reason on stderr, and the engine ends the task `failed`. The
 reasons are prefixed so they are greppable: `MISSING_PARAM`, `INVALID_PARAM`, `FILE_NOT_READABLE`,
-`FILE_NOT_WRITABLE`, `REQUEST_FAILED`, `REQUEST_REJECTED`, `INVALID_RESPONSE`, `NO_COMPLETION`,
+`FILE_NOT_WRITABLE`, `FILE_TOO_LARGE`, `REQUEST_FAILED`, `REQUEST_REJECTED`, `INVALID_RESPONSE`, `NO_COMPLETION`,
 and for the agent `UNKNOWN_TOOL` and `MAX_TURNS_EXCEEDED`.
 
 `429`, `5xx` and transport failures are retried, three attempts in total, on the SDK's exponential
@@ -186,9 +200,59 @@ reason. An MCP server that cannot be connected or listed is `REQUEST_FAILED` nam
 No credential is printed on any path: nothing logs request headers, a JSON param that fails to
 parse is not echoed, and `task-core` logs the names of the params it reads but not their values.
 
+## Tracing (OpenTelemetry)
+
+Off unless the executor sets `OTEL_EXPORTER_OTLP_ENDPOINT` (or `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`).
+Off, nothing from `@opentelemetry` is even imported. On, the SDK is imported at startup and every
+model call, tool call and MCP call becomes a span, exported over OTLP/HTTP. Nothing about the task
+changes either way: results, exit codes and the JSON-lines trace in the task log are the same.
+
+| Variable | Effect |
+| --- | --- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | where spans go; `/v1/traces` is appended |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` (default) or `http/json`. `grpc` is not supported by this image: one warning, nothing exported |
+| `OTEL_EXPORTER_OTLP_HEADERS` | sent with each export (a Langfuse basic-auth header, for one); never logged |
+| `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES` | the resource every span carries; `service.name` defaults to `task-ai` |
+| `TRACEPARENT`, `TRACESTATE` | the W3C context the spans join; Flow derives it from the run so every task of a run shares one trace. Invalid, it is a warning and the spans start their own trace |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true` | adds prompts, replies, tool arguments and tool results to the spans. Off by default, because prompts carry customer data |
+| `OTEL_SDK_DISABLED=true`, `OTEL_TRACES_EXPORTER=none` | off, even with an endpoint |
+
+The spans follow the OpenTelemetry GenAI and MCP semantic conventions:
+
+```
+ai-prompt   chat <model>                         CLIENT, child of TRACEPARENT
+
+ai-agent    invoke_agent ai-agent                INTERNAL, child of TRACEPARENT
+            ├── initialize                       CLIENT, per MCP server
+            ├── tools/list                       CLIENT, per MCP server
+            ├── chat <model>                     CLIENT, per turn (flow.agent.turn)
+            └── execute_tool <tool>              INTERNAL, per tool call (flow.agent.turn)
+                └── tools/call <tool>            CLIENT
+```
+
+A chat span carries `gen_ai.operation.name`, `gen_ai.provider.name` (`openai`, the wire protocol;
+`server.address` names the real host), `gen_ai.request.model`, `gen_ai.output.type`, a
+`gen_ai.request.*` attribute for each sampling parameter actually sent (`flow.ai.request.*` for
+one with no convention name, `reasoning_effort` for example), `gen_ai.response.model`,
+`gen_ai.response.id`, `gen_ai.response.finish_reasons`, `gen_ai.usage.input_tokens`,
+`gen_ai.usage.output_tokens`, `gen_ai.usage.cache_read.input_tokens` and
+`flow.ai.usage.reasoning_tokens` when reported, and `gen_ai.usage.cost` when the endpoint reports a
+cost, which is the attribute Langfuse reads as a generation's total cost. A failure sets the span's
+status to error and `error.type` to the reason prefix.
+
+With content capture on, a chat span adds `gen_ai.input.messages` and `gen_ai.output.messages`
+(the current convention) and `gen_ai.prompt` and `gen_ai.completion` (the names Langfuse maps to a
+generation's input and output), all as the chat-completions JSON; an `execute_tool` span adds
+`gen_ai.tool.call.arguments` and `gen_ai.tool.call.result`. Even then, image data is replaced by
+`[image data omitted]`, URL query strings are dropped, and no credential appears.
+
+An export failure is one warning line. The flush before exit is bounded at 5 s, so an unreachable
+endpoint delays the end of a task by at most that, and never changes its outcome.
+
 ## Network zone
 
-The endpoint and the MCP servers are the only things this container needs to reach. A deployment
+The endpoint, the MCP servers and, when tracing is on, the OTLP endpoint are the only things this
+container needs to reach. Image URLs are fetched by the provider, not by this container. A deployment
 that wants AI traffic confined registers a dispatcher for the `ai` type alone
 (`flow.dispatcher.task-types=ai`) in a namespace whose egress policy allows those and nothing else.
 
@@ -198,10 +262,10 @@ that wants AI traffic confined registers a dispatcher for the `ai` type alone
 node tasks/ai/tests/run.js        # or: pnpm --filter @boomerang-io/task-ai test
 ```
 
-66 cases in [`tests/fixtures/`](tests/), each a JSON file of params in, scripted endpoint and MCP
-replies, and the results, requests, log lines and workspace files expected out. The runner drives
+98 cases in [`tests/fixtures/`](tests/), each a JSON file of params in, scripted endpoint and MCP
+replies, and the results, requests, log lines, workspace files and exported spans expected out. The runner drives
 the real commands through their environment exactly as the platform does and stands in for the
-endpoint and the MCP servers in-process, so there is no network and no image build. The fixtures
+endpoint, the MCP servers and an OTLP receiver in-process, so there is no network and no image build. The fixtures
 are the contract as data: an in-process implementation of `ai-prompt` and `ai-agent` replays the
 same files against itself. [`tests/README.md`](tests/README.md) describes the format.
 

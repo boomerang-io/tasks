@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { log } from "@boomerang-io/task-core";
 import { TaskError, asInteger, asJson, asJsonSchema, asNumber, isSet } from "./params.js";
+import { KIND, captureContent, redactMessages } from "./telemetry.js";
 
 /**
  * The chat-completions request and reply, shared by the prompt and agent commands.
@@ -257,4 +258,85 @@ export function finalizeOutput(content, sampling) {
     log.sys("stripped a code fence or think block from the JSON completion");
   }
   return candidate;
+}
+
+//
+// Spans. A chat span covers one model call, its retries included; the attributes follow the
+// OpenTelemetry GenAI conventions, with Flow-specific extras under flow.ai.*.
+//
+
+// Request keys with a GenAI convention name; anything else that was sent goes under flow.ai.request.*.
+const REQUEST_ATTRIBUTES = {
+  temperature: "gen_ai.request.temperature",
+  top_p: "gen_ai.request.top_p",
+  top_k: "gen_ai.request.top_k",
+  seed: "gen_ai.request.seed",
+  max_tokens: "gen_ai.request.max_tokens",
+  max_completion_tokens: "gen_ai.request.max_tokens",
+  frequency_penalty: "gen_ai.request.frequency_penalty",
+  presence_penalty: "gen_ai.request.presence_penalty",
+  stop: "gen_ai.request.stop_sequences",
+  n: "gen_ai.request.choice.count",
+};
+// Keys that are the conversation or its shape rather than sampling parameters.
+const NOT_REQUEST_PARAMETERS = new Set(["model", "messages", "tools", "response_format", "parallel_tool_calls", "stream"]);
+
+/** The name and options of a chat span for this request; the caller starts it under its parent. */
+export function chatSpan(connection, body, sampling, extra = {}) {
+  const url = new URL(connection.baseURL);
+  const attributes = {
+    "gen_ai.operation.name": "chat",
+    // The wire protocol; server.address names the real host (OpenRouter, Azure, Ollama...).
+    "gen_ai.provider.name": "openai",
+    "gen_ai.request.model": body.model,
+    "gen_ai.output.type": sampling.responseFormat === "json" ? "json" : "text",
+    "server.address": url.hostname,
+    "server.port": Number(url.port || (url.protocol === "https:" ? 443 : 80)),
+    ...extra,
+  };
+  for (const [key, value] of Object.entries(body)) {
+    if (NOT_REQUEST_PARAMETERS.has(key)) continue;
+    attributes[REQUEST_ATTRIBUTES[key] ?? `flow.ai.request.${key}`] = key === "stop" && !Array.isArray(value) ? [value] : value;
+  }
+  if (captureContent()) {
+    const messages = JSON.stringify(redactMessages(body.messages));
+    // The current convention's name, and the older one Langfuse maps to a generation's input.
+    attributes["gen_ai.input.messages"] = messages;
+    attributes["gen_ai.prompt"] = messages;
+  }
+  return [`chat ${body.model}`, { kind: KIND.CLIENT, attributes }];
+}
+
+/** What the response says about itself, onto its chat span. */
+export function recordCompletion(span, completion) {
+  const choice = completion?.choices?.[0];
+  const usage = completion?.usage ?? {};
+  span.set({
+    "gen_ai.response.model": completion?.model,
+    "gen_ai.response.id": completion?.id,
+    "gen_ai.response.finish_reasons": choice?.finish_reason ? [choice.finish_reason] : undefined,
+    "gen_ai.usage.input_tokens": usage.prompt_tokens,
+    "gen_ai.usage.output_tokens": usage.completion_tokens,
+    "gen_ai.usage.cache_read.input_tokens": usage.prompt_tokens_details?.cached_tokens,
+    "flow.ai.usage.reasoning_tokens": usage.completion_tokens_details?.reasoning_tokens,
+    // The name Langfuse reads as a generation's total cost.
+    "gen_ai.usage.cost": typeof usage.cost === "number" ? usage.cost : undefined,
+  });
+  if (captureContent() && choice?.message) {
+    const output = JSON.stringify(
+      redactMessages([
+        {
+          role: "assistant",
+          content: choice.message.content ?? null,
+          ...(choice.message.tool_calls ? { tool_calls: choice.message.tool_calls } : {}),
+        },
+      ]),
+    );
+    span.set({ "gen_ai.output.messages": output, "gen_ai.completion": output });
+  }
+}
+
+/** Marks a span failed with the TaskError's reason, or the error's own name. */
+export function failSpan(span, error) {
+  span.fail(error?.reason ?? error?.name, error?.message);
 }

@@ -1,0 +1,61 @@
+{
+  "description": "messages whose content is an array of content parts go to the endpoint exactly as given",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "messages": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Describe this\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://img.example.com/c.png\", \"detail\": \"low\"}}]}]"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requests": [
+      {
+        "body": {
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Describe this"
+                },
+                {
+                  "type": "image_url",
+                  "image_url": {
+                    "url": "https://img.example.com/c.png",
+                    "detail": "low"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

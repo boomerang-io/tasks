@@ -6,12 +6,6 @@
 // A failure goes to stderr and exits non-zero, so the engine ends the task `failed` with a reason
 // the task author can act on. The task's own logging goes to stdout.
 import { run } from "../commands/prompt.js";
+import { main } from "../lib/main.js";
 
-try {
-  await run();
-} catch (e) {
-  // A TaskError carries a reason the author can act on; anything else is a bug in the task or the
-  // SDK, and its stack is what makes that debuggable.
-  console.error(`ai/prompt: ${e.name === "TaskError" ? e.message : (e.stack ?? e.message)}`);
-  process.exit(1);
-}
+await main("ai/prompt", run);

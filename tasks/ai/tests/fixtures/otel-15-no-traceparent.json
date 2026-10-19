@@ -1,0 +1,58 @@
+{
+  "description": "without TRACEPARENT the chat span is the root of its own trace",
+  "command": "prompt",
+  "otlp": true,
+  "env": {
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "${OTLP}",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json",
+    "OTEL_SERVICE_NAME": "flow-task-ai-prompt",
+    "OTEL_RESOURCE_ATTRIBUTES": "flow.workflow.run.id=aaaaaaaaaaaaaaaaaaaaaaaa,flow.task.run.id=ccccccccccccccccbbbbbbbbbbbbbbbb,flow.task.name=ask"
+  },
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "stdout": [
+      "OpenTelemetry: exporting spans over http/json"
+    ],
+    "stdoutNot": [
+      "under TRACEPARENT"
+    ],
+    "spanCount": 1,
+    "spans": [
+      {
+        "name": "chat gpt-4o-mini",
+        "parent": "$root",
+        "parentSpanId": ""
+      }
+    ]
+  }
+}

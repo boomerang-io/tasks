@@ -1,0 +1,78 @@
+{
+  "description": "files are appended to the last text part of a content-parts message; other parts are untouched",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "messages": "[{\"role\": \"user\", \"content\": [{\"type\": \"image_url\", \"image_url\": {\"url\": \"https://img.example.com/c.png\"}}, {\"type\": \"text\", \"text\": \"Describe this\"}]}]",
+    "files": "${WORKSPACE}/notes.txt"
+  },
+  "workspace": {
+    "notes.txt": "context notes\n"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requests": [
+      {
+        "body": {
+          "messages": [
+            {
+              "content": [
+                {
+                  "type": "image_url",
+                  "image_url": {
+                    "url": "https://img.example.com/c.png"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "$contains:## ${WORKSPACE}/notes.txt"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 0,
+        "body": {
+          "messages": [
+            {
+              "content": [
+                {},
+                {
+                  "text": "$contains:Describe this"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "description": "several images keep their order, a URL is passed through, imageDetail applies to each, and a URL's query string stays out of the log",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "systemPrompt": "Sys",
+    "images": "${WORKSPACE}/a.jpg, https://img.example.com/b.png?X-Amz-Signature=sig-secret-123",
+    "imageDetail": "high"
+  },
+  "workspace": {
+    "a.jpg": {
+      "base64": "/9j/4AAQSkZJRgABAQAAAQABAAD/2Q=="
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requests": [
+      {
+        "body": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "Sys"
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "How did the run go?"
+                },
+                {
+                  "type": "image_url",
+                  "image_url": {
+                    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2Q==",
+                    "detail": "high"
+                  }
+                },
+                {
+                  "type": "image_url",
+                  "image_url": {
+                    "url": "https://img.example.com/b.png?X-Amz-Signature=sig-secret-123",
+                    "detail": "high"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "stdout": [
+      "attaching image https://img.example.com/b.png (URL, fetched by the provider)",
+      "image/jpeg"
+    ],
+    "stdoutNot": [
+      "sig-secret-123"
+    ]
+  }
+}

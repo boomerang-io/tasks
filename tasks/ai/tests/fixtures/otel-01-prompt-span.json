@@ -1,0 +1,130 @@
+{
+  "description": "with an OTLP endpoint, one chat span under TRACEPARENT carries the GenAI attributes, the sent parameters and usage, with no content by default; results are unchanged",
+  "command": "prompt",
+  "otlp": true,
+  "env": {
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "${OTLP}",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json",
+    "TRACEPARENT": "00-00000000aaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01",
+    "OTEL_SERVICE_NAME": "flow-task-ai-prompt",
+    "OTEL_RESOURCE_ATTRIBUTES": "flow.workflow.run.id=aaaaaaaaaaaaaaaaaaaaaaaa,flow.task.run.id=ccccccccccccccccbbbbbbbbbbbbbbbb,flow.task.name=ask"
+  },
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "temperature": "0.2",
+    "parameters": "{\"reasoning_effort\":\"low\",\"top_p\":0.5}"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 100,
+          "completion_tokens": 30,
+          "total_tokens": 130,
+          "completion_tokens_details": {
+            "reasoning_tokens": 12
+          },
+          "prompt_tokens_details": {
+            "cached_tokens": 64
+          },
+          "cost": 0.00123
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "resultKeys": [
+      "output",
+      "finishReason",
+      "model",
+      "promptTokens",
+      "completionTokens",
+      "totalTokens",
+      "reasoningTokens",
+      "cachedPromptTokens",
+      "cost"
+    ],
+    "results": {
+      "output": "The run succeeded in 12 seconds.",
+      "totalTokens": "130",
+      "cost": "0.00123"
+    },
+    "stdout": [
+      "OpenTelemetry: exporting spans over http/json under TRACEPARENT"
+    ],
+    "stdoutNot": [
+      "export failed"
+    ],
+    "spanCount": 1,
+    "otlpRequests": [
+      {
+        "path": "/v1/traces",
+        "contentType": "application/json"
+      }
+    ],
+    "spans": [
+      {
+        "name": "chat gpt-4o-mini",
+        "parent": "$root",
+        "traceId": "00000000aaaaaaaaaaaaaaaaaaaaaaaa",
+        "parentSpanId": "bbbbbbbbbbbbbbbb",
+        "kind": "client",
+        "status": "unset",
+        "attributes": {
+          "gen_ai.operation.name": "chat",
+          "gen_ai.provider.name": "openai",
+          "gen_ai.request.model": "gpt-4o-mini",
+          "gen_ai.output.type": "text",
+          "server.address": "127.0.0.1",
+          "server.port": "$present",
+          "gen_ai.request.temperature": 0.2,
+          "gen_ai.request.top_p": 0.5,
+          "flow.ai.request.reasoning_effort": "low",
+          "gen_ai.request.max_tokens": "$absent",
+          "gen_ai.response.model": "gpt-4o-mini-2024-07-18",
+          "gen_ai.response.id": "chatcmpl-1",
+          "gen_ai.response.finish_reasons": [
+            "stop"
+          ],
+          "gen_ai.usage.input_tokens": 100,
+          "gen_ai.usage.output_tokens": 30,
+          "gen_ai.usage.cache_read.input_tokens": 64,
+          "flow.ai.usage.reasoning_tokens": 12,
+          "gen_ai.usage.cost": 0.00123,
+          "gen_ai.input.messages": "$absent",
+          "gen_ai.prompt": "$absent",
+          "gen_ai.output.messages": "$absent",
+          "gen_ai.completion": "$absent"
+        },
+        "resource": {
+          "service.name": "flow-task-ai-prompt",
+          "service.version": "$present",
+          "flow.workflow.run.id": "aaaaaaaaaaaaaaaaaaaaaaaa",
+          "flow.task.name": "ask"
+        }
+      }
+    ],
+    "spansNotContaining": [
+      "How did the run go?",
+      "The run succeeded",
+      "sk-test-do-not-log-me"
+    ]
+  }
+}
