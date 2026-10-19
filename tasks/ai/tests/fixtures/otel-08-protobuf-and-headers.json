@@ -1,0 +1,68 @@
+{
+  "description": "the default protocol is http/protobuf, OTEL_EXPORTER_OTLP_HEADERS reach the backend, and the headers never reach the log",
+  "command": "prompt",
+  "otlp": true,
+  "env": {
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "${OTLP}",
+    "TRACEPARENT": "00-00000000aaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01",
+    "OTEL_SERVICE_NAME": "flow-task-ai-prompt",
+    "OTEL_RESOURCE_ATTRIBUTES": "flow.workflow.run.id=aaaaaaaaaaaaaaaaaaaaaaaa,flow.task.run.id=ccccccccccccccccbbbbbbbbbbbbbbbb,flow.task.name=ask",
+    "OTEL_EXPORTER_OTLP_HEADERS": "Authorization=Basic cGstbGY6c2stbGY="
+  },
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "stdout": [
+      "exporting spans over http/protobuf"
+    ],
+    "stdoutNot": [
+      "cGstbGY6c2stbGY="
+    ],
+    "otlpRequestCount": 1,
+    "otlpRequests": [
+      {
+        "path": "/v1/traces",
+        "contentType": "application/x-protobuf",
+        "authorization": "Basic cGstbGY6c2stbGY=",
+        "bodyContainsHex": [
+          "00000000aaaaaaaaaaaaaaaaaaaaaaaa",
+          "bbbbbbbbbbbbbbbb"
+        ],
+        "bodyContains": [
+          "chat gpt-4o-mini",
+          "gen_ai.usage.input_tokens",
+          "flow-task-ai-prompt"
+        ]
+      }
+    ]
+  }
+}

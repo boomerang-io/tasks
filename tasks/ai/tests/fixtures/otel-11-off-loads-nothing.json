@@ -1,0 +1,113 @@
+{
+  "description": "with no OTLP endpoint, no @opentelemetry module is loaded at all and nothing is logged about it",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "mcpServers": "[{\"name\": \"tools\", \"url\": \"${MCP:tools}\"}]"
+  },
+  "mcp": {
+    "tools": {
+      "tools": [
+        {
+          "name": "weather",
+          "description": "Current weather for a city",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "city"
+            ]
+          },
+          "result": "Sunny, 24C"
+        },
+        {
+          "name": "clock",
+          "description": "The current time",
+          "inputSchema": {
+            "type": "object",
+            "properties": {}
+          },
+          "result": "12:00"
+        }
+      ]
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_1",
+                  "type": "function",
+                  "function": {
+                    "name": "weather",
+                    "arguments": "{\"city\": \"Sydney\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "Sunny"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 20,
+          "completion_tokens": 6,
+          "total_tokens": 26
+        }
+      }
+    }
+  ],
+  "env": {
+    "TRACEPARENT": "00-00000000aaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01"
+  },
+  "expect": {
+    "exit": 0,
+    "modulesLoaded": [
+      "/openai/"
+    ],
+    "modulesNotLoaded": [
+      "@opentelemetry"
+    ],
+    "stdoutNot": [
+      "OpenTelemetry"
+    ]
+  }
+}

@@ -1,7 +1,9 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import fs from "fs";
 import { log } from "@boomerang-io/task-core";
 import { TaskError } from "./params.js";
+import { KIND } from "./telemetry.js";
 
 /**
  * The agent command's tools over MCP (streamable HTTP). Each server in `mcpServers` is connected
@@ -10,7 +12,34 @@ import { TaskError } from "./params.js";
  * map, keyed by server name, as a bearer token.
  */
 
-const CLIENT_INFO = { name: "boomerang-task-ai", version: "2.0.0" };
+const VERSION = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+const CLIENT_INFO = { name: "boomerang-task-ai", version: VERSION };
+
+/** The MCP span attributes every call to one server carries. */
+function serverAttributes(server) {
+  return {
+    "flow.mcp.server.name": server.name,
+    "server.address": server.url.hostname,
+    "server.port": Number(server.url.port || (server.url.protocol === "https:" ? 443 : 80)),
+    "network.transport": "tcp",
+  };
+}
+
+/** Runs fn under an MCP span named after the method; a failure marks the span and rethrows. */
+async function mcpSpan(parent, method, target, server, fn, attributes = {}) {
+  const span = parent.child(target ? `${method} ${target}` : method, {
+    kind: KIND.CLIENT,
+    attributes: { "mcp.method.name": method, ...serverAttributes(server), ...attributes },
+  });
+  try {
+    return await fn(span);
+  } catch (e) {
+    span.fail(e?.name ?? "_OTHER", e?.message);
+    throw e;
+  } finally {
+    span.end();
+  }
+}
 
 // How much of a tool result to send back when it is not text: the model is told what it missed.
 const NON_TEXT_NOTE = "[non-text content omitted]";
@@ -69,7 +98,7 @@ export function validateMcpTokens(tokens, servers) {
  * a `call` that routes by tool name, and a `close` for the end of the run. A tool name served by
  * two servers is refused, since the model names a tool and nothing else.
  */
-export async function connectMcpServers(servers, tokens) {
+export async function connectMcpServers(servers, tokens, parent) {
   const clients = [];
   const tools = new Map();
 
@@ -81,8 +110,15 @@ export async function connectMcpServers(servers, tokens) {
     const client = new Client(CLIENT_INFO);
     let listed;
     try {
-      await client.connect(transport);
-      listed = await client.listTools();
+      await mcpSpan(parent, "initialize", undefined, server, (span) =>
+        client.connect(transport).then(() => span.set({ "mcp.protocol.version": transport.protocolVersion })),
+      );
+      listed = await mcpSpan(parent, "tools/list", undefined, server, (span) =>
+        client.listTools().then((result) => {
+          span.set({ "flow.mcp.tool.count": (result.tools ?? []).length });
+          return result;
+        }),
+      );
     } catch (e) {
       await Promise.allSettled(clients.map((c) => c.client.close()));
       throw new TaskError(
@@ -121,14 +157,26 @@ export async function connectMcpServers(servers, tokens) {
         };
       });
     },
-    /** Calls a tool; returns { text, isError } for the tool message. */
-    async call(name, args) {
+    /** Calls a tool under a tools/call span; returns { server, text, isError } for the tool message. */
+    async call(name, args, parent) {
       const entry = tools.get(name);
-      const result = await entry.client.callTool({ name, arguments: args });
-      const text = (result.content ?? [])
-        .map((part) => (part.type === "text" ? part.text : NON_TEXT_NOTE))
-        .join("\n");
-      return { server: entry.server.name, text, isError: result.isError === true };
+      return mcpSpan(
+        parent,
+        "tools/call",
+        name,
+        entry.server,
+        async (span) => {
+          const result = await entry.client.callTool({ name, arguments: args });
+          const text = (result.content ?? [])
+            .map((part) => (part.type === "text" ? part.text : NON_TEXT_NOTE))
+            .join("\n");
+          if (result.isError === true) {
+            span.fail("tool_error", "the tool reported an error");
+          }
+          return { server: entry.server.name, text, isError: result.isError === true };
+        },
+        { "gen_ai.tool.name": name },
+      );
     },
     async close() {
       await Promise.allSettled(clients.map((c) => c.client.close()));

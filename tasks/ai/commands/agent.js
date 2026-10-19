@@ -14,15 +14,19 @@ import {
   EMPTY_USAGE,
   addUsage,
   buildRequestBody,
+  chatSpan,
   createCompletion,
   describeRequest,
+  failSpan,
   finalizeOutput,
   firstChoice,
   readSampling,
+  recordCompletion,
   resolveConnection,
   usageResults,
 } from "../lib/completion.js";
 import { connectMcpServers, validateMcpServers, validateMcpTokens } from "../lib/mcp.js";
+import { KIND, captureContent, rootSpan } from "../lib/telemetry.js";
 
 /**
  * `ai-agent`: a tool-calling loop against an OpenAI-compatible endpoint.
@@ -35,6 +39,10 @@ import { connectMcpServers, validateMcpServers, validateMcpTokens } from "../lib
  * `tools` declares tools an executor implements natively. A container has no native tools, so each
  * declared name must be served by an MCP server here, or the task fails UNKNOWN_TOOL before the
  * first call rather than when the model first reaches for it.
+ *
+ * With an OTLP endpoint configured, the run is an `invoke_agent` span under the run's TRACEPARENT,
+ * holding the MCP `initialize` and `tools/list` spans, a `chat` span per turn, and an
+ * `execute_tool` span per tool call with its MCP `tools/call` span beneath it.
  */
 
 const DEFAULT_MAX_TURNS = 10;
@@ -96,26 +104,56 @@ function selectTools(registry, agent) {
   return served.filter((name) => agent.allowedTools.includes(name));
 }
 
-/** Executes one of the model's tool calls and returns its tool message. */
-async function executeToolCall(registry, selected, call, turn) {
+/** Executes one of the model's tool calls under an execute_tool span and returns its tool message. */
+async function executeToolCall(registry, selected, call, turn, parent) {
   const name = call.function?.name ?? "";
-  if (!selected.includes(name)) {
-    throw new TaskError("UNKNOWN_TOOL", `the model called '${name}', which is not an available tool`);
+  const span = parent.child(`execute_tool ${name}`, {
+    kind: KIND.INTERNAL,
+    attributes: {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": name,
+      "gen_ai.tool.call.id": call.id,
+      "gen_ai.tool.type": "function",
+      "flow.agent.turn": turn,
+      ...(captureContent() ? { "gen_ai.tool.call.arguments": call.function?.arguments ?? "" } : {}),
+    },
+  });
+  try {
+    if (!selected.includes(name)) {
+      throw new TaskError("UNKNOWN_TOOL", `the model called '${name}', which is not an available tool`);
+    }
+    const message = await runToolCall(registry, call, name, turn, span);
+    if (captureContent()) {
+      span.set({ "gen_ai.tool.call.result": message.content });
+    }
+    return message;
+  } catch (e) {
+    failSpan(span, e);
+    throw e;
+  } finally {
+    span.end();
   }
+}
+
+async function runToolCall(registry, call, name, turn, span) {
   let args;
   try {
     args = call.function.arguments ? JSON.parse(call.function.arguments) : {};
   } catch {
     // The model's mistake, handed back to it rather than failing the run.
     trace({ event: "tool", turn, tool: name, ok: false, error: "arguments were not valid JSON" });
+    span.fail("invalid_arguments", "the tool call arguments were not valid JSON");
     return { role: "tool", tool_call_id: call.id, content: "ERROR: the tool call arguments were not valid JSON" };
   }
   const started = Date.now();
   let outcome;
   try {
-    outcome = await registry.call(name, args);
+    outcome = await registry.call(name, args, span);
   } catch (e) {
     outcome = { server: registry.tools.get(name).server.name, text: `ERROR: ${e.message}`, isError: true };
+  }
+  if (outcome.isError) {
+    span.fail("tool_error", "the tool reported an error");
   }
   trace({
     event: "tool",
@@ -140,7 +178,27 @@ export async function run() {
   const agent = readAgentParams(input);
   const messages = resolveMessages(input);
 
-  const registry = await connectMcpServers(agent.servers, agent.tokens);
+  const agentSpan = rootSpan("invoke_agent ai-agent", {
+    kind: KIND.INTERNAL,
+    attributes: {
+      "gen_ai.operation.name": "invoke_agent",
+      "gen_ai.agent.name": "ai-agent",
+      "gen_ai.provider.name": "openai",
+      "gen_ai.request.model": model,
+    },
+  });
+  try {
+    await runAgent({ input, model, connection, sampling, agent, messages, agentSpan });
+  } catch (e) {
+    failSpan(agentSpan, e);
+    throw e;
+  } finally {
+    agentSpan.end();
+  }
+}
+
+async function runAgent({ input, model, connection, sampling, agent, messages, agentSpan }) {
+  const registry = await connectMcpServers(agent.servers, agent.tokens, agentSpan);
   try {
     const selected = selectTools(registry, agent);
     const tools = registry.definitions(selected);
@@ -158,9 +216,18 @@ export async function run() {
       if (turns === 0) {
         log.sys(describeRequest(connection.url, body, sampling));
       }
-      completion = await createCompletion(connection, body);
       turns += 1;
-      choice = firstChoice(completion);
+      const turnSpan = agentSpan.child(...chatSpan(connection, body, sampling, { "flow.agent.turn": turns }));
+      try {
+        completion = await createCompletion(connection, body);
+        recordCompletion(turnSpan, completion);
+        choice = firstChoice(completion);
+      } catch (e) {
+        failSpan(turnSpan, e);
+        throw e;
+      } finally {
+        turnSpan.end();
+      }
       usage = addUsage(usage, usageResults(completion));
 
       const calls = Array.isArray(choice.message.tool_calls) ? choice.message.tool_calls : [];
@@ -195,9 +262,9 @@ export async function run() {
       // message per call, in the order the model made them.
       messages.push(choice.message);
       const toolMessages = agent.parallelToolCalls
-        ? await Promise.all(calls.map((call) => executeToolCall(registry, selected, call, turns)))
+        ? await Promise.all(calls.map((call) => executeToolCall(registry, selected, call, turns, agentSpan)))
         : await calls.reduce(
-            (chain, call) => chain.then(async (done) => [...done, await executeToolCall(registry, selected, call, turns)]),
+            (chain, call) => chain.then(async (done) => [...done, await executeToolCall(registry, selected, call, turns, agentSpan)]),
             Promise.resolve([]),
           );
       messages.push(...toolMessages);
@@ -221,6 +288,7 @@ export async function run() {
 
     const finishReason = choice.finish_reason ?? "";
     const servedModel = completion.model ?? "";
+    agentSpan.set({ "gen_ai.response.model": servedModel, "flow.agent.turns": turns, "flow.agent.tool_calls": toolCalls });
     await results({ output, finishReason, model: servedModel, ...usage, turns, toolCalls });
 
     log.good(

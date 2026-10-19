@@ -1,0 +1,50 @@
+{
+  "description": "OTEL_SDK_DISABLED=true turns telemetry off even with an endpoint",
+  "command": "prompt",
+  "otlp": true,
+  "env": {
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "${OTLP}",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json",
+    "TRACEPARENT": "00-00000000aaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01",
+    "OTEL_SERVICE_NAME": "flow-task-ai-prompt",
+    "OTEL_RESOURCE_ATTRIBUTES": "flow.workflow.run.id=aaaaaaaaaaaaaaaaaaaaaaaa,flow.task.run.id=ccccccccccccccccbbbbbbbbbbbbbbbb,flow.task.name=ask",
+    "OTEL_SDK_DISABLED": "true"
+  },
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "otlpRequestCount": 0,
+    "stdoutNot": [
+      "OpenTelemetry"
+    ]
+  }
+}

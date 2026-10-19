@@ -1,0 +1,81 @@
+{
+  "description": "a workspace PNG is sniffed, size-checked and sent as a data URL image_url part after the prompt text; no detail unless set",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "images": "${WORKSPACE}/shot.png"
+  },
+  "workspace": {
+    "shot.png": {
+      "base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg=="
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "resultKeys": [
+      "output",
+      "finishReason",
+      "model",
+      "promptTokens",
+      "completionTokens",
+      "totalTokens",
+      "reasoningTokens",
+      "cachedPromptTokens",
+      "cost"
+    ],
+    "requests": [
+      {
+        "body": {
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "How did the run go?"
+                },
+                {
+                  "type": "image_url",
+                  "image_url": {
+                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==",
+                    "detail": "$absent"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "stdout": [
+      "attaching image ${WORKSPACE}/shot.png (70 bytes, image/png)"
+    ]
+  }
+}

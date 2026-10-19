@@ -1,0 +1,114 @@
+{
+  "description": "a tool that reports an error marks execute_tool and tools/call as errors while the agent run itself succeeds",
+  "command": "agent",
+  "otlp": true,
+  "env": {
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "${OTLP}",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json",
+    "TRACEPARENT": "00-00000000aaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01",
+    "OTEL_SERVICE_NAME": "flow-task-ai-prompt",
+    "OTEL_RESOURCE_ATTRIBUTES": "flow.workflow.run.id=aaaaaaaaaaaaaaaaaaaaaaaa,flow.task.run.id=ccccccccccccccccbbbbbbbbbbbbbbbb,flow.task.name=ask"
+  },
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "mcpServers": "[{\"name\": \"tools\", \"url\": \"${MCP:tools}\"}]"
+  },
+  "mcp": {
+    "tools": {
+      "tools": [
+        {
+          "name": "clock",
+          "inputSchema": {
+            "type": "object"
+          },
+          "result": {
+            "text": "service down",
+            "isError": true
+          }
+        }
+      ]
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "c",
+                  "type": "function",
+                  "function": {
+                    "name": "clock",
+                    "arguments": "{}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "could not tell"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "spans": [
+      {
+        "name": "invoke_agent ai-agent",
+        "status": "unset"
+      },
+      {
+        "name": "execute_tool clock",
+        "status": "error",
+        "attributes": {
+          "error.type": "tool_error"
+        }
+      },
+      {
+        "name": "tools/call clock",
+        "status": "error",
+        "attributes": {
+          "error.type": "tool_error"
+        }
+      }
+    ]
+  }
+}

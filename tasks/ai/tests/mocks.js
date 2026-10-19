@@ -124,3 +124,79 @@ export async function startMcpServer(name, spec) {
     close: () => new Promise((resolve) => httpServer.close(resolve)),
   };
 }
+
+/** OTLP span kinds by their protobuf enum number, as the JSON encoding carries them. */
+const SPAN_KINDS = ["unspecified", "internal", "server", "client", "producer", "consumer"];
+
+function attributeValue(value) {
+  if (!value || typeof value !== "object") return value;
+  if ("stringValue" in value) return value.stringValue;
+  if ("boolValue" in value) return value.boolValue;
+  if ("intValue" in value) return Number(value.intValue);
+  if ("doubleValue" in value) return value.doubleValue;
+  if ("arrayValue" in value) return (value.arrayValue.values ?? []).map(attributeValue);
+  return value;
+}
+
+function attributeMap(attributes) {
+  return Object.fromEntries((attributes ?? []).map((a) => [a.key, attributeValue(a.value)]));
+}
+
+/**
+ * An OTLP/HTTP trace receiver. JSON exports are decoded into flat spans - {name, traceId, spanId,
+ * parentSpanId, kind, status, attributes, resource} - so a case can assert on them; protobuf
+ * exports are kept raw, with their content type, for byte-level checks.
+ */
+export async function startOtlpReceiver() {
+  const requests = [];
+  const spans = [];
+  const server = http.createServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const body = Buffer.concat(chunks);
+    const contentType = req.headers["content-type"] ?? "";
+    requests.push({ path: req.url, contentType, authorization: req.headers.authorization ?? null, body });
+    if (contentType.includes("json")) {
+      const payload = JSON.parse(body.toString("utf8"));
+      for (const rs of payload.resourceSpans ?? []) {
+        const resource = attributeMap(rs.resource?.attributes);
+        for (const ss of rs.scopeSpans ?? []) {
+          for (const span of ss.spans ?? []) {
+            spans.push({
+              name: span.name,
+              traceId: span.traceId,
+              spanId: span.spanId,
+              parentSpanId: span.parentSpanId ?? "",
+              kind: SPAN_KINDS[span.kind] ?? String(span.kind),
+              status: span.status?.code === 2 ? "error" : span.status?.code === 1 ? "ok" : "unset",
+              statusMessage: span.status?.message ?? "",
+              startTime: BigInt(span.startTimeUnixNano ?? 0),
+              attributes: attributeMap(span.attributes),
+              resource,
+            });
+          }
+        }
+      }
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end("{}");
+    } else {
+      res.writeHead(200, { "Content-Type": "application/x-protobuf" });
+      res.end();
+    }
+  });
+  const port = await listen(server);
+  return {
+    endpoint: `http://127.0.0.1:${port}`,
+    requests,
+    spans,
+    close: () => new Promise((resolve) => server.close(resolve)),
+  };
+}
+
+/** A port nothing listens on, for a dead endpoint. */
+export async function deadEndpoint() {
+  const server = http.createServer();
+  const port = await listen(server);
+  await new Promise((resolve) => server.close(resolve));
+  return `http://127.0.0.1:${port}`;
+}

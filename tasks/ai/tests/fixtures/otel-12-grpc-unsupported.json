@@ -1,0 +1,52 @@
+{
+  "description": "OTLP over grpc is not supported by this image: one warning, nothing exported, no SDK loaded, the task unaffected",
+  "command": "prompt",
+  "otlp": true,
+  "env": {
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "${OTLP}",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+    "TRACEPARENT": "00-00000000aaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01",
+    "OTEL_SERVICE_NAME": "flow-task-ai-prompt",
+    "OTEL_RESOURCE_ATTRIBUTES": "flow.workflow.run.id=aaaaaaaaaaaaaaaaaaaaaaaa,flow.task.run.id=ccccccccccccccccbbbbbbbbbbbbbbbb,flow.task.name=ask"
+  },
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "stdout": [
+      "OTLP protocol 'grpc' is not supported by this image (http/protobuf or http/json only)"
+    ],
+    "otlpRequestCount": 0,
+    "modulesNotLoaded": [
+      "@opentelemetry"
+    ]
+  }
+}

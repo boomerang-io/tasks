@@ -1,0 +1,72 @@
+{
+  "description": "GIF and WEBP are recognised by their bytes, whatever the file is called",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "How did the run go?",
+    "images": "${WORKSPACE}/one.bin,${WORKSPACE}/two.dat"
+  },
+  "workspace": {
+    "one.bin": {
+      "base64": "R0lGODlhAQABAAAAADs="
+    },
+    "two.dat": {
+      "base64": "UklGRhoAAABXRUJQVlA4IA4AAAAAAAAAAAAAAAAAAAA="
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "The run succeeded in 12 seconds."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 41,
+          "completion_tokens": 9,
+          "total_tokens": 50
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "requests": [
+      {
+        "body": {
+          "messages": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "How did the run go?"
+                },
+                {
+                  "image_url": {
+                    "url": "$contains:data:image/gif;base64,"
+                  }
+                },
+                {
+                  "image_url": {
+                    "url": "$contains:data:image/webp;base64,"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

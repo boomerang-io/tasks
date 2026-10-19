@@ -277,6 +277,317 @@
         "workingDir": null
       },
       "parentRef": "ai-prompt"
+    },
+    {
+      "displayName": "AI Prompt",
+      "description": "One call to an OpenAI-compatible model: a prompt or an exact message array in, the reply out, optionally held to a JSON Schema.",
+      "category": "AI",
+      "icon": "AI",
+      "version": 2,
+      "changelog": {
+        "reason": "Image input (images, imageDetail, maxImageBytes); OpenTelemetry spans when the executor configures an OTLP endpoint",
+        "date": {
+          "$date": "2026-10-19T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Model",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The model identifier the endpoint expects, for example openai/gpt-4o-mini.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "model"
+          },
+          {
+            "description": "",
+            "label": "Prompt",
+            "type": "texteditor::text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The user message. Supports $(params.x) and $(tasks.x.results.y) references. Give this or Prompt file, unless Messages or Messages file replaces both.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "prompt"
+          },
+          {
+            "description": "",
+            "label": "Prompt file",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A path on the run workspace whose contents are the user message, for a prompt too large for a param. Give Prompt or Prompt file, not both: neither fails with MISSING_PARAM, both with INVALID_PARAM.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "promptFile"
+          },
+          {
+            "description": "",
+            "label": "System prompt",
+            "type": "texteditor::text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Sent as the system message ahead of the prompt. Ignored when Messages is given.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "systemPrompt"
+          },
+          {
+            "description": "[{role, content}]: the exact message array to send, replacing System prompt and Prompt. content is a string or an array of content parts ([{type: \"text\"}, {type: \"image_url\"}]), passed through unchanged.",
+            "label": "Messages",
+            "type": "json",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A JSON array of {role, content} sent as the exact message array, replacing System prompt and Prompt. For replays and evals. Fails with INVALID_PARAM when it does not parse. Give this or Messages file, not both.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "messages"
+          },
+          {
+            "description": "",
+            "label": "Messages file",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A path on the run workspace holding the JSON array of {role, content}, for a message array too large for a param. Give Messages or Messages file, not both; either replaces System prompt and Prompt.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "messagesFile"
+          },
+          {
+            "description": "",
+            "label": "Endpoint",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "An OpenAI-compatible base URL - OpenRouter, LiteLLM, Azure AI Foundry or Ollama. When absent the executor's default applies: the dispatcher's environment (OPENAI_BASE_URL) for a container run, the embedding product's gateway settings in-process.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "endpoint"
+          },
+          {
+            "description": "",
+            "label": "API token",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Bearer token for the endpoint. Blanked on every workspace-scoped read. When absent the executor's default applies: the dispatcher's environment (OPENAI_API_KEY) for a container run, the embedding product's gateway settings in-process.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "token"
+          },
+          {
+            "description": "",
+            "label": "Temperature",
+            "type": "slider",
+            "min": 0.0,
+            "max": 2.0,
+            "step": 0.1,
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Sampling temperature. Lower is more deterministic. Blank sends none, so the provider's default applies; newer reasoning models reject any other value.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "temperature"
+          },
+          {
+            "description": "",
+            "label": "Max tokens",
+            "type": "number",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Upper bound on the tokens the model may generate, sent as max_tokens. Blank sends none, so the provider's default applies; a max_completion_tokens key in Request parameters replaces it.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "maxTokens"
+          },
+          {
+            "description": "",
+            "label": "Seed",
+            "type": "number",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Optional sampling seed, for endpoints that honour one.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "seed"
+          },
+          {
+            "description": "An open map passed through to the request as sent; its keys win over the convenience params (temperature, maxTokens, seed), and max_completion_tokens suppresses max_tokens.",
+            "label": "Request parameters",
+            "type": "json",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A JSON object merged into the request as sent: top_p, reasoning_effort, verbosity, max_completion_tokens, frequency_penalty, presence_penalty and so on. A key here wins over Temperature, Max tokens and Seed. Fails with INVALID_PARAM when it does not parse.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "parameters"
+          },
+          {
+            "description": "",
+            "label": "Response format",
+            "type": "select",
+            "options": [
+              {
+                "key": "text",
+                "value": "text"
+              },
+              {
+                "key": "json",
+                "value": "json"
+              }
+            ],
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Ask the model for free text or a JSON object.",
+            "defaultValue": "text",
+            "readOnly": false,
+            "name": "responseFormat"
+          },
+          {
+            "description": "",
+            "label": "JSON Schema",
+            "type": "texteditor::text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A JSON Schema object. With Response format json, the reply is held to it (response_format json_schema, strict) and validated before it is returned.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "jsonSchema"
+          },
+          {
+            "description": "",
+            "label": "Files",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Comma-separated paths on the run workspace, read into the prompt context. Appended to the last user message's text, or to its last text part when it has content parts.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "files"
+          },
+          {
+            "description": "",
+            "label": "Max context bytes",
+            "type": "number",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Byte budget for the files read into context. Reading stops at the budget.",
+            "defaultValue": "65536",
+            "readOnly": false,
+            "name": "maxContextBytes"
+          },
+          {
+            "description": "path-or-https-URL[, ...]: workspace paths sent inline as data URLs, https URLs passed through; any other scheme is refused.",
+            "label": "Images",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Images to send with the prompt, comma-separated: paths on the run workspace (PNG, JPEG, GIF or WEBP, read and sent inline) or https URLs (fetched by the provider). Attached to the last user message after its text. Needs a vision-capable model. This is a text param, so a presigned URL is stored and shown with the run; put private images on the workspace instead.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "images"
+          },
+          {
+            "description": "",
+            "label": "Image detail",
+            "type": "select",
+            "options": [
+              {
+                "key": "low",
+                "value": "low"
+              },
+              {
+                "key": "high",
+                "value": "high"
+              },
+              {
+                "key": "auto",
+                "value": "auto"
+              }
+            ],
+            "required": false,
+            "placeholder": "",
+            "helpertext": "How closely the provider looks at each image. Blank sends nothing, so the provider's default applies. Applies to Images only, not to image parts inside Messages.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "imageDetail"
+          },
+          {
+            "description": "",
+            "label": "Max image bytes",
+            "type": "number",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Largest workspace image to send, in bytes. A larger file fails with FILE_TOO_LARGE rather than being resized or skipped. Not sent to the provider, and URLs are not checked.",
+            "defaultValue": "5242880",
+            "readOnly": false,
+            "name": "maxImageBytes"
+          },
+          {
+            "description": "",
+            "label": "Output file",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A path on the run workspace to write the full reply to, for a following uploadartifact node. The output result still carries the reply up to the results cap.",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "outputFile"
+          }
+        ],
+        "arguments": [],
+        "command": [
+          "prompt"
+        ],
+        "envs": null,
+        "image": "boomerangio/task-ai:2.1.0",
+        "results": [
+          {
+            "description": "The model's reply: the text, or the JSON string when Response format is json",
+            "name": "output"
+          },
+          {
+            "description": "Why the model stopped, as the endpoint reported it",
+            "name": "finishReason"
+          },
+          {
+            "description": "The model the endpoint actually served",
+            "name": "model"
+          },
+          {
+            "description": "Tokens consumed by the prompt",
+            "name": "promptTokens"
+          },
+          {
+            "description": "Tokens generated in the reply",
+            "name": "completionTokens"
+          },
+          {
+            "description": "Prompt plus completion tokens, the value a platform sums to meter usage",
+            "name": "totalTokens"
+          },
+          {
+            "description": "Reasoning tokens, when the endpoint reports them; empty otherwise",
+            "name": "reasoningTokens"
+          },
+          {
+            "description": "Prompt tokens served from the provider's cache, when reported; empty otherwise",
+            "name": "cachedPromptTokens"
+          },
+          {
+            "description": "The call's cost as the endpoint reports it (OpenRouter usage.cost); empty otherwise",
+            "name": "cost"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "ai-prompt"
     }
   ]
 }

@@ -23,10 +23,12 @@ No network and no image build. Needs `node` with this package's dependencies ins
   "command": "prompt | agent",
   "params": { "endpoint": "${PROVIDER}", "token": "sk-test", "model": "m", "prompt": "..." },
   "env": { "OPENAI_API_KEY": "..." },
-  "workspace": { "relative/path.txt": "contents" },
+  "workspace": { "relative/path.txt": "contents", "shot.png": { "base64": "iVBORw0..." } },
   "resultsChannel": "directory | file",
   "provider": [ { "status": 200, "body": { "...": "a chat-completions response" } } ],
   "mcp": { "serverName": { "token": "optional", "tools": [ { "name": "...", "inputSchema": {}, "result": "text" } ] } },
+  "otlp": true,
+  "otlpDead": true,
   "expect": { "...": "see below" }
 }
 ```
@@ -34,9 +36,13 @@ No network and no image build. Needs `node` with this package's dependencies ins
 - **params**: exactly what reaches the task, every value a string (a JSON param is JSON text). The
   runner delivers them as `PARAM_NAMES` plus `PARAM_<NAME>`, as the platform does. Placeholders:
   `${PROVIDER}` is the mock endpoint's base URL, `${MCP:name}` a mock MCP server's URL,
-  `${WORKSPACE}` the case's temporary run workspace.
+  `${WORKSPACE}` the case's temporary run workspace, `${OTLP}` the mock OTLP receiver and
+  `${OTLP_DEAD}` an address nothing listens on.
 - **env**: extra environment for the task (the executor-default credentials, for example).
-- **workspace**: files to create on the run workspace before the task starts.
+- **workspace**: files to create on the run workspace before the task starts: a string is written
+  as text, `{ "base64": "..." }` as the bytes it encodes.
+- **otlp**: start a mock OTLP/HTTP trace receiver at `${OTLP}`. JSON exports are decoded into spans
+  for the span expectations; protobuf exports are kept raw. **otlpDead**: provide `${OTLP_DEAD}`.
 - **resultsChannel**: `directory` (Tekton, one file per result; the default) or `file` (Kubernetes
   Jobs, one JSON object).
 - **provider**: the scripted replies, in order; the last one repeats once the list is exhausted,
@@ -60,6 +66,11 @@ No network and no image build. Needs `node` with this package's dependencies ins
 | `requests` | per request (by position, or by `index`): `path`, `authorization`, `contentType` and a partial match on `body` |
 | `mcpCallCount`, `mcpCalls` | tool calls the MCP servers received: `{ server, tool, arguments }` |
 | `workspace` | files that must exist on the workspace afterwards, with their exact contents |
+| `spanCount` | how many spans the OTLP receiver got |
+| `spans` | in start order, each matched against the first unmatched span of its `name`: a partial match on `traceId`, `parentSpanId`, `kind`, `status`, `statusMessage`, `attributes`, `resource`, and `parent` naming the parent span (`"$root"` when its parent was not exported, as with a `TRACEPARENT` parent) |
+| `spansNotContaining` | strings that must appear in no exported span (prompt text, a token, image data) |
+| `otlpRequestCount`, `otlpRequests` | exports received: `path`, `contentType`, `authorization`, and `bodyContains` / `bodyContainsHex` for a protobuf body |
+| `modulesLoaded`, `modulesNotLoaded` | substrings of module URLs the command must or must not load, recorded with a resolve hook (`tests/hooks/`) |
 
 A partial match checks every key given and ignores the rest; arrays match element by element and
 must have the same length. Three markers stand in for values: `"$absent"` (the key must not exist),
@@ -71,5 +82,6 @@ An implementation that does not run as a container maps the fields the same way:
 task's params by name, `provider` is what its model client must be shown in order, `mcp` the
 servers it must connect to, `results` what it must hand back, and the request expectations what it
 must have sent. The cases that assert `stdout` lines (the agent's JSON trace, task-core's log
-lines) are this image's; an implementation with its own log format skips those assertions, not the
-cases.
+lines) and the ones that assert loaded modules are this image's; an implementation with its own log
+format or loader skips those assertions, not the cases. The span expectations apply to any
+implementation that exports spans for the same calls.

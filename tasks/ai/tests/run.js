@@ -12,11 +12,12 @@ import os from "os";
 import path from "path";
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
-import { startMcpServer, startProvider } from "./mocks.js";
+import { deadEndpoint, startMcpServer, startOtlpReceiver, startProvider } from "./mocks.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.join(HERE, "fixtures");
 const BIN = { prompt: path.join(HERE, "..", "bin", "prompt.js"), agent: path.join(HERE, "..", "bin", "agent.js") };
+const MODULE_RECORDER = path.join(HERE, "hooks", "record-modules.mjs");
 
 const filters = process.argv.slice(2);
 // A case that runs this long is hung, not slow: the retry cases take a few seconds at most.
@@ -99,7 +100,8 @@ async function runCase(file) {
   for (const [rel, contents] of Object.entries(fixture.workspace ?? {})) {
     const target = path.join(workspace, rel);
     fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.writeFileSync(target, contents);
+    // A string is written as text; {"base64": "..."} as the bytes it encodes (an image, say).
+    fs.writeFileSync(target, typeof contents === "string" ? contents : Buffer.from(contents.base64, "base64"));
   }
 
   const provider = await startProvider(fixture.provider ?? [{ status: 500, body: { error: "no provider script" } }]);
@@ -107,7 +109,14 @@ async function runCase(file) {
   for (const [server, spec] of Object.entries(fixture.mcp ?? {})) {
     mcp[server] = await startMcpServer(server, spec);
   }
-  const vars = { PROVIDER: provider.baseURL, WORKSPACE: workspace, mcp };
+  const otlp = fixture.otlp ? await startOtlpReceiver() : undefined;
+  const vars = {
+    PROVIDER: provider.baseURL,
+    WORKSPACE: workspace,
+    mcp,
+    OTLP: otlp?.endpoint,
+    OTLP_DEAD: fixture.otlpDead ? await deadEndpoint() : undefined,
+  };
 
   const channel = fixture.resultsChannel ?? "directory";
   const resultsPath = channel === "file" ? path.join(tmp, "termination-log") : path.join(tmp, "results");
@@ -123,6 +132,11 @@ async function runCase(file) {
     ...Object.fromEntries(Object.entries(params).map(([k, v]) => [envName(k), typeof v === "string" ? v : JSON.stringify(v)])),
     ...substitute(fixture.env ?? {}, vars),
   };
+  const moduleRecord = path.join(tmp, "modules.txt");
+  if (fixture.expect?.modulesNotLoaded || fixture.expect?.modulesLoaded) {
+    env.NODE_OPTIONS = `--import=${MODULE_RECORDER}`;
+    env.TASK_AI_MODULE_RECORD = moduleRecord;
+  }
 
   const command = fixture.command ?? "prompt";
   // Asynchronous on purpose: the mocks live in this process, so a blocking spawn would starve them.
@@ -141,6 +155,7 @@ async function runCase(file) {
 
   await provider.close();
   for (const m of Object.values(mcp)) await m.close();
+  if (otlp) await otlp.close();
 
   const problems = [];
   const expect = substitute(fixture.expect ?? {}, vars);
@@ -183,6 +198,12 @@ async function runCase(file) {
     problems.push(`mcp calls: expected ${expect.mcpCallCount}, got ${JSON.stringify(mcpCalls)}`);
   }
   if (expect.mcpCalls) matches(expect.mcpCalls, mcpCalls, "mcpCalls", problems);
+  if (expect.modulesNotLoaded || expect.modulesLoaded) {
+    const loaded = fs.existsSync(moduleRecord) ? fs.readFileSync(moduleRecord, "utf8") : "";
+    for (const m of expect.modulesLoaded ?? []) if (!loaded.includes(m)) problems.push(`modules: expected ${m} to be loaded`);
+    for (const m of expect.modulesNotLoaded ?? []) if (loaded.includes(m)) problems.push(`modules: expected ${m} not to be loaded`);
+  }
+  if (otlp) checkSpans(expect, otlp, problems);
   for (const [rel, contents] of Object.entries(expect.workspace ?? {})) {
     const target = path.join(workspace, rel);
     const actual = fs.existsSync(target) ? fs.readFileSync(target, "utf8") : undefined;
@@ -202,6 +223,60 @@ async function runCase(file) {
       console.log("         --- stdout ---\n" + stdout.split("\n").map((l) => "         " + l).join("\n"));
       console.log("         --- stderr ---\n" + stderr.split("\n").map((l) => "         " + l).join("\n"));
     }
+  }
+}
+
+/**
+ * Span expectations. Spans are taken in start order; each expected span is matched against the
+ * first unmatched span with its name. `parent` names the expected parent span ("$root" for none
+ * among the exported spans, which is what a TRACEPARENT parent looks like).
+ */
+function checkSpans(expect, otlp, problems) {
+  const spans = [...otlp.spans].sort((a, b) => (a.startTime < b.startTime ? -1 : a.startTime > b.startTime ? 1 : 0));
+  const byId = new Map(spans.map((s) => [s.spanId, s]));
+  if (expect.spanCount !== undefined && spans.length !== expect.spanCount) {
+    problems.push(`spans: expected ${expect.spanCount}, got ${spans.length}: ${spans.map((s) => s.name).join(", ")}`);
+  }
+  const used = new Set();
+  (expect.spans ?? []).forEach((e, i) => {
+    const { parent, ...expected } = e;
+    const span = spans.find((s, j) => !used.has(j) && s.name === e.name && used.add(j));
+    if (!span) {
+      problems.push(`spans[${i}]: no span named ${JSON.stringify(e.name)} among ${spans.map((s) => s.name).join(", ")}`);
+      return;
+    }
+    matches(expected, span, `spans[${i}] (${e.name})`, problems);
+    if (parent !== undefined) {
+      const actual = byId.get(span.parentSpanId)?.name ?? "$root";
+      if (actual !== parent) problems.push(`spans[${i}] (${e.name}): expected parent ${parent}, got ${actual}`);
+    }
+  });
+  for (const s of expect.spansNotContaining ?? []) {
+    const text = JSON.stringify(spans, (k, v) => (typeof v === "bigint" ? String(v) : v));
+    if (text.includes(s)) problems.push(`spans: expected no span to contain ${JSON.stringify(s)}`);
+  }
+  (expect.otlpRequests ?? []).forEach((e, i) => {
+    const request = otlp.requests[i];
+    if (!request) {
+      problems.push(`otlpRequests[${i}]: no export received`);
+      return;
+    }
+    if (e.contentType && !request.contentType.includes(e.contentType)) {
+      problems.push(`otlpRequests[${i}]: expected content type ${e.contentType}, got ${request.contentType}`);
+    }
+    if (e.path && request.path !== e.path) problems.push(`otlpRequests[${i}]: expected path ${e.path}, got ${request.path}`);
+    if (e.authorization && request.authorization !== e.authorization) {
+      problems.push(`otlpRequests[${i}]: expected authorization ${e.authorization}, got ${request.authorization}`);
+    }
+    for (const hex of e.bodyContainsHex ?? []) {
+      if (!request.body.includes(Buffer.from(hex, "hex"))) problems.push(`otlpRequests[${i}]: body does not contain bytes ${hex}`);
+    }
+    for (const text of e.bodyContains ?? []) {
+      if (!request.body.includes(Buffer.from(text, "utf8"))) problems.push(`otlpRequests[${i}]: body does not contain ${JSON.stringify(text)}`);
+    }
+  });
+  if (expect.otlpRequestCount !== undefined && otlp.requests.length !== expect.otlpRequestCount) {
+    problems.push(`otlpRequests: expected ${expect.otlpRequestCount}, got ${otlp.requests.length}`);
   }
 }
 
