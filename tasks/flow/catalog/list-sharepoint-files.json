@@ -1,0 +1,136 @@
+{
+  "task": {
+    "name": "list-sharepoint-files",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "List SharePoint Files",
+      "description": "Lists the files and folders in one folder of a SharePoint document library through Microsoft Graph. The app registration needs the Sites.Read.All or Files.Read.All application permission, or Sites.Selected with a grant on the site.",
+      "category": "SharePoint",
+      "icon": "Search",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Tenant ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "Defaults to the tenant ID the workspace's Microsoft integration shares; or enter the Directory (tenant) ID of an Entra app registration",
+            "defaultValue": "$(workspace.params.microsoft-tenant-id)",
+            "readOnly": false,
+            "name": "tenantId"
+          },
+          {
+            "description": "",
+            "label": "Client ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "Defaults to the client ID the workspace's Microsoft integration shares; or enter the app registration's Application (client) ID",
+            "defaultValue": "$(workspace.params.microsoft-client-id)",
+            "readOnly": false,
+            "name": "clientId"
+          },
+          {
+            "description": "",
+            "label": "Client Secret",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "Defaults to the client secret the workspace's Microsoft integration shares; or enter one of the app registration's. The task gets its own app-only Microsoft Graph token with it",
+            "defaultValue": "$(workspace.params.microsoft-client-secret)",
+            "readOnly": false,
+            "name": "clientSecret"
+          },
+          {
+            "description": "",
+            "label": "Site",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g. https://contoso.sharepoint.com/sites/Engineering",
+            "helpertext": "The site's URL (any page under the site will do) or its Graph site ID",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "site"
+          },
+          {
+            "description": "",
+            "label": "Document Library",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The library's name, e.g. Documents. Blank is the site's default library",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "library"
+          },
+          {
+            "description": "",
+            "label": "Folder",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The folder in the library. Blank is the library's root",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "folder"
+          },
+          {
+            "description": "",
+            "label": "Output File",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A workspace path to write the listing to as JSON, absolute or relative to /workspace. Needed when the listing is over 3000 bytes",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "outputFile"
+          }
+        ],
+        "arguments": [
+          "sharepoint",
+          "listFiles"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "A JSON array of {name, path, type, size, lastModified, webUrl}, when it fits in a result (3000 bytes); otherwise empty and the listing is in Output File",
+            "name": "files"
+          },
+          {
+            "description": "How many files and folders the folder holds",
+            "name": "count"
+          },
+          {
+            "description": "The absolute path of Output File, when set",
+            "name": "outputPath"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "list-sharepoint-files"
+    }
+  ]
+}

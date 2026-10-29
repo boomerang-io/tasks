@@ -1,0 +1,114 @@
+{
+  "task": {
+    "name": "list-files",
+    "status": "active",
+    "verified": false,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2022-04-20T09:28:02.838Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "List Files",
+      "description": "Lists or searches files.\n\nThis method returns all files by default, including deleted files. Use the 'trashed=false' query parameter to filter trashed files from the results.",
+      "category": "Google Drive",
+      "icon": "Search",
+      "version": 2,
+      "changelog": {
+        "reason": "Service Account Key takes the whole JSON key file; Client Email and Private Key stay for revisions that use them; Corpora and Drive ID now reach the request, so a shared drive can be listed",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's whole JSON key file, pasted as-is. Replaces Client Email and Private Key",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "Private Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's private key. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "privateKey"
+          },
+          {
+            "description": "",
+            "label": "Client Email",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's client email. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientEmail"
+          },
+          {
+            "description": "",
+            "label": "Query",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A query for filtering the file results",
+            "readOnly": false,
+            "name": "query"
+          },
+          {
+            "description": "Supported groupings are: 'user', 'drive', 'domain', and 'allDrives' (A combination of 'user' and 'drive' for all drives where the user is a member).",
+            "label": "Corpora",
+            "type": "text",
+            "required": false,
+            "placeholder": "user",
+            "helpertext": "Groupings of files to which the query applies.",
+            "readOnly": false,
+            "name": "corpora"
+          },
+          {
+            "description": "",
+            "label": "Drive ID",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "ID of the shared drive to search.",
+            "readOnly": false,
+            "name": "driveId"
+          }
+        ],
+        "arguments": [
+          "googledrive",
+          "listFiles"
+        ],
+        "command": [],
+        "envs": [],
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "An array of file objects based on the listing query.",
+            "name": "results"
+          }
+        ],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "list-files"
+    }
+  ]
+}

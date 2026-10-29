@@ -5,7 +5,7 @@
 # fetching it from the npm registry. See CONTRIBUTING_TASKS.md.
 
 # ---- deps: resolve/install this task's workspace deps with pnpm ----
-FROM alpine:3.20.2 AS deps
+FROM alpine:3.24 AS deps
 
 RUN apk add --no-cache bash coreutils nodejs npm python3 make g++
 
@@ -33,12 +33,21 @@ RUN pnpm install --prod --frozen-lockfile --filter @boomerang-io/task-flow...
 RUN pnpm --filter @boomerang-io/task-flow deploy --prod /out
 
 # ---- runtime: small alpine image, no pnpm/corepack, no build toolchain ----
-FROM alpine:3.20.2
+# A supported Alpine release, upgraded at build time so the OS packages carry their latest fixes
+# (CI fails the image on a critical finding). The tools stay the same because the execute-shell
+# task runs user scripts that may call any of them, npm included.
+FROM alpine:3.24
 
 WORKDIR /opt/bin
 
 #Add Packages
-RUN apk add --no-cache bash sed grep curl coreutils nodejs npm
+# npm is pinned past Alpine's own build for the fixes in the tar and pacote it bundles: Alpine's
+# npm installs it into /usr/local and is then removed, so only the pinned one is left.
+RUN apk upgrade --no-cache \
+    && apk add --no-cache bash sed grep curl coreutils tar nodejs npm \
+    && npm install -g npm@11.21.1 \
+    && apk del --no-cache npm \
+    && /usr/local/bin/npm cache clean --force
 
 WORKDIR /cli
 COPY --from=deps /out ./

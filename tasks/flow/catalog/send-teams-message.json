@@ -1,0 +1,90 @@
+{
+  "task": {
+    "name": "send-teams-message",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Send Teams Message",
+      "description": "Posts a message to a Teams channel or chat through a Teams Workflows webhook (the 'Post to a channel when a webhook request is received' template), as an Adaptive Card. The retired Office 365 connector webhooks are not supported.",
+      "category": "Microsoft Teams",
+      "icon": "Message",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Webhook URL",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The workflow's HTTP POST URL. It carries the webhook's signature, so it is kept like a password",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "webhookUrl"
+          },
+          {
+            "description": "",
+            "label": "Title",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Shown large and bold above the message",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "title"
+          },
+          {
+            "description": "",
+            "label": "Message",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The message text; Teams renders a subset of Markdown",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "message"
+          },
+          {
+            "description": "",
+            "label": "Adaptive Card",
+            "type": "json",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A whole Adaptive Card (type AdaptiveCard), or a whole webhook message (type message), sent instead of Title and Message",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "card"
+          }
+        ],
+        "arguments": [
+          "teams",
+          "sendMessage"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": null,
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "send-teams-message"
+    }
+  ]
+}

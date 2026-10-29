@@ -1,0 +1,175 @@
+{
+  "task": {
+    "name": "share-google-drive-file",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Share Google Drive File",
+      "description": "Shares a Google Drive file or folder with a user, a group, a domain, or anyone with the link, with a service account.",
+      "category": "Google Drive",
+      "icon": "Add",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "Defaults to the key the workspace's Google integration shares; or paste a service account's whole JSON key file as-is",
+            "defaultValue": "$(workspace.params.google-service-account-key)",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "File ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "fileId"
+          },
+          {
+            "description": "",
+            "label": "Share With",
+            "type": "select",
+            "options": [
+              {
+                "key": "user",
+                "value": "user"
+              },
+              {
+                "key": "group",
+                "value": "group"
+              },
+              {
+                "key": "domain",
+                "value": "domain"
+              },
+              {
+                "key": "anyone",
+                "value": "anyone"
+              }
+            ],
+            "required": true,
+            "placeholder": "",
+            "helpertext": "anyone means anyone with the link",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "type"
+          },
+          {
+            "description": "",
+            "label": "Role",
+            "type": "select",
+            "options": [
+              {
+                "key": "reader",
+                "value": "reader"
+              },
+              {
+                "key": "commenter",
+                "value": "commenter"
+              },
+              {
+                "key": "writer",
+                "value": "writer"
+              }
+            ],
+            "required": true,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "role"
+          },
+          {
+            "description": "",
+            "label": "Email Address",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The user's or group's email; required to share with a user or group",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "emailAddress"
+          },
+          {
+            "description": "",
+            "label": "Domain",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The domain, e.g. acme.com; required to share with a domain",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "domain"
+          },
+          {
+            "description": "",
+            "label": "Send Notification Email",
+            "type": "boolean",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Email a user or group that the file is shared with them",
+            "defaultValue": "true",
+            "readOnly": false,
+            "name": "sendNotificationEmail"
+          },
+          {
+            "description": "",
+            "label": "Email Message",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A message for the notification email",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "emailMessage"
+          }
+        ],
+        "arguments": [
+          "googledrive",
+          "shareFile"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The new permission's ID",
+            "name": "permissionId"
+          },
+          {
+            "description": "The file's link in Drive",
+            "name": "webViewLink"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "share-google-drive-file"
+    }
+  ]
+}

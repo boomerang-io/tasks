@@ -1,0 +1,95 @@
+{
+  "task": {
+    "name": "list-file-permissions",
+    "status": "active",
+    "verified": false,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2022-04-20T09:28:02.838Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "List File Permissions",
+      "description": "List a file's permissions.",
+      "category": "Google Drive",
+      "icon": "Filter",
+      "version": 2,
+      "changelog": {
+        "reason": "Service Account Key takes the whole JSON key file; Client Email and Private Key stay for revisions that use them",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's whole JSON key file, pasted as-is. Replaces Client Email and Private Key",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "Private Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's private key. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "privateKey"
+          },
+          {
+            "description": "",
+            "label": "Client Email",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's client email. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientEmail"
+          },
+          {
+            "description": "The ID of the file.",
+            "label": "File ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "fileId"
+          }
+        ],
+        "arguments": [
+          "googledrive",
+          "listFilePermissions"
+        ],
+        "command": [],
+        "envs": [],
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The resulting array of permissions associated with the file",
+            "name": "permissions"
+          }
+        ],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "list-file-permissions"
+    }
+  ]
+}

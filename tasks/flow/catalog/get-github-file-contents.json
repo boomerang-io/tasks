@@ -1,0 +1,140 @@
+{
+  "task": {
+    "name": "get-github-file-contents",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Get GitHub File Contents",
+      "description": "Reads one file from a repository at a branch, tag or commit. Works with a GitHub App installation token (Contents: read) or a personal access token. See https://docs.github.com/en/rest/repos/contents#get-repository-content",
+      "category": "GitHub",
+      "icon": "Download",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "URL",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g. https://api.github.com",
+            "helpertext": "Defaults to the GitHub API URL the workspace's GitHub integration shares",
+            "defaultValue": "$(workspace.params.github-url)",
+            "readOnly": false,
+            "name": "url"
+          },
+          {
+            "description": "",
+            "label": "Github Access Token",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "Defaults to the token the workspace's GitHub integration shares; or enter a personal access token",
+            "defaultValue": "$(workspace.params.github-token)",
+            "readOnly": false,
+            "name": "token"
+          },
+          {
+            "description": "",
+            "label": "Owner",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The organization or user that owns the repository",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "owner"
+          },
+          {
+            "description": "",
+            "label": "Repository",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The repository name, without the owner",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "repo"
+          },
+          {
+            "description": "",
+            "label": "File Path",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The file's path in the repository, e.g. config/app.yaml",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "path"
+          },
+          {
+            "description": "",
+            "label": "Ref",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The branch, tag or commit SHA. Blank is the default branch",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "ref"
+          },
+          {
+            "description": "",
+            "label": "Output File",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A workspace path to write the file to, absolute or relative to /workspace. Needed for a file over 3000 bytes or one that is not UTF-8 text",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "outputFile"
+          }
+        ],
+        "arguments": [
+          "github",
+          "getFileContents"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The file's text, when it is UTF-8 and fits in a result (3000 bytes); otherwise empty and the file is in Output File",
+            "name": "content"
+          },
+          {
+            "description": "The file's blob SHA",
+            "name": "sha"
+          },
+          {
+            "description": "The file's size in bytes",
+            "name": "size"
+          },
+          {
+            "description": "The absolute path of Output File, when set",
+            "name": "outputPath"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "get-github-file-contents"
+    }
+  ]
+}
