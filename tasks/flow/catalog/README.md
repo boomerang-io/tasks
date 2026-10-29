@@ -16,6 +16,10 @@ with, which may predate the command. `spec.arguments` is `[<command module>, <me
 
 ## task-flow 3.3.0
 
+Sheets revision 4 and Drive revision 3 came after the image, without a new one: each is its
+3.3.0 revision (Sheets 3, Drive 2) with only `serviceAccountKey`'s default, `version` and
+`changelog` changed, still pinned to `boomerangio/task-flow:3.3.0` (Flow PR #764).
+
 | Task | Revision | Arguments | What it is |
 | --- | --- | --- | --- |
 | `create-github-issue` | 1 | `github createIssue` | new |
@@ -35,7 +39,9 @@ with, which may predate the command. `spec.arguments` is `[<command module>, <me
 | `download-google-drive-file` | 1 | `googledrive downloadFile` | new |
 | `share-google-drive-file` | 1 | `googledrive shareFile` | new |
 | `create-spreadsheet`, `add-sheet`, `delete-sheet`, `copy-sheet-to-another-spreadsheet`, `get-data`, `clear-data`, `append-data`, `update-data` | 3 | `googlesheets …` | `serviceAccountKey` |
+| the same eight Sheets tasks | 4 | `googlesheets …` | `serviceAccountKey` defaults to the Google integration's workspace param |
 | `copy-file`, `list-files`, `list-file-permissions`, `delete-file` | 2 | `googledrive …` | `serviceAccountKey`; `list-files` passes `corpora` and `driveId` through |
+| the same four Drive tasks | 3 | `googledrive …` | `serviceAccountKey` defaults to the Google integration's workspace param |
 | `artifactory-file-download` | 2 | `artifactory downloadFile` | `accessToken`, results, the command runs again |
 | `artifactory-file-upload` | 3 | `artifactory uploadFile` | `accessToken`, results, the command runs again |
 
@@ -64,11 +70,13 @@ default image is 3.4.0), except advanced revision 2, which is pinned to 3.1.0.
   `$(workspace.params.microsoft-client-secret)`. Each run mints its own app-only token from them
   with the client-credentials flow, so nothing refreshes a token. send-teams-message's
   `webhookUrl` has no default: a webhook belongs to one channel.
-- **Google**: on the three new Drive tasks, `serviceAccountKey` (the whole JSON key file) defaults
-  to `$(workspace.params.google-service-account-key)`. The new revisions of the seeded Sheets and
-  Drive tasks give it no default. A default reference resolves when the run is admitted, so in a
-  workspace with no Google integration it would fail a node that still uses the now-optional
-  `clientEmail` and `privateKey`.
+- **Google**: `serviceAccountKey` (the whole JSON key file) defaults to
+  `$(workspace.params.google-service-account-key)` on the three new Drive tasks, on Sheets
+  revision 4 and on Drive revision 3. Sheets revision 3 and Drive revision 2 give it no default.
+  A default reference resolves when the run is admitted. So on Sheets 4 and Drive 3, a node that
+  still uses the now-optional `clientEmail` and `privateKey`, in a workspace without the Google
+  integration, fails at admission unless the key is typed into the node. Typing the key in
+  replaces the reference. A node pinned to an earlier revision is unaffected.
 - Each GitHub task's description names the App permission it needs (Issues, Pull requests,
   Contents, Commit statuses or Actions), since an installation token carries only what the App
   was granted.
