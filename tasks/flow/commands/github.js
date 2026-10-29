@@ -3,6 +3,19 @@ import { Octokit } from "@octokit/rest";
 import { graphql } from "@octokit/graphql";
 import moment from "moment";
 import fs from "fs";
+import path from "path";
+import { isUtf8 } from "buffer";
+import {
+  run,
+  required,
+  asBoolean,
+  asInteger,
+  asList,
+  asJsonObject,
+  fitResult,
+  writeOutputFile,
+  TaskError,
+} from "../libs/task.js";
 // https://octokit.github.io/rest.js/
 import { HttpsProxyAgent } from "https-proxy-agent";
 
@@ -1143,4 +1156,214 @@ export async function addIssueToProject() {
     process.exit(1);
   }
   log.debug("Finished addIssueToProject() GitHub Plugin");
+}
+
+/*
+ * Pipeline tasks. Each is scoped to one repository and calls no /user endpoint, so a GitHub App
+ * installation token works as well as a personal access token. Results are scalars, not the
+ * response objects, to stay inside the task-result size limit.
+ */
+
+/** The client for a pipeline task; the API URL and token are checked first so a blank workspace param fails clearly. */
+function pipelineClient(url, token) {
+  required({ url, token }, ["url", "token"]);
+  return GetConfiguredClient(url, token);
+}
+
+export async function createIssue() {
+  await run("GitHub createIssue", async () => {
+    const { url, token, owner, repo, title, body, labels, assignees, milestone } = params;
+    const octokit = pipelineClient(url, token);
+    required({ owner, repo, title }, ["owner", "repo", "title"]);
+
+    const { data } = await octokit.issues.create({
+      owner,
+      repo,
+      title,
+      body: body || undefined,
+      labels: asList(labels),
+      assignees: asList(assignees),
+      milestone: asInteger(milestone, "milestone"),
+    });
+    log.good(`Created issue #${data.number}: ${data.html_url}`);
+    await results({ issueNumber: data.number, issueUrl: data.html_url, issueId: data.id });
+  });
+}
+
+export async function commentOnIssueOrPullRequest() {
+  await run("GitHub commentOnIssueOrPullRequest", async () => {
+    const { url, token, owner, repo, number, body } = params;
+    const octokit = pipelineClient(url, token);
+    required({ owner, repo, number, body }, ["owner", "repo", "number", "body"]);
+
+    // A pull request is an issue to the comments API, so one call serves both.
+    const { data } = await octokit.issues.createComment({
+      owner,
+      repo,
+      issue_number: asInteger(number, "number"),
+      body,
+    });
+    log.good(`Commented on #${number}: ${data.html_url}`);
+    await results({ commentId: data.id, commentUrl: data.html_url });
+  });
+}
+
+export async function createPullRequest() {
+  await run("GitHub createPullRequest", async () => {
+    const { url, token, owner, repo, title, head, base, body, draft } = params;
+    const octokit = pipelineClient(url, token);
+    required({ owner, repo, title, head, base }, ["owner", "repo", "title", "head", "base"]);
+
+    const { data } = await octokit.pulls.create({
+      owner,
+      repo,
+      title,
+      head,
+      base,
+      body: body || undefined,
+      draft: asBoolean(draft),
+    });
+    log.good(`Opened pull request #${data.number}: ${data.html_url}`);
+    await results({ pullRequestNumber: data.number, pullRequestUrl: data.html_url });
+  });
+}
+
+const COMMIT_STATES = ["pending", "success", "failure", "error"];
+// GitHub refuses a longer status description.
+const STATUS_DESCRIPTION_MAX = 140;
+
+export async function setCommitStatus() {
+  await run("GitHub setCommitStatus", async () => {
+    const { url, token, owner, repo, sha, state, context, targetUrl, description } = params;
+    const octokit = pipelineClient(url, token);
+    required({ owner, repo, sha, state }, ["owner", "repo", "sha", "state"]);
+    if (!COMMIT_STATES.includes(state)) {
+      throw new TaskError(`state must be one of ${COMMIT_STATES.join(", ")}, got '${state}'`);
+    }
+    let text = description || undefined;
+    if (text && text.length > STATUS_DESCRIPTION_MAX) {
+      log.warn(`description is ${text.length} characters; GitHub takes ${STATUS_DESCRIPTION_MAX}, so it is shortened`);
+      text = text.slice(0, STATUS_DESCRIPTION_MAX - 1) + "…";
+    }
+
+    const { data } = await octokit.repos.createCommitStatus({
+      owner,
+      repo,
+      sha,
+      state,
+      context: context || undefined,
+      target_url: targetUrl || undefined,
+      description: text,
+    });
+    log.good(`Set ${data.context} to ${data.state} on ${sha}`);
+    await results({ statusId: data.id });
+  });
+}
+
+export async function dispatchWorkflow() {
+  await run("GitHub dispatchWorkflow", async () => {
+    const { url, token, owner, repo, workflow, ref, inputs } = params;
+    const octokit = pipelineClient(url, token);
+    required({ owner, repo, workflow, ref }, ["owner", "repo", "workflow", "ref"]);
+
+    const request = {
+      owner,
+      repo,
+      // A file name or a numeric ID; a path such as .github/workflows/build.yml is taken by its file name.
+      workflow_id: path.basename(workflow.trim()),
+      ref,
+      inputs: asJsonObject(inputs, "inputs"),
+    };
+    let response;
+    try {
+      // return_run_details (github.com since February 2026) answers 200 with the run instead of 204.
+      response = await octokit.actions.createWorkflowDispatch({ ...request, return_run_details: true });
+    } catch (e) {
+      // A server that predates it refuses the key as a validation error; nothing was dispatched, so dispatch without it.
+      if (e.status !== 422 || !JSON.stringify(e.response?.data ?? "").includes("return_run_details")) {
+        throw e;
+      }
+      log.debug("The server does not return run details; dispatching without them");
+      response = await octokit.actions.createWorkflowDispatch(request);
+    }
+
+    const runId = response.data?.workflow_run_id ?? "";
+    const runUrl = response.data?.html_url ?? "";
+    log.good(`Dispatched ${request.workflow_id} on ${ref}${runUrl ? `: ${runUrl}` : ""}`);
+    await results({ runId, runUrl });
+  });
+}
+
+const MAKE_LATEST = ["true", "false", "legacy"];
+
+export async function createRelease() {
+  await run("GitHub createRelease", async () => {
+    const { url, token, owner, repo, tagName, targetCommitish, name, body, draft, prerelease, generateReleaseNotes, makeLatest } =
+      params;
+    const octokit = pipelineClient(url, token);
+    required({ owner, repo, tagName }, ["owner", "repo", "tagName"]);
+    if (makeLatest && !MAKE_LATEST.includes(makeLatest)) {
+      throw new TaskError(`makeLatest must be one of ${MAKE_LATEST.join(", ")}, got '${makeLatest}'`);
+    }
+
+    const { data } = await octokit.repos.createRelease({
+      owner,
+      repo,
+      tag_name: tagName,
+      target_commitish: targetCommitish || undefined,
+      name: name || undefined,
+      body: body || undefined,
+      draft: asBoolean(draft),
+      prerelease: asBoolean(prerelease),
+      generate_release_notes: asBoolean(generateReleaseNotes),
+      make_latest: makeLatest || undefined,
+    });
+    log.good(`Created release ${data.tag_name}: ${data.html_url}`);
+    await results({ releaseId: data.id, releaseUrl: data.html_url });
+  });
+}
+
+export async function getFileContents() {
+  await run("GitHub getFileContents", async () => {
+    const { url, token, owner, repo, path: filePath, ref, outputFile } = params;
+    const octokit = pipelineClient(url, token);
+    required({ owner, repo, path: filePath }, ["owner", "repo", "path"]);
+
+    const { data } = await octokit.repos.getContent({
+      owner,
+      repo,
+      path: filePath.replace(/^\/+/, ""),
+      ref: ref || undefined,
+    });
+    if (Array.isArray(data) || data.type !== "file") {
+      const kind = Array.isArray(data) ? "a directory" : `a ${data.type}`;
+      throw new TaskError(`${filePath} is ${kind} in ${owner}/${repo}, not a file`);
+    }
+
+    // The contents API inlines files up to 1 MB; past that the content is empty and the blob API serves it (to 100 MB).
+    let base64 = data.content;
+    if (data.encoding !== "base64" || (!base64 && data.size > 0)) {
+      const blob = await octokit.git.getBlob({ owner, repo, file_sha: data.sha });
+      base64 = blob.data.content;
+    }
+    const bytes = Buffer.from(base64 ?? "", "base64");
+    log.good(`Read ${data.path} (${bytes.length} bytes) at ${data.sha}`);
+
+    const fileResults = { sha: data.sha, size: bytes.length };
+    if (outputFile) {
+      fileResults.outputPath = writeOutputFile(outputFile, bytes);
+    }
+    if (!isUtf8(bytes)) {
+      if (!outputFile) {
+        throw new TaskError(`${filePath} is not UTF-8 text, so it cannot be a result; set outputFile to write it to the workspace`);
+      }
+      log.sys(`${filePath} is not UTF-8 text: it is in the output file only`);
+    } else {
+      const content = fitResult(bytes.toString("utf8"), filePath, outputFile);
+      if (content !== undefined) {
+        fileResults.content = content;
+      }
+    }
+    await results(fileResults);
+  });
 }

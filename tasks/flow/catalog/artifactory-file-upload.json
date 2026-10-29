@@ -1,0 +1,125 @@
+{
+  "task": {
+    "name": "artifactory-file-upload",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2020-01-09T00:01:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Artifactory File Upload",
+      "description": "Upload file to Artifactory",
+      "category": "Artifactory",
+      "icon": "Upload",
+      "version": 3,
+      "changelog": {
+        "reason": "Access Token (Bearer) auth, since JFrog no longer issues API keys; the task runs again (it was disabled), streams, and checks checksums",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "URL",
+            "type": "text",
+            "required": true,
+            "placeholder": "artifactory.url/folder/test.txt",
+            "helpertext": "The artifact's full URL, e.g. https://acme.jfrog.io/artifactory/libs-release/com/acme/widget/1.0/widget-1.0.jar",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "url"
+          },
+          {
+            "description": "",
+            "label": "File",
+            "type": "text",
+            "required": true,
+            "placeholder": "/data/test.txt",
+            "helpertext": "The workspace file to upload, absolute or relative to /workspace",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "file"
+          },
+          {
+            "description": "",
+            "label": "Access Token",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A JFrog access token, sent as a Bearer token. Preferred over API Key and Username/Password",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "accessToken"
+          },
+          {
+            "description": "",
+            "label": "API Key",
+            "type": "password",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "apiKey",
+            "defaultValue": "",
+            "required": false,
+            "helpertext": "An existing JFrog API key; JFrog no longer issues them, so prefer Access Token"
+          },
+          {
+            "description": "",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "username",
+            "defaultValue": "",
+            "required": false,
+            "helpertext": "With Password, when there is no Access Token"
+          },
+          {
+            "description": "",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "password",
+            "defaultValue": "",
+            "required": false,
+            "helpertext": "With Username, when there is no Access Token"
+          }
+        ],
+        "arguments": [
+          "artifactory",
+          "uploadFile"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The artifact's URL, as Artifactory reports it",
+            "name": "downloadUri"
+          },
+          {
+            "description": "The file's SHA-256, checked against the checksum Artifactory stored",
+            "name": "sha256"
+          },
+          {
+            "description": "The file's size in bytes",
+            "name": "size"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "artifactory-file-upload"
+    }
+  ]
+}

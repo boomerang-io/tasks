@@ -1,0 +1,101 @@
+{
+  "task": {
+    "name": "add-sheet",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2021-10-28T12:23:29.333Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Add Sheet",
+      "description": "Add new sheet to a Google spreadsheet.",
+      "category": "Google Sheets",
+      "icon": "Add",
+      "version": 3,
+      "changelog": {
+        "reason": "Service Account Key takes the whole JSON key file; Client Email and Private Key stay for revisions that use them",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's whole JSON key file, pasted as-is. Replaces Client Email and Private Key",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "Private Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's private key. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "privateKey"
+          },
+          {
+            "description": "",
+            "label": "Client Email",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's client email. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientEmail"
+          },
+          {
+            "description": "You can find the spreadsheet ID in a Google Sheets URL:  https://docs.google.com/spreadsheets/d/spreadsheetId/edit#gid=sheetId",
+            "label": "Spreadsheet ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The ID of the desired spreadsheet",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "spreadsheetId"
+          },
+          {
+            "description": "",
+            "label": "Sheet Title",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The title of the new sheet",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "title"
+          }
+        ],
+        "arguments": [
+          "googlesheets",
+          "addSheet"
+        ],
+        "command": [],
+        "envs": [],
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "add-sheet"
+    }
+  ]
+}

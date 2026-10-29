@@ -1,5 +1,7 @@
 import { log, params, results, result } from "@boomerang-io/task-core";
 import { google } from "googleapis";
+import { googleAuth } from "../libs/google.js";
+import { describeError } from "../libs/task.js";
 
 //Internal helper function
 function assertExists(value, message) {
@@ -9,26 +11,29 @@ function assertExists(value, message) {
   }
 }
 
-// get service account auth credentials
-function getJwtClient(privateKey, clientEmail) {
-  assertExists(privateKey, "Private Key must be provided");
-  assertExists(clientEmail, "Client email must be provided");
+// get service account auth credentials: the JSON key file, or the older clientEmail and privateKey
+function getJwtClient(values) {
+  try {
+    return googleAuth(values, ["https://www.googleapis.com/auth/spreadsheets"]);
+  } catch (e) {
+    log.err(describeError(e));
+    process.exit(1);
+  }
+}
 
-  const jwtClient = new google.auth.JWT({
-    email: clientEmail,
-    key: privateKey.replace(new RegExp("\\\\n", "g"), "\n"),
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  });
-  return jwtClient;
+// A Google API failure without the request config, which carries the bearer token.
+function fail(err) {
+  log.err(describeError(err));
+  process.exit(1);
 }
 
 export async function create() {
   log.debug("Starting create Google Sheet task");
 
-  const { title, privateKey, clientEmail } = params;
+  const { title } = params;
   const sheets = google.sheets({
     version: "v4",
-    auth: getJwtClient(privateKey, clientEmail),
+    auth: getJwtClient(params),
   });
   assertExists(title, "Title must be provided");
 
@@ -48,10 +53,7 @@ export async function create() {
       await result("spreadsheet", spreadsheet);
       log.good("Response successfully received!");
     })
-    .catch((err) => {
-      log.err(err);
-      process.exit(1);
-    });
+    .catch(fail);
 
   log.debug("Finished create Google Sheet task");
 }
@@ -59,10 +61,10 @@ export async function create() {
 export async function addSheet() {
   log.debug("Starting addSheet Google Sheets task");
 
-  const { spreadsheetId, title, privateKey, clientEmail } = params;
+  const { spreadsheetId, title } = params;
   const sheets = google.sheets({
     version: "v4",
-    auth: getJwtClient(privateKey, clientEmail),
+    auth: getJwtClient(params),
   });
   assertExists(spreadsheetId, "Spreadsheet Id must be provided");
   assertExists(title, "Title must be provided");
@@ -89,10 +91,7 @@ export async function addSheet() {
       log.sys("Response Received:", spreadsheet);
       log.good("Successfully added sheet!");
     })
-    .catch((err) => {
-      log.err(err);
-      process.exit(1);
-    });
+    .catch(fail);
 
   log.debug("Finished addSheet Google Sheets task");
 }
@@ -100,10 +99,10 @@ export async function addSheet() {
 export async function deleteSheet() {
   log.debug("Starting deleteSheet Google Sheets task");
 
-  const { spreadsheetId, sheetId, privateKey, clientEmail } = params;
+  const { spreadsheetId, sheetId } = params;
   const sheets = google.sheets({
     version: "v4",
-    auth: getJwtClient(privateKey, clientEmail),
+    auth: getJwtClient(params),
   });
   assertExists(spreadsheetId, "Spreadsheet Id must be provided");
   assertExists(sheetId, "Sheet Id must be provided");
@@ -128,10 +127,7 @@ export async function deleteSheet() {
       log.sys("Response Received:", spreadsheet);
       log.good("Successfully deleted sheet!");
     })
-    .catch((err) => {
-      log.err(err);
-      process.exit(1);
-    });
+    .catch(fail);
 
   log.debug("Finished deleteSheet Google Sheets task");
 }
@@ -143,12 +139,10 @@ export async function copySheetTo() {
     fromSpreadsheetId,
     sheetId,
     toSpreadsheetId,
-    privateKey,
-    clientEmail,
   } = params;
   const sheets = google.sheets({
     version: "v4",
-    auth: getJwtClient(privateKey, clientEmail),
+    auth: getJwtClient(params),
   });
   assertExists(fromSpreadsheetId, "The source spreadsheet Id must be provided");
   assertExists(
@@ -170,10 +164,7 @@ export async function copySheetTo() {
       log.sys("Response Received:", spreadsheet);
       log.good("Successfully copied sheet!");
     })
-    .catch((err) => {
-      log.err(err);
-      process.exit(1);
-    });
+    .catch(fail);
 
   log.debug("Finished copySheetTo Google Sheets task");
 }
@@ -181,10 +172,10 @@ export async function copySheetTo() {
 export async function getData() {
   log.debug("Starting getData Google Sheets task");
 
-  const { spreadsheetId, ranges, privateKey, clientEmail } = params;
+  const { spreadsheetId, ranges } = params;
   const sheets = google.sheets({
     version: "v4",
-    auth: getJwtClient(privateKey, clientEmail),
+    auth: getJwtClient(params),
   });
   assertExists(spreadsheetId, "Spreadsheet Id must be provided");
   assertExists(ranges, "Ranges must be provided");
@@ -204,10 +195,7 @@ export async function getData() {
       await result("rows", values);
       log.good("Response successfully received!");
     })
-    .catch((err) => {
-      log.err(err);
-      process.exit(1);
-    });
+    .catch(fail);
 
   log.debug("Finished getData Google Sheets task");
 }
@@ -215,10 +203,10 @@ export async function getData() {
 export async function clearData() {
   log.debug("Starting clearData Google Sheets task");
 
-  const { spreadsheetId, ranges, privateKey, clientEmail } = params;
+  const { spreadsheetId, ranges } = params;
   const sheets = google.sheets({
     version: "v4",
-    auth: getJwtClient(privateKey, clientEmail),
+    auth: getJwtClient(params),
   });
   assertExists(spreadsheetId, "Spreadsheet Id must be provided");
   assertExists(ranges, "Ranges must be provided");
@@ -234,10 +222,7 @@ export async function clearData() {
       log.sys("Response Received:", JSON.stringify(body.data));
       log.good("Successfully removed data!");
     })
-    .catch((err) => {
-      log.err(err);
-      process.exit(1);
-    });
+    .catch(fail);
 
   log.debug("Finished clearData Google Sheets task");
 }
@@ -245,10 +230,10 @@ export async function clearData() {
 export async function append() {
   log.debug("Starting append Google Sheets data task");
 
-  const { spreadsheetId, range, privateKey, clientEmail } = params;
+  const { spreadsheetId, range, values } = params;
   const sheets = google.sheets({
     version: "v4",
-    auth: getJwtClient(privateKey, clientEmail),
+    auth: getJwtClient(params),
   });
   assertExists(spreadsheetId, "Spreadsheet Id must be provided");
   assertExists(range, "Range must be provided");
@@ -269,10 +254,7 @@ export async function append() {
       await result("response", data);
       log.good("Response successfully received!");
     })
-    .catch((err) => {
-      log.err(err);
-      process.exit(1);
-    });
+    .catch(fail);
 
   log.debug("Finished append Google Sheets data task");
 }
@@ -280,10 +262,10 @@ export async function append() {
 export async function update() {
   log.debug("Starting update Google Sheets data task");
 
-  const { spreadsheetId, range, values, privateKey, clientEmail } = params;
+  const { spreadsheetId, range, values } = params;
   const sheets = google.sheets({
     version: "v4",
-    auth: getJwtClient(privateKey, clientEmail),
+    auth: getJwtClient(params),
   });
   assertExists(spreadsheetId, "Spreadsheet Id must be provided");
   assertExists(range, "Range must be provided");
@@ -304,10 +286,7 @@ export async function update() {
       await result("response", response);
       log.good("Response successfully received!");
     })
-    .catch((err) => {
-      log.err(err);
-      process.exit(1);
-    });
+    .catch(fail);
 
   log.debug("Finished update Google Sheets data task");
 }

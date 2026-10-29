@@ -1,0 +1,172 @@
+{
+  "task": {
+    "name": "upload-sharepoint-file",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Upload SharePoint File",
+      "description": "Uploads a workspace file to a SharePoint document library through Microsoft Graph; a file over 4 MB goes through a resumable upload session. The app registration needs the Sites.ReadWrite.All or Files.ReadWrite.All application permission, or Sites.Selected with a grant on the site.",
+      "category": "SharePoint",
+      "icon": "Upload",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Tenant ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The Directory (tenant) ID of the Microsoft Entra app registration",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "tenantId"
+          },
+          {
+            "description": "",
+            "label": "Client ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The Application (client) ID of the app registration",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientId"
+          },
+          {
+            "description": "",
+            "label": "Client Secret",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "A client secret of the app registration. The task gets its own app-only Microsoft Graph token with it",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientSecret"
+          },
+          {
+            "description": "",
+            "label": "Site",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g. https://contoso.sharepoint.com/sites/Engineering",
+            "helpertext": "The site's URL (any page under the site will do) or its Graph site ID",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "site"
+          },
+          {
+            "description": "",
+            "label": "Document Library",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The library's name, e.g. Documents. Blank is the site's default library",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "library"
+          },
+          {
+            "description": "",
+            "label": "File",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The workspace file to upload, absolute or relative to /workspace",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "filePath"
+          },
+          {
+            "description": "",
+            "label": "Folder",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The folder in the library, e.g. Releases/2026. Created if missing. Blank is the library's root",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "folder"
+          },
+          {
+            "description": "",
+            "label": "File Name",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The name in SharePoint. Blank keeps the file's own name",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "fileName"
+          },
+          {
+            "description": "",
+            "label": "If the File Exists",
+            "type": "select",
+            "options": [
+              {
+                "key": "replace",
+                "value": "replace"
+              },
+              {
+                "key": "fail",
+                "value": "fail"
+              },
+              {
+                "key": "rename",
+                "value": "rename"
+              }
+            ],
+            "required": false,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "replace",
+            "readOnly": false,
+            "name": "conflictBehavior"
+          }
+        ],
+        "arguments": [
+          "sharepoint",
+          "uploadFile"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The uploaded item's ID",
+            "name": "itemId"
+          },
+          {
+            "description": "The file's SharePoint URL",
+            "name": "webUrl"
+          },
+          {
+            "description": "The file's name in SharePoint, which differs from File Name after a rename",
+            "name": "name"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "upload-sharepoint-file"
+    }
+  ]
+}

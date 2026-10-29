@@ -1,0 +1,125 @@
+{
+  "task": {
+    "name": "artifactory-file-download",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2020-01-09T00:01:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Artifactory File Download",
+      "description": "Artifactory File Download",
+      "category": "Artifactory",
+      "icon": "Download",
+      "version": 2,
+      "changelog": {
+        "reason": "Access Token (Bearer) auth, since JFrog no longer issues API keys; the task runs again (it was disabled), streams, and checks checksums",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "URL",
+            "type": "text",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "url",
+            "defaultValue": "",
+            "required": true,
+            "helpertext": "The artifact's full URL, e.g. https://acme.jfrog.io/artifactory/libs-release/com/acme/widget/1.0/widget-1.0.jar"
+          },
+          {
+            "description": "",
+            "label": "Destination Path",
+            "type": "text",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "destinationPath",
+            "defaultValue": "",
+            "required": true,
+            "helpertext": "A workspace file or directory, absolute or relative to /workspace. A directory (or a path ending in /) keeps the artifact's name"
+          },
+          {
+            "description": "",
+            "label": "Access Token",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A JFrog access token, sent as a Bearer token. Preferred over API Key and Username/Password",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "accessToken"
+          },
+          {
+            "description": "",
+            "label": "API Key",
+            "type": "password",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "apiKey",
+            "defaultValue": "",
+            "required": false,
+            "helpertext": "An existing JFrog API key; JFrog no longer issues them, so prefer Access Token"
+          },
+          {
+            "description": "",
+            "label": "Username",
+            "type": "text",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "username",
+            "defaultValue": "",
+            "required": false,
+            "helpertext": "With Password, when there is no Access Token"
+          },
+          {
+            "description": "",
+            "label": "Password",
+            "type": "password",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "password",
+            "defaultValue": "",
+            "required": false,
+            "helpertext": "With Username, when there is no Access Token"
+          }
+        ],
+        "arguments": [
+          "artifactory",
+          "downloadFile"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The absolute path of the downloaded file",
+            "name": "path"
+          },
+          {
+            "description": "The file's size in bytes",
+            "name": "size"
+          },
+          {
+            "description": "The file's SHA-256, checked against the checksum Artifactory sends",
+            "name": "sha256"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "artifactory-file-download"
+    }
+  ]
+}

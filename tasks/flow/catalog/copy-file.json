@@ -1,0 +1,148 @@
+{
+  "task": {
+    "name": "copy-file",
+    "status": "active",
+    "verified": false,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2022-04-20T09:28:02.838Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Copy File",
+      "description": "Creates a copy of a file. Folders cannot be copied.\n\nThe file will be owned by the Service Account used. We recommend providing a shared parent folder or adding new permissions after the copy.",
+      "category": "Google Drive",
+      "icon": "Add",
+      "version": 2,
+      "changelog": {
+        "reason": "Service Account Key takes the whole JSON key file; Client Email and Private Key stay for revisions that use them; the task no longer fails on an undeclared variable",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's whole JSON key file, pasted as-is. Replaces Client Email and Private Key",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "Private Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's private key. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "privateKey"
+          },
+          {
+            "description": "",
+            "label": "Client Email",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's client email. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientEmail"
+          },
+          {
+            "description": "The ID of the file.",
+            "label": "File ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "fileId"
+          },
+          {
+            "description": "The IDs of the parent folders which contain the file. If not specified the file will be placed directly in the user's My Drive folder.",
+            "label": "Parent Folders",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "New line delimited list of folder IDs",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "parents"
+          },
+          {
+            "description": "If not specified the file will end up being being prefixed with 'Copy of' and then the current name.",
+            "label": "New Name",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The name to set on the copied file",
+            "readOnly": false,
+            "name": "fileName"
+          }
+        ],
+        "arguments": [
+          "googledrive",
+          "copyFile"
+        ],
+        "command": [],
+        "envs": [],
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The ID of the file.",
+            "name": "id"
+          },
+          {
+            "description": "The name of the file.",
+            "name": "name"
+          },
+          {
+            "description": "The IDs of the parent folders which contain the file.",
+            "name": "parents"
+          },
+          {
+            "description": "The time at which the file was created",
+            "name": "createdTime"
+          },
+          {
+            "description": "The last time the file was modified by anyone",
+            "name": "modifiedTime"
+          },
+          {
+            "description": "The owner of this file.",
+            "name": "owners"
+          },
+          {
+            "description": "The full list of permissions for the file. This is only available if the requesting user can share the file. Not populated for items in shared drives.",
+            "name": "permissions"
+          },
+          {
+            "description": "Whether the file is shared",
+            "name": "shared"
+          },
+          {
+            "description": "A link for opening the file in a relevant Google editor or viewer in a browser.",
+            "name": "webViewLink"
+          }
+        ],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "copy-file"
+    }
+  ]
+}

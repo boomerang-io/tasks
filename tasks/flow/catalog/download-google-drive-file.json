@@ -1,0 +1,103 @@
+{
+  "task": {
+    "name": "download-google-drive-file",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Download Google Drive File",
+      "description": "Downloads a Google Drive file to the workspace with a service account. A Google Docs, Sheets, Slides or Drawings file is exported (up to 10 MB), by default as .docx, .xlsx, .pptx or .png.",
+      "category": "Google Drive",
+      "icon": "Download",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The service account's whole JSON key file, pasted as-is",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "File ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "fileId"
+          },
+          {
+            "description": "",
+            "label": "Destination",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "A workspace file or directory, absolute or relative to /workspace. A directory (or a path ending in /) keeps the file's name",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "destinationPath"
+          },
+          {
+            "description": "",
+            "label": "Export Format",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "For a Google Docs file only: the MIME type to export as, e.g. application/pdf. Blank is the Office format",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "exportMimeType"
+          }
+        ],
+        "arguments": [
+          "googledrive",
+          "downloadFile"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The absolute path of the downloaded file",
+            "name": "path"
+          },
+          {
+            "description": "The file's size in bytes",
+            "name": "size"
+          },
+          {
+            "description": "The downloaded file's MIME type",
+            "name": "mimeType"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "download-google-drive-file"
+    }
+  ]
+}

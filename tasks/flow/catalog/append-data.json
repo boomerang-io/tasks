@@ -1,0 +1,117 @@
+{
+  "task": {
+    "name": "append-data",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2021-10-28T12:28:30.895Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Append Data",
+      "description": "Append data to an existing Google spreadsheet.\nThe supported range notations are A1 notation and R1C1 notation.",
+      "category": "Google Sheets",
+      "icon": "Add",
+      "version": 3,
+      "changelog": {
+        "reason": "Service Account Key takes the whole JSON key file; Client Email and Private Key stay for revisions that use them; the task no longer fails on an undeclared variable",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's whole JSON key file, pasted as-is. Replaces Client Email and Private Key",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "Private Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's private key. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "privateKey"
+          },
+          {
+            "description": "",
+            "label": "Client Email",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's client email. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientEmail"
+          },
+          {
+            "description": "You can find the spreadsheet ID in a Google Sheets URL:  https://docs.google.com/spreadsheets/d/spreadsheetId/edit#gid=sheetId",
+            "label": "Spreadsheet ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The ID of the desired spreadsheet",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "spreadsheetId"
+          },
+          {
+            "description": "The input range is used to search for existing data and find a \"table\" within that range. Values will be appended to the next row of the table, starting with the first column of the table.",
+            "label": "Data Range",
+            "type": "text",
+            "required": true,
+            "placeholder": "Sheet1!6:7",
+            "helpertext": "The desired data range",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "range"
+          },
+          {
+            "description": "Split each data row with an endline and each cell value with a semicolon",
+            "label": "Cell Data",
+            "type": "textarea",
+            "required": true,
+            "placeholder": "Val1;Val2;Val3",
+            "helpertext": "Input data",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "values"
+          }
+        ],
+        "arguments": [
+          "googlesheets",
+          "append"
+        ],
+        "command": [],
+        "envs": [],
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "Append information",
+            "name": "response"
+          }
+        ],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "append-data"
+    }
+  ]
+}

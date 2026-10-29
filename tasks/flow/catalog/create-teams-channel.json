@@ -1,0 +1,153 @@
+{
+  "task": {
+    "name": "create-teams-channel",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Create Teams Channel",
+      "description": "Creates a standard or private channel in a team through Microsoft Graph. The app registration needs the Channel.Create application permission. See https://learn.microsoft.com/en-us/graph/api/channel-post",
+      "category": "Microsoft Teams",
+      "icon": "Add",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Tenant ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The Directory (tenant) ID of the Microsoft Entra app registration",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "tenantId"
+          },
+          {
+            "description": "",
+            "label": "Client ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The Application (client) ID of the app registration",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientId"
+          },
+          {
+            "description": "",
+            "label": "Client Secret",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "A client secret of the app registration. The task gets its own app-only Microsoft Graph token with it",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientSecret"
+          },
+          {
+            "description": "",
+            "label": "Team ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The team's ID (its Microsoft 365 group ID)",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "teamId"
+          },
+          {
+            "description": "",
+            "label": "Channel Name",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "Up to 50 characters",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "displayName"
+          },
+          {
+            "description": "",
+            "label": "Description",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "description"
+          },
+          {
+            "description": "",
+            "label": "Membership",
+            "type": "select",
+            "options": [
+              {
+                "key": "standard",
+                "value": "standard"
+              },
+              {
+                "key": "private",
+                "value": "private"
+              }
+            ],
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A standard channel is open to the whole team; a private one to its members",
+            "defaultValue": "standard",
+            "readOnly": false,
+            "name": "membershipType"
+          },
+          {
+            "description": "",
+            "label": "Owner",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Required for a private channel: the owner's user principal name (e.g. jo@contoso.com) or object ID",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "owner"
+          }
+        ],
+        "arguments": [
+          "teams",
+          "createChannel"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The new channel's ID",
+            "name": "channelId"
+          },
+          {
+            "description": "The channel's link in Teams",
+            "name": "channelUrl"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "create-teams-channel"
+    }
+  ]
+}

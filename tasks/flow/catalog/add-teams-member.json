@@ -1,0 +1,131 @@
+{
+  "task": {
+    "name": "add-teams-member",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Add Teams Member",
+      "description": "Adds a user to a team as a member or an owner through Microsoft Graph. The app registration needs the TeamMember.ReadWrite.All application permission (TeamMember.ReadWriteNonOwnerRole.All for members only). Guests cannot be added with application permissions. See https://learn.microsoft.com/en-us/graph/api/team-post-members",
+      "category": "Microsoft Teams",
+      "icon": "Add",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Tenant ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The Directory (tenant) ID of the Microsoft Entra app registration",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "tenantId"
+          },
+          {
+            "description": "",
+            "label": "Client ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The Application (client) ID of the app registration",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientId"
+          },
+          {
+            "description": "",
+            "label": "Client Secret",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "A client secret of the app registration. The task gets its own app-only Microsoft Graph token with it",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientSecret"
+          },
+          {
+            "description": "",
+            "label": "Team ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The team's ID (its Microsoft 365 group ID)",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "teamId"
+          },
+          {
+            "description": "",
+            "label": "User",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The user's user principal name (e.g. jo@contoso.com) or object ID",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "user"
+          },
+          {
+            "description": "",
+            "label": "Role",
+            "type": "select",
+            "options": [
+              {
+                "key": "member",
+                "value": "member"
+              },
+              {
+                "key": "owner",
+                "value": "owner"
+              }
+            ],
+            "required": false,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "member",
+            "readOnly": false,
+            "name": "role"
+          }
+        ],
+        "arguments": [
+          "teams",
+          "addMember"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The membership's ID",
+            "name": "membershipId"
+          },
+          {
+            "description": "The user's object ID",
+            "name": "userId"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "add-teams-member"
+    }
+  ]
+}

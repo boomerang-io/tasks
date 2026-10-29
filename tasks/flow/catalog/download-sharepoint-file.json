@@ -1,0 +1,132 @@
+{
+  "task": {
+    "name": "download-sharepoint-file",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Download SharePoint File",
+      "description": "Downloads a file from a SharePoint document library to the workspace through Microsoft Graph. The app registration needs the Sites.Read.All or Files.Read.All application permission, or Sites.Selected with a grant on the site.",
+      "category": "SharePoint",
+      "icon": "Download",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Tenant ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The Directory (tenant) ID of the Microsoft Entra app registration",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "tenantId"
+          },
+          {
+            "description": "",
+            "label": "Client ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The Application (client) ID of the app registration",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientId"
+          },
+          {
+            "description": "",
+            "label": "Client Secret",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "A client secret of the app registration. The task gets its own app-only Microsoft Graph token with it",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientSecret"
+          },
+          {
+            "description": "",
+            "label": "Site",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g. https://contoso.sharepoint.com/sites/Engineering",
+            "helpertext": "The site's URL (any page under the site will do) or its Graph site ID",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "site"
+          },
+          {
+            "description": "",
+            "label": "Document Library",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The library's name, e.g. Documents. Blank is the site's default library",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "library"
+          },
+          {
+            "description": "",
+            "label": "File Path",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The file's path in the library, e.g. Releases/2026/notes.md",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "path"
+          },
+          {
+            "description": "",
+            "label": "Destination",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "A workspace file or directory, absolute or relative to /workspace. A directory (or a path ending in /) keeps the file's name",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "destinationPath"
+          }
+        ],
+        "arguments": [
+          "sharepoint",
+          "downloadFile"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The absolute path of the downloaded file",
+            "name": "path"
+          },
+          {
+            "description": "The file's size in bytes",
+            "name": "size"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "download-sharepoint-file"
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "task": {
+    "name": "upload-google-drive-file",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "4",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2026-10-29T00:00:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Upload Google Drive File",
+      "description": "Uploads a workspace file to Google Drive with a service account. A service account has no Drive storage of its own, so upload into a shared drive folder it is a member of.",
+      "category": "Google Drive",
+      "icon": "Upload",
+      "version": 1,
+      "changelog": {
+        "reason": "First revision",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The service account's whole JSON key file, pasted as-is",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "File",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The workspace file to upload, absolute or relative to /workspace",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "filePath"
+          },
+          {
+            "description": "",
+            "label": "Folder ID",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The ID of the Drive folder to upload into, in a shared drive",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "folderId"
+          },
+          {
+            "description": "",
+            "label": "File Name",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The name in Drive. Blank keeps the file's own name",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "fileName"
+          },
+          {
+            "description": "",
+            "label": "MIME Type",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The file's content type, e.g. text/csv. Blank lets Drive detect it",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "mimeType"
+          }
+        ],
+        "arguments": [
+          "googledrive",
+          "uploadFile"
+        ],
+        "command": [],
+        "envs": null,
+        "image": "boomerangio/task-flow:3.3.0",
+        "results": [
+          {
+            "description": "The new file's ID",
+            "name": "fileId"
+          },
+          {
+            "description": "The file's name in Drive",
+            "name": "fileName"
+          },
+          {
+            "description": "The file's link in Drive",
+            "name": "webViewLink"
+          }
+        ],
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "upload-google-drive-file"
+    }
+  ]
+}
