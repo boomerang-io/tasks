@@ -34,8 +34,8 @@
             "type": "text",
             "required": true,
             "placeholder": "",
-            "helpertext": "The Directory (tenant) ID of the Microsoft Entra app registration",
-            "defaultValue": "",
+            "helpertext": "Defaults to the tenant ID the workspace's Microsoft integration shares; or enter the Directory (tenant) ID of an Entra app registration",
+            "defaultValue": "$(workspace.params.microsoft-tenant-id)",
             "readOnly": false,
             "name": "tenantId"
           },
@@ -45,8 +45,8 @@
             "type": "text",
             "required": true,
             "placeholder": "",
-            "helpertext": "The Application (client) ID of the app registration",
-            "defaultValue": "",
+            "helpertext": "Defaults to the client ID the workspace's Microsoft integration shares; or enter the app registration's Application (client) ID",
+            "defaultValue": "$(workspace.params.microsoft-client-id)",
             "readOnly": false,
             "name": "clientId"
           },
@@ -56,8 +56,8 @@
             "type": "password",
             "required": true,
             "placeholder": "",
-            "helpertext": "A client secret of the app registration. The task gets its own app-only Microsoft Graph token with it",
-            "defaultValue": "",
+            "helpertext": "Defaults to the client secret the workspace's Microsoft integration shares; or enter one of the app registration's. The task gets its own app-only Microsoft Graph token with it",
+            "defaultValue": "$(workspace.params.microsoft-client-secret)",
             "readOnly": false,
             "name": "clientSecret"
           },

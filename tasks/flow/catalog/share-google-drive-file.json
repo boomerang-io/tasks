@@ -34,8 +34,8 @@
             "type": "password",
             "required": true,
             "placeholder": "",
-            "helpertext": "The service account's whole JSON key file, pasted as-is",
-            "defaultValue": "",
+            "helpertext": "Defaults to the key the workspace's Google integration shares; or paste a service account's whole JSON key file as-is",
+            "defaultValue": "$(workspace.params.google-service-account-key)",
             "readOnly": false,
             "name": "serviceAccountKey"
           },

@@ -45,9 +45,17 @@ with, which may predate the command. `spec.arguments` is `[<command module>, <me
   `$(workspace.params.github-token)`, the read-only workspace params Flow's GitHub integration
   shares (the installation token is a GitHub App token, so no task calls a `/user` endpoint).
   A user can still type a personal access token into the node.
-- **Microsoft**: `tenantId`, `clientId` and `clientSecret` have no default. The Graph tasks mint
-  their own app-only token with the client-credentials flow, so the names are what a Microsoft
-  integration would share as workspace params.
-- **Google**: `serviceAccountKey` (the whole JSON key file) has no default; the same name is what a
-  Google integration would share. The revised Sheets and Drive tasks keep `clientEmail` and
-  `privateKey`, now optional, for a node that already uses them.
+- **Microsoft**: on the five Graph tasks (create-teams-channel, add-teams-member and the three
+  SharePoint tasks), `tenantId`, `clientId` and `clientSecret` default to
+  `$(workspace.params.microsoft-tenant-id)`, `$(workspace.params.microsoft-client-id)` and
+  `$(workspace.params.microsoft-client-secret)`. Each run mints its own app-only token from them
+  with the client-credentials flow, so nothing refreshes a token. send-teams-message's
+  `webhookUrl` has no default: a webhook belongs to one channel.
+- **Google**: on the three new Drive tasks, `serviceAccountKey` (the whole JSON key file) defaults
+  to `$(workspace.params.google-service-account-key)`. The new revisions of the seeded Sheets and
+  Drive tasks give it no default. A default reference resolves when the run is admitted, so in a
+  workspace with no Google integration it would fail a node that still uses the now-optional
+  `clientEmail` and `privateKey`.
+- Each GitHub task's description names the App permission it needs (Issues, Pull requests,
+  Contents, Commit statuses or Actions), since an installation token carries only what the App
+  was granted.
