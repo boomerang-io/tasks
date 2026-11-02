@@ -39,6 +39,19 @@ with, which may predate the command. `spec.arguments` is `[<command module>, <me
 | `artifactory-file-download` | 2 | `artifactory downloadFile` | `accessToken`, results, the command runs again |
 | `artifactory-file-upload` | 3 | `artifactory uploadFile` | `accessToken`, results, the command runs again |
 
+## task-flow 3.4.0
+
+| Task | Revision | Arguments | What it is |
+| --- | --- | --- | --- |
+| `execute-basic-http-call` | 2 | `http execute` | the command runs again; helper text describes the behaviour |
+| `execute-advanced-http-call` | 5 | `http execute` | the command runs again; helper text describes the behaviour |
+
+`commands/http.js` was commented out from 2025-03 to 3.4.0, so every earlier revision of both
+tasks logged "Could not find method execute for command http" and exited 0, doing nothing. The
+params of these revisions are the same as the previous ones (basic 1, advanced 4); an earlier
+revision runs the restored command too on an image of 3.4.0 or later (unpinned, or once Flow's
+default image is 3.4.0), except advanced revision 2, which is pinned to 3.1.0.
+
 ## Shared credentials
 
 - **GitHub**: `url` and `token` default to `$(workspace.params.github-url)` and

@@ -84,7 +84,7 @@ Like every task param, these arrive as `PARAM_<NAME>` environment variables reso
 
 #### **Integration commands: shared rules** [libs/task.js](./libs/task.js)
 
-The GitHub pipeline, Teams, SharePoint, Google Drive upload/download/share and Artifactory commands share these rules:
+The GitHub pipeline, Teams, SharePoint, Google Drive upload/download/share, Artifactory and HTTP Call commands share these rules:
 
 - **Failure**: every failure is logged and exits 1. The task CLI does not await a command, so a thrown error would otherwise end the pod with exit code 0.
 - **No credential in a log**: errors are reported as the status and the service's own error message, never the HTTP client's error object (which carries the request headers). A Teams webhook URL, which carries its signature, is never logged.
@@ -137,6 +137,24 @@ Every Google Sheets and Drive command takes `serviceAccountKey`, the service acc
 - `shareFile` grants `role` (reader, commenter, writer) on `fileId` to a `user` or `group` (`emailAddress`), a `domain` (`domain`) or `anyone` with the link; `sendNotificationEmail` (default true) and `emailMessage` apply to a user or group. Results `permissionId`, `webViewLink`.
 
 `listFiles` passes `corpora` and `driveId` through (with the shared-drive flags), so a shared drive can be listed; it writes its listing under the declared `results` and the `result` name it used before.
+
+#### **HTTP Call command** [commands/http.js](./commands/http.js)
+
+`http execute` serves execute-basic-http-call and execute-advanced-http-call: one request, judged by its status code, with the status as `statusCode` and the body as `response`.
+
+| Param | Meaning |
+| --- | --- |
+| `url` | http or https. Credentials and the query string are left out of the log. |
+| `method` | GET, HEAD, PUT, POST, PATCH, OPTIONS or DELETE; blank is GET. |
+| `header` | One `Name: value` per line; one pair of quotes around a name or value is dropped. Only header names are logged. |
+| `contentType` | Sets `Content-Type`, replacing one in `header`. |
+| `body` | Sent exactly as written. For a JSON type (`application/json`, `+json`) it must parse; it is not reformatted, so large numbers keep their digits. JSON pasted with raw line breaks inside a string is accepted with those breaks removed, as the original command did. |
+| `allowUntrustedCerts` | `true` skips verifying the server's certificate (also through a proxy). |
+| `outputFilePath` | A workspace file (absolute, or relative to `/workspace`) for the body as received; `response` is then left empty. Needed for a body over 3000 bytes, which otherwise fails the task rather than be cut short. |
+| `successcodes`, `errorcodes`, `retrycodes` | Comma-separated status codes or patterns with `x` for a digit (`2xx`, `404`, `50x`). |
+| `retrynumber`, `retrydelay` | Retries after the first call (0 to 9, blank 0) and the milliseconds between them (100 to 300000, blank 200). |
+
+A response is judged in order: an error code fails at once; any 2xx or a success code succeeds; a retry code is retried while retries remain; anything else fails. Redirects are not followed, so a 3xx is judged like any other status. A failed call still sets `statusCode`, and `response` when it fits. Failures before any response (`ECONNREFUSED`, `ETIMEDOUT`, `EAI_AGAIN`) are retried on their own schedule, 3 times 5 seconds apart (the undeclared `systemretrynumber` and `systemretrydelay` params change it). `HTTP_PROXY` applies unless `NO_PROXY` lists the host or a parent domain of it.
 
 #### **Artifactory commands** [commands/artifactory.js](./commands/artifactory.js)
 
