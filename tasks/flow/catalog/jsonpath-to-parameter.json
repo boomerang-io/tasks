@@ -1,0 +1,73 @@
+{
+  "task": {
+    "name": "jsonpath-to-parameter",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2020-04-30T22:43:20.543Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "JSONPath To Parameter",
+      "description": "Takes the first value returned by a valid JSONPath expression and sets as an output property",
+      "category": "Utilities",
+      "icon": "Filter",
+      "version": 4,
+      "changelog": {
+        "reason": "Json and Query are required, as the task always needed; a query that matches nothing sets an empty evaluation with a warning, and the value is no longer logged",
+        "date": {
+          "$date": "2026-11-06T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Json",
+            "type": "textarea",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The JSON to query, e.g. $(tasks.call.results.response)",
+            "readOnly": false,
+            "name": "json",
+            "defaultValue": ""
+          },
+          {
+            "description": "",
+            "label": "Query Expression",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g. $.store.book",
+            "helpertext": "A JSONPath expression, e.g. $.items[0].id. One that matches nothing sets an empty evaluation",
+            "readOnly": false,
+            "name": "query",
+            "defaultValue": ""
+          }
+        ],
+        "arguments": [
+          "system",
+          "jsonPathToProperty"
+        ],
+        "command": [],
+        "envs": [],
+        "image": "boomerangio/task-flow:3.4.0",
+        "results": [
+          {
+            "description": "The value the query matched, JSON for an object or array; empty when nothing matched",
+            "name": "evaluation"
+          }
+        ],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "jsonpath-to-parameter"
+    }
+  ]
+}

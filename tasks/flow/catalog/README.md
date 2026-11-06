@@ -51,12 +51,27 @@ Sheets revision 4 and Drive revision 3 came after the image, without a new one: 
 | --- | --- | --- | --- |
 | `execute-basic-http-call` | 2 | `http execute` | the command runs again; helper text describes the behaviour |
 | `execute-advanced-http-call` | 5 | `http execute` | the command runs again; helper text describes the behaviour |
+| `send-simple-slack-message` | 3 | `slack sendSimpleMessage` | sends again; Message required |
+| `send-slack-message-with-file-contents` | 3 | `slack sendFileMessage` | sends again; Encoded content is decoded |
+| `send-custom-slack-message` | 3 | `slack sendCustomMessage` | fails the task on any Slack, network or JSON error |
+| `jsonpath-to-parameter` | 4 | `system jsonPathToProperty` | Json and Query required; a query that matches nothing sets an empty `evaluation` |
+| `file-jsonpath-to-parameter` | 3 | `system jsonFilePathToProperty` | Query required; File Path relative to `/workspace`; same no-match rule |
+| `execute-shell` | 3 | `shell execute` | `failOnError` (default true) runs the script under `set -e` |
 
 `commands/http.js` was commented out from 2025-03 to 3.4.0, so every earlier revision of both
 tasks logged "Could not find method execute for command http" and exited 0, doing nothing. The
 params of these revisions are the same as the previous ones (basic 1, advanced 4); an earlier
 revision runs the restored command too on an image of 3.4.0 or later (unpinned, or once Flow's
 default image is 3.4.0), except advanced revision 2, which is pinned to 3.1.0.
+
+The Slack webhook commands had the same silent failure: Send Simple Slack Message and Send Slack
+Message with File Contents crashed on an undefined `datetime` before sending, and every webhook
+error (Send Custom Slack Message's included) became an unhandled rejection, so all of them exited
+0. The commands are fixed for every revision on an image of 3.4.0 or later; the new revisions
+only add the required flags and helper text. Execute Shell's earlier revisions keep their
+behaviour (the script's last command sets the exit status), since they do not declare
+`failOnError`. `execute-shell` is a `script` task: whether Flow's dispatcher runs its declared
+image, rather than its configured one, is Flow's to confirm.
 
 ## Shared credentials
 

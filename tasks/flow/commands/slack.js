@@ -4,288 +4,163 @@ import { IncomingWebhook } from "@slack/webhook";
 import { WebClient } from "@slack/web-api";
 import axios from "axios";
 import fs from "fs";
+import { run, required, asBoolean, TaskError } from "../libs/task.js";
 
 // Internal Helper Functions
-async function ContentChunker(content, limit) {
-  const contentByLines = content.split("\n");
-  log.debug("Content by lines:", contentByLines);
-  let limitIter = 0;
-  let chunkIter = 0;
-  let contentChunks = [];
 
-  let tempLine = "";
-  let tempLines;
-  contentByLines.forEach((line) => {
-    if (line.length != 0) {
-      if (limitIter + line.length < limit) {
-        tempLine += line + "\n";
-        limitIter += tempLine.length;
-      } else if (limitIter + line.length > limit) {
-        tempLines = line.split(char[2999]);
-        chunkIter++;
-        tempLines.forEach((l) => {
-          contentChunks[chunkIter] = l;
-          chunkIter++;
-        });
+// Slack takes up to 3000 characters in a section's text, and 50 blocks in a message.
+const SECTION_LIMIT = 3000;
+const MAX_BLOCKS = 50;
+
+/** Splits text into pieces of at most `limit` characters, at line breaks where it can. */
+function chunkContent(content, limit) {
+  const chunks = [];
+  let current = "";
+  for (const line of content.split("\n")) {
+    // A line longer than a whole chunk is cut where the limit falls.
+    for (let piece = line; ; piece = piece.slice(limit)) {
+      const part = piece.slice(0, limit);
+      const joined = current ? `${current}\n${part}` : part;
+      if (joined.length <= limit) {
+        current = joined;
       } else {
-        chunkIter++;
-        tempLine = line + "\n";
-        limitIter = tempLine.length;
+        chunks.push(current);
+        current = part;
       }
-      contentChunks[chunkIter] = tempLine;
+      if (piece.length <= limit) {
+        break;
+      }
     }
-  });
+  }
+  if (current.trim()) {
+    chunks.push(current);
+  }
+  return chunks.filter((chunk) => chunk.trim());
+}
 
-  log.debug("Content by chunks:", contentChunks);
-  return contentChunks;
+/** The incoming webhook for a URL, with the HTTP_PROXY agent when one is set. */
+function incomingWebhook(url) {
+  /** @todo see if we can set the proxy at the higher CLI level rather than have each plugin have to support a proxy*/
+  if (process.env.HTTP_PROXY) {
+    log.debug("Using Proxy", process.env.HTTP_PROXY);
+    return new IncomingWebhook(url, { agent: new HttpsProxyAgent(process.env.HTTP_PROXY) });
+  }
+  return new IncomingWebhook(url);
+}
+
+/**
+ * Posts to the webhook and fails the task on any error. The webhook URL is the credential, and
+ * @slack/webhook's error carries the request config with it, so only the status and Slack's
+ * answer (e.g. invalid_payload, no_service) are reported.
+ */
+async function sendToWebhook(url, payload) {
+  log.debug("Payload:", JSON.stringify(payload));
+  try {
+    await incomingWebhook(url).send(payload);
+  } catch (e) {
+    const response = e.original?.response;
+    if (response) {
+      const answer = typeof response.data === "string" ? response.data.slice(0, 200) : JSON.stringify(response.data ?? "").slice(0, 200);
+      throw new TaskError(`The Slack webhook answered HTTP ${response.status}${answer ? `: ${answer}` : ""}`);
+    }
+    const cause = e.original?.code ?? e.original?.message ?? e.code ?? "no response";
+    throw new TaskError(`The Slack webhook could not be reached: ${cause}`);
+  }
+  log.good("Message sent");
+}
+
+/**
+ * The sender fields a payload takes. Blank ones are left out, so the webhook's own name, icon and
+ * channel apply; Slack apps' webhooks ignore them anyway, only legacy custom integrations use them.
+ */
+function sender({ channel, username, icon }) {
+  const fields = {};
+  if (channel && channel !== '""') {
+    fields.channel = channel;
+  } else {
+    log.sys("No channel set: the message goes to the webhook's own channel");
+  }
+  if (username && username !== '""') {
+    fields.username = username;
+  }
+  if (icon && icon !== '""') {
+    fields.icon_emoji = icon;
+  }
+  return fields;
+}
+
+/** A JSON param that must parse; the parse error is not echoed. */
+function jsonParam(text, name) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new TaskError(`${name} is not valid JSON`);
+  }
 }
 
 // Available Task Functions
 export async function sendSimpleMessage() {
-  log.debug("Inside Send Simple Slack Webhook Plugin");
-
-  //Destructure and get properties ready.
-  const { url, channel, username, message, icon } = params;
-
-  //Variable Checks
-  if (!url) {
-    log.err("URL has not been set");
-    process.exit(1);
-  }
-  if (!username) {
-    log.debug("Setting default username to Boomerang Joe");
-    username == "Boomerang Joe";
-  }
-  if (!icon) {
-    log.debug("Setting default icon to :boomerang:");
-    icon == ":boomerang:";
-  }
-
-  let webhook = new IncomingWebhook(url);
-
-  /** @todo see if we can set the proxy at the higher CLI level rather than have each plugin have to support a proxy*/
-  if (process.env.HTTP_PROXY) {
-    log.debug("Using Proxy", process.env.HTTP_PROXY);
-    webhook = new IncomingWebhook(url, {
-      agent: new HttpsProxyAgent(process.env.HTTP_PROXY),
-    });
-  }
-
-  let payload = {
-    channel: channel,
-    username: username,
-    icon_emoji: icon,
-    text: message,
-    ts: datetime.create().epoch(),
-  };
-  if (!channel || channel === '""') {
-    log.warn(
-      "Channel or user has not been set. Leaving empty to default to the channel or user configured as part of the webhook."
-    );
-    delete payload.channel;
-  }
-  log.debug("Payload:", payload);
-  await webhook.send(payload, function (err, res) {
-    if (err) {
-      /** @todo Catch HTTP error for timeout so we can return better exits */
-      log.err("Slack sendWebhook error", err);
-      process.exit(1);
-    } else {
-      log.good("Message sent: " + res.text);
-    }
+  await run("Slack sendSimpleMessage", async () => {
+    const { url, channel, username, message, icon } = params;
+    required({ url, message }, ["url", "message"]);
+    await sendToWebhook(url, { ...sender({ channel, username, icon }), text: message });
   });
 }
+
 export async function sendRichMessage() {
-  log.debug("Inside Send Rich Slack Webhook Plugin");
-
-  //Destructure and get properties ready.
-  const { url, channel, username, fallback, blocks, icon } = params;
-
-  //Variable Checks
-  if (!url) {
-    log.err("URL has not been set");
-    process.exit(1);
-  }
-  if (!channel) {
-    log.err("Channel or user has not been set");
-    process.exit(1);
-  }
-  if (!username) {
-    log.debug("Setting default username to Boomerang Joe");
-    username == "Boomerang Joe";
-  }
-  if (!icon) {
-    log.debug("Setting default icon to :boomerang:");
-    icon == ":boomerang:";
-  }
-
-  let webhook = new IncomingWebhook(url);
-
-  /** @todo see if we can set the proxy at the higher CLI level rather than have each plugin have to support a proxy*/
-  if (process.env.HTTP_PROXY) {
-    log.debug("Using Proxy", process.env.HTTP_PROXY);
-    webhook = new IncomingWebhook(url, {
-      agent: new HttpsProxyAgent(process.env.HTTP_PROXY),
-    });
-  }
-
-  let payload = {
-    channel: channel,
-    username: username,
-    icon_emoji: icon,
-    ts: datetime.create().epoch(),
-    text: fallback,
-    blocks: JSON.parse(blocks),
-  };
-  log.debug("Payload:", payload);
-  await webhook.send(payload, function (err, res) {
-    if (err) {
-      /** @todo Catch HTTP error for timeout so we can return better exits */
-      log.err("Slack sendWebhook error", err);
-      process.exit(1);
-    } else {
-      log.good("Message sent: " + res.text);
+  await run("Slack sendRichMessage", async () => {
+    const { url, channel, username, fallback, blocks, icon } = params;
+    required({ url, blocks }, ["url", "blocks"]);
+    const payload = { ...sender({ channel, username, icon }), blocks: jsonParam(blocks, "blocks") };
+    if (fallback) {
+      payload.text = fallback;
     }
+    await sendToWebhook(url, payload);
   });
 }
+
 export async function sendCustomMessage() {
-  log.debug("Inside Send Custom Slack Webhook Plugin");
-
-  //Destructure and get properties ready.
-  const { url, message } = params;
-
-  //Variable Checks
-  if (!url) {
-    log.err("URL has not been set");
-    process.exit(1);
-  }
-  if (!message) {
-    log.err("Message Payload has not been set");
-    process.exit(1);
-  }
-
-  let webhook = new IncomingWebhook(url);
-
-  /** @todo see if we can set the proxy at the higher CLI level rather than have each plugin have to support a proxy*/
-  if (process.env.HTTP_PROXY) {
-    log.debug("Using Proxy", process.env.HTTP_PROXY);
-    webhook = new IncomingWebhook(url, {
-      agent: new HttpsProxyAgent(process.env.HTTP_PROXY),
-    });
-  }
-
-  let payload = JSON.parse(message);
-  log.debug("Payload:", payload);
-  await webhook.send(payload, function (err, res) {
-    if (err) {
-      /** @todo Catch HTTP error for timeout so we can return better exits */
-      log.err("Slack sendWebhook error", err);
-      process.exit(1);
-    } else {
-      log.good("Message sent: " + res.text);
+  await run("Slack sendCustomMessage", async () => {
+    const { url, message } = params;
+    required({ url, message }, ["url", "message"]);
+    const payload = jsonParam(message, "message");
+    if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+      throw new TaskError("message must be a JSON object, the whole webhook payload");
     }
+    await sendToWebhook(url, payload);
   });
 }
+
 export async function sendFileMessage() {
-  log.debug("Inside Send Log Slack Webhook Plugin");
+  await run("Slack sendFileMessage", async () => {
+    const { url, channel, icon, username, message, content, encoded, context } = params;
+    required({ url }, ["url"]);
+    const text = asBoolean(encoded) ? Buffer.from(content ?? "", "base64").toString("utf-8") : content ?? "";
 
-  //Destructure and get properties ready.
-  const { url, channel, icon, username, message, content, encoded, context } =
-    params;
-
-  //Variable Checks
-  if (!url) {
-    log.err("URL has not been set");
-    process.exit(1);
-  }
-  if (!username) {
-    log.debug("Setting default username to Boomerang Joe");
-    username == "Boomerang Joe";
-  }
-  if (!icon) {
-    log.debug("Setting default icon to :boomerang:");
-    icon == ":boomerang:";
-  }
-  let contentDecoded;
-  if (!encoded || encoded !== true) {
-    contentDecoded = content;
-  } else {
-    log.debug("Decoding log content...");
-    contentDecoded = Buffer.from(content, "base64").toString("utf-8");
-  }
-
-  let webhook = new IncomingWebhook(url);
-
-  /** @todo see if we can set the proxy at the higher CLI level rather than have each plugin have to support a proxy*/
-  if (process.env.HTTP_PROXY) {
-    log.debug("Using Proxy", process.env.HTTP_PROXY);
-    webhook = new IncomingWebhook(url, {
-      agent: new HttpsProxyAgent(process.env.HTTP_PROXY),
-    });
-  }
-
-  // Need to break content up as Slack has a 3000 character limit on each block
-  let chunkedContent = await ContentChunker(contentDecoded, 3000);
-  let blocks = [];
-  blocks.push(
-    {
-      type: "section",
-      text: {
-        type: "plain_text",
-        text: message,
-      },
-    },
-    {
-      type: "divider",
+    // Each block's text must be 1 to 3000 characters, so blank parts get no block.
+    const head = [];
+    if (message) {
+      head.push({ type: "section", text: { type: "plain_text", text: message.slice(0, SECTION_LIMIT) } }, { type: "divider" });
     }
-  );
-  chunkedContent.forEach((chunk) =>
-    blocks.push({
-      type: "section",
-      text: {
-        type: "plain_text",
-        text: chunk,
-      },
-    })
-  );
-  blocks.push(
-    {
-      type: "divider",
-    },
-    {
-      type: "context",
-      elements: [
-        {
-          type: "mrkdwn",
-          text: context,
-        },
-      ],
+    const tail = [];
+    if (context) {
+      tail.push({ type: "divider" }, { type: "context", elements: [{ type: "mrkdwn", text: context.slice(0, SECTION_LIMIT) }] });
     }
-  );
-
-  payload = {
-    channel: channel,
-    username: username,
-    icon_emoji: icon,
-    ts: datetime.create().epoch(),
-    text: message,
-    blocks: blocks,
-  };
-  if (!channel || channel === '""') {
-    log.warn(
-      "Channel or user has not been set. Leaving empty to default to the channel or user configured as part of the webhook."
-    );
-    delete payload.channel;
-  }
-  log.debug("Payload:", payload);
-  await webhook.send(payload, function (err, res) {
-    if (err) {
-      /** @todo Catch HTTP error for timeout so we can return better exits */
-      log.err("Slack upload file error", err);
-      process.exit(1);
-    } else {
-      log.good("Message sent: " + res.text);
+    let chunks = chunkContent(text, SECTION_LIMIT);
+    // One block is kept back for the note when the content does not fit in one message.
+    const room = MAX_BLOCKS - head.length - tail.length - 1;
+    let note;
+    if (chunks.length > room) {
+      const left = chunks.slice(room).reduce((sum, chunk) => sum + chunk.length, 0);
+      log.warn(`The content is longer than one Slack message holds; the last ${left} characters are left out`);
+      chunks = chunks.slice(0, room);
+      note = { type: "context", elements: [{ type: "mrkdwn", text: `…${left} more characters not shown` }] };
     }
+    const blocks = [...head, ...chunks.map((chunk) => ({ type: "section", text: { type: "plain_text", text: chunk } })), ...(note ? [note] : []), ...tail];
+    if (!blocks.length) {
+      throw new TaskError("Give a message, content, or a context to send");
+    }
+    await sendToWebhook(url, { ...sender({ channel, username, icon }), text: message || "File contents", blocks });
   });
 }
 export async function uploadFileMessage() {

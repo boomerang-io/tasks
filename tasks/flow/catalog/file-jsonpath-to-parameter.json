@@ -1,0 +1,73 @@
+{
+  "task": {
+    "name": "file-jsonpath-to-parameter",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2021-06-10T14:58:05.686Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "File JSONPath To Parameter",
+      "description": "Takes the first value from the file content returned by a valid JSONPath expression and sets as an output property",
+      "category": "Utilities",
+      "icon": "Filter",
+      "version": 3,
+      "changelog": {
+        "reason": "Query is required, as the task always needed; File Path is absolute or relative to /workspace; a query that matches nothing sets an empty evaluation with a warning, and the value is no longer logged",
+        "date": {
+          "$date": "2026-11-06T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "File Path",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "A workspace file holding JSON, absolute or relative to /workspace",
+            "readOnly": false,
+            "name": "filePath",
+            "defaultValue": ""
+          },
+          {
+            "description": "",
+            "label": "Query Expression",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g. $.store.book",
+            "helpertext": "A JSONPath expression, e.g. $.items[0].id. One that matches nothing sets an empty evaluation",
+            "readOnly": false,
+            "name": "query",
+            "defaultValue": ""
+          }
+        ],
+        "arguments": [
+          "system",
+          "jsonFilePathToProperty"
+        ],
+        "command": [],
+        "envs": [],
+        "image": "boomerangio/task-flow:3.4.0",
+        "results": [
+          {
+            "description": "The value the query matched, JSON for an object or array; empty when nothing matched",
+            "name": "evaluation"
+          }
+        ],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "file-jsonpath-to-parameter"
+    }
+  ]
+}
