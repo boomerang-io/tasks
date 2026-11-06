@@ -57,7 +57,6 @@
         ],
         "command": [],
         "envs": null,
-        "image": "boomerangio/task-flow:3.4.0",
         "results": null,
         "script": null,
         "workingDir": null

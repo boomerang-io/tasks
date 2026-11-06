@@ -90,7 +90,6 @@
         ],
         "command": [],
         "envs": null,
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [
           {
             "description": "The new file's ID",

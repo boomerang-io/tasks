@@ -112,7 +112,6 @@
         ],
         "command": [],
         "envs": null,
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [
           {
             "description": "The workflow run's ID, when the server reports it (github.com does); empty otherwise",

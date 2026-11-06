@@ -101,7 +101,6 @@
         ],
         "command": [],
         "envs": [],
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [
           {
             "description": "Update information",
@@ -200,7 +199,6 @@
         ],
         "command": [],
         "envs": [],
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [
           {
             "description": "Update information",

@@ -90,7 +90,6 @@
         ],
         "command": [],
         "envs": [],
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [],
         "script": "",
         "workingDir": ""
@@ -173,7 +172,6 @@
         ],
         "command": [],
         "envs": [],
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [],
         "script": "",
         "workingDir": ""

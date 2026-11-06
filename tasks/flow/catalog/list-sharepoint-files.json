@@ -112,7 +112,6 @@
         ],
         "command": [],
         "envs": null,
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [
           {
             "description": "A JSON array of {name, path, type, size, lastModified, webUrl}, when it fits in a result (3000 bytes); otherwise empty and the listing is in Output File",

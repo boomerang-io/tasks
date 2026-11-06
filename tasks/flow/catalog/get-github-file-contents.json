@@ -112,7 +112,6 @@
         ],
         "command": [],
         "envs": null,
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [
           {
             "description": "The file's text, when it is UTF-8 and fits in a result (3000 bytes); otherwise empty and the file is in Output File",

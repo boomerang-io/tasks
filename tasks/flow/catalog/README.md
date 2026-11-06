@@ -9,16 +9,17 @@ Flow's seed is a copy of these files. For a task Flow seeded before 3.3.0, `task
 head unchanged and `revisions[]` holds only the revisions added here; the earlier ones stay as
 Flow has them. A seeded revision is never edited: a change to a contract is a new revision.
 
-Every revision here pins `spec.image` to the `boomerangio/task-flow` tag it was written against,
-since a revision with a blank image runs whatever default image the Flow install is configured
-with, which may predate the command. `spec.arguments` is `[<command module>, <method>]`, the
-`boomerang-task-cli` arguments the image's entrypoint takes.
+No revision sets `spec.image`. Every task-flow revision runs the image Flow's task settings name
+as `default.image`, so a fix reaches every revision, old and new, when that setting moves; a
+revision written for a command that is newer than an install's default image needs that setting
+moved first. Each section below names the release a revision needs. `spec.arguments` is
+`[<command module>, <method>]`, the `boomerang-task-cli` arguments the image's entrypoint takes.
 
 ## task-flow 3.3.0
 
 Sheets revision 4 and Drive revision 3 came after the image, without a new one: each is its
 3.3.0 revision (Sheets 3, Drive 2) with only `serviceAccountKey`'s default, `version` and
-`changelog` changed, still pinned to `boomerangio/task-flow:3.3.0` (Flow PR #764).
+`changelog` changed, needing 3.3.0 like them (Flow PR #764).
 
 | Task | Revision | Arguments | What it is |
 | --- | --- | --- | --- |
@@ -60,18 +61,17 @@ Sheets revision 4 and Drive revision 3 came after the image, without a new one: 
 
 `commands/http.js` was commented out from 2025-03 to 3.4.0, so every earlier revision of both
 tasks logged "Could not find method execute for command http" and exited 0, doing nothing. The
-params of these revisions are the same as the previous ones (basic 1, advanced 4); an earlier
-revision runs the restored command too on an image of 3.4.0 or later (unpinned, or once Flow's
-default image is 3.4.0), except advanced revision 2, which is pinned to 3.1.0.
+params of these revisions are the same as the previous ones (basic 1, advanced 4), and every
+revision, earlier ones included, runs the restored command once Flow's `default.image` is 3.4.0
+or later.
 
 The Slack webhook commands had the same silent failure: Send Simple Slack Message and Send Slack
 Message with File Contents crashed on an undefined `datetime` before sending, and every webhook
 error (Send Custom Slack Message's included) became an unhandled rejection, so all of them exited
-0. The commands are fixed for every revision on an image of 3.4.0 or later; the new revisions
-only add the required flags and helper text. Execute Shell's earlier revisions keep their
-behaviour (the script's last command sets the exit status), since they do not declare
-`failOnError`. `execute-shell` is a `script` task: whether Flow's dispatcher runs its declared
-image, rather than its configured one, is Flow's to confirm.
+0. The commands are fixed for every revision once `default.image` is 3.4.0 or later; the new
+revisions only add the required flags and helper text. Execute Shell's earlier revisions keep
+their behaviour (the script's last command sets the exit status), since they do not declare
+`failOnError`.
 
 ## Shared credentials
 

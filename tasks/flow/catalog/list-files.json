@@ -98,7 +98,6 @@
         ],
         "command": [],
         "envs": [],
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [
           {
             "description": "An array of file objects based on the listing query.",
@@ -194,7 +193,6 @@
         ],
         "command": [],
         "envs": [],
-        "image": "boomerangio/task-flow:3.3.0",
         "results": [
           {
             "description": "An array of file objects based on the listing query.",
