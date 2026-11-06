@@ -1,0 +1,89 @@
+{
+  "task": {
+    "name": "execute-shell",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2020-01-09T00:01:00Z"
+    },
+    "type": "script"
+  },
+  "revisions": [
+    {
+      "displayName": "Execute Shell",
+      "description": "Execute a shell script",
+      "category": "Utilities",
+      "icon": "Terminal",
+      "version": 3,
+      "changelog": {
+        "reason": "Fail On Error stops the script at its first failing command (set -e); Directory Path takes a trailing slash or a path relative to /workspace",
+        "date": {
+          "$date": "2026-11-06T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Directory Path",
+            "type": "text",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "path",
+            "defaultValue": "",
+            "required": false,
+            "helpertext": "The directory to run in, absolute or relative to /workspace. Blank is /data, else /workspace"
+          },
+          {
+            "description": "",
+            "label": "Shell Interpreter",
+            "type": "text",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "shell",
+            "defaultValue": "",
+            "required": false,
+            "helpertext": "The shell to run the script with, e.g. /bin/bash. Blank is /bin/sh"
+          },
+          {
+            "description": "",
+            "label": "Shell Script",
+            "type": "texteditor::shell",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "The script to run",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "script"
+          },
+          {
+            "description": "",
+            "label": "Fail On Error",
+            "type": "boolean",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Stop at the first command that fails (set -e). Off, only the last command's exit status counts",
+            "defaultValue": "true",
+            "readOnly": false,
+            "name": "failOnError"
+          }
+        ],
+        "arguments": [
+          "shell",
+          "execute"
+        ],
+        "command": [],
+        "envs": null,
+        "results": null,
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "execute-shell"
+    }
+  ]
+}

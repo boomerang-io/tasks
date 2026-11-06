@@ -1,0 +1,216 @@
+{
+  "task": {
+    "name": "execute-advanced-http-call",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2020-01-09T00:01:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Execute Advanced HTTP Call",
+      "description": "Makes one HTTP request with configurable success, error and retry status codes, and returns the status code and the response. Network failures before a response (refused, timed out, DNS) are retried three times, five seconds apart.",
+      "category": "Utilities",
+      "icon": "API/HTTP call",
+      "version": 5,
+      "changelog": {
+        "reason": "The http command runs again (it was disabled, so the task did nothing and reported success); helper text describes how codes, bodies and redirects behave",
+        "date": {
+          "$date": "2026-11-02T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "URL",
+            "type": "url",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "url",
+            "required": true,
+            "defaultValue": "",
+            "helpertext": "The request URL, http or https. Credentials or a query string in it are left out of the log"
+          },
+          {
+            "description": "",
+            "label": "Method",
+            "type": "select",
+            "options": [
+              {
+                "key": "GET",
+                "value": "GET"
+              },
+              {
+                "key": "HEAD",
+                "value": "HEAD"
+              },
+              {
+                "key": "PUT",
+                "value": "PUT"
+              },
+              {
+                "key": "POST",
+                "value": "POST"
+              },
+              {
+                "key": "PATCH",
+                "value": "PATCH"
+              },
+              {
+                "key": "OPTIONS",
+                "value": "OPTIONS"
+              },
+              {
+                "key": "DELETE",
+                "value": "DELETE"
+              }
+            ],
+            "placeholder": "",
+            "readOnly": false,
+            "name": "method",
+            "required": false,
+            "defaultValue": "",
+            "helpertext": "Blank is GET"
+          },
+          {
+            "description": "Start a new line for each header",
+            "label": "Headers",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "One header per line, as Name: value; quotes around a name or value are dropped. Values are never logged",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "header"
+          },
+          {
+            "description": "",
+            "label": "Content Type",
+            "type": "text",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "contentType",
+            "required": false,
+            "defaultValue": "",
+            "helpertext": "Sets the Content-Type header. For a JSON type (application/json or +json) the body must be valid JSON"
+          },
+          {
+            "description": "",
+            "label": "Body",
+            "type": "texteditor",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "body",
+            "required": false,
+            "defaultValue": "",
+            "helpertext": "Sent exactly as written; a JSON body is checked, not reformatted"
+          },
+          {
+            "description": "",
+            "label": "Allow Untrusted SSL Certs",
+            "type": "boolean",
+            "placeholder": "",
+            "readOnly": false,
+            "name": "allowUntrustedCerts",
+            "required": false,
+            "defaultValue": "",
+            "helpertext": "Skip verifying the server's TLS certificate, e.g. a self-signed one"
+          },
+          {
+            "description": "If provided, the result parameter is not filled",
+            "label": "Response File Path",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "A workspace file, absolute or relative to /workspace, to write the response to as received; the Response result is then empty. Needed for a response over 3000 bytes",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "outputFilePath"
+          },
+          {
+            "description": "If left empty, success will be considered: 2xx",
+            "label": "HTTP response codes for successful execution",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Comma-separated codes or patterns with x for a digit, e.g. 2xx,404. Any 2xx always succeeds. Redirects are not followed, so add 3xx to accept one",
+            "defaultValue": "1xx,2xx",
+            "readOnly": false,
+            "name": "successcodes"
+          },
+          {
+            "description": "No retry calls are done for these HTTP status codes",
+            "label": "HTTP response codes for failure",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g. 5xx,404",
+            "helpertext": "Codes or patterns that fail the call at once, without a retry; checked before the success codes",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "errorcodes"
+          },
+          {
+            "description": "HTTP response codes for which the task will retry the call",
+            "label": "HTTP response codes for execution retry",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Codes or patterns to retry while retries remain, e.g. 502,503",
+            "defaultValue": "502,503",
+            "readOnly": false,
+            "name": "retrycodes"
+          },
+          {
+            "description": "",
+            "label": "Number of milliseconds to wait until the next retry",
+            "type": "number",
+            "required": false,
+            "placeholder": "e.g. 200",
+            "helpertext": "Milliseconds between retries, 100 to 300000. Blank is 200",
+            "readOnly": false,
+            "name": "retrydelay",
+            "defaultValue": ""
+          },
+          {
+            "description": "",
+            "label": "Number of retries",
+            "type": "number",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Retries after the first call, 0 to 9",
+            "defaultValue": "3",
+            "readOnly": false,
+            "name": "retrynumber"
+          }
+        ],
+        "arguments": [
+          "http",
+          "execute"
+        ],
+        "command": [],
+        "envs": [],
+        "results": [
+          {
+            "description": "The response body, when it fits in a result (3000 bytes) and Response File Path is blank; also set on a failed call when it fits",
+            "name": "response"
+          },
+          {
+            "description": "The HTTP status code received, also set on a failed call",
+            "name": "statusCode"
+          }
+        ],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "execute-advanced-http-call"
+    }
+  ]
+}

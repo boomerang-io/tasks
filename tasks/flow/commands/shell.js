@@ -1,26 +1,31 @@
 import { log, params } from "@boomerang-io/task-core";
 import shelljs from "shelljs";
+import fs from "fs";
+import { asBoolean, resolvePath } from "../libs/task.js";
+
+// Where a script runs when no path is given: the v3 data mount, else the v5 workspace root.
+const DEFAULT_DIRECTORIES = ["/data", "/workspace"];
+
+/** The directory to run in: the path given (absolute, or relative to /workspace), else the first default that exists. */
+function workingDirectory(path) {
+  if (path && path.trim() && path !== '""') {
+    return resolvePath(path.trim());
+  }
+  const fallback = DEFAULT_DIRECTORIES.find((dir) => fs.existsSync(dir)) ?? process.cwd();
+  log.debug(`No directory specified. Defaulting to ${fallback}...`);
+  return fallback;
+}
 
 export function execute() {
   log.debug("Inside Shell Plugin");
-  log.debug("Params: ", JSON.stringify(params, null, 2));
-  const { path, shell, script } = params;
+  const { path, shell, script, failOnError } = params;
 
-  let dir;
-  if (!path || path === '""') {
-    log.debug("No directory specified. Defaulting to /data...");
-    dir = "/data";
-  } else {
-    dir = path;
-  }
-  shelljs.config.silent = true; //set to silent otherwise CD will print out no such file or directory if the directory doesn't exist
-  shelljs.cd(dir);
-  //shelljs.cd -> does not have an error handling call back and will default to current directory
-  if (shelljs.pwd().toString() !== dir.toString()) {
-    log.err("No such file or directory:", dir);
+  const dir = workingDirectory(path);
+  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
+    log.err("No such directory:", dir);
     return process.exit(1);
   }
-  shelljs.config.silent = false;
+  shelljs.cd(dir);
 
   let config = {
     verbose: false,
@@ -30,8 +35,14 @@ export function execute() {
   } else {
     config.shell = shell;
   }
-  log.debug("Script to execute:", script);
-  shelljs.exec(script, config, function (code, stdout, stderr) {
+  // Without it a shell's exit status is its last command's, so an earlier failure goes unnoticed.
+  let toRun = script ?? "";
+  if (asBoolean(failOnError)) {
+    log.debug("failOnError is set: the script runs under set -e");
+    toRun = `set -e\n${toRun}`;
+  }
+  log.debug("Script to execute:", toRun);
+  shelljs.exec(toRun, config, function (code, stdout, stderr) {
     if (code != 0) {
       log.err("  Exit code:", code);
       log.err("  Program stderr:", stderr);

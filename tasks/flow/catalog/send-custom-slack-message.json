@@ -1,0 +1,67 @@
+{
+  "task": {
+    "name": "send-custom-slack-message",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2020-01-09T00:01:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Send Custom Slack Message",
+      "description": "Send custom JSON payload to a specified Slack webhook URL. For more information on the underlying Slack API and potential configurations: https://api.slack.com/messaging/webhooks",
+      "category": "Communication with Slack",
+      "icon": "Message",
+      "version": 3,
+      "changelog": {
+        "reason": "The task fails on any error from Slack, an unreachable webhook, or a Message that is not JSON; it reported success before",
+        "date": {
+          "$date": "2026-11-06T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "Found within your webhook integration settings",
+            "label": "URL",
+            "type": "password",
+            "required": true,
+            "placeholder": "https://hooks.slack.com/services/...",
+            "helpertext": "The incoming webhook URL. It is the credential, so it is never logged",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "url"
+          },
+          {
+            "description": "",
+            "label": "Message Payload",
+            "type": "texteditor",
+            "required": true,
+            "placeholder": "{ \"text\": \"My Slack message.\" }",
+            "helpertext": "The whole webhook payload as a JSON object, e.g. {\"text\": \"...\", \"blocks\": [...]}",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "message"
+          }
+        ],
+        "arguments": [
+          "slack",
+          "sendCustomMessage"
+        ],
+        "command": [],
+        "envs": null,
+        "results": null,
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "send-custom-slack-message"
+    }
+  ]
+}

@@ -79,7 +79,77 @@
         ],
         "command": [],
         "envs": [],
-        "image": "boomerangio/task-flow:3.3.0",
+        "results": [],
+        "script": "",
+        "workingDir": ""
+      },
+      "parentRef": "delete-file"
+    },
+    {
+      "displayName": "Delete File",
+      "description": "Deletes a file.",
+      "category": "Google Drive",
+      "icon": "Delete",
+      "version": 3,
+      "changelog": {
+        "reason": "The service-account key defaults to the Google integration's workspace parameter",
+        "date": {
+          "$date": "2026-10-29T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "",
+            "label": "Service Account Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's whole JSON key file, pasted as-is. Replaces Client Email and Private Key",
+            "defaultValue": "$(workspace.params.google-service-account-key)",
+            "readOnly": false,
+            "name": "serviceAccountKey"
+          },
+          {
+            "description": "",
+            "label": "Private Key",
+            "type": "password",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's private key. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "privateKey"
+          },
+          {
+            "description": "",
+            "label": "Client Email",
+            "type": "text",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The service account's client email. Not needed when Service Account Key is set",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "clientEmail"
+          },
+          {
+            "description": "The ID of the file.",
+            "label": "File ID",
+            "type": "text",
+            "required": true,
+            "placeholder": "",
+            "helpertext": "",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "fileId"
+          }
+        ],
+        "arguments": [
+          "googledrive",
+          "deleteFile"
+        ],
+        "command": [],
+        "envs": [],
         "results": [],
         "script": "",
         "workingDir": ""

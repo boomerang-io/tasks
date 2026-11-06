@@ -1,0 +1,133 @@
+{
+  "task": {
+    "name": "send-slack-message-with-file-contents",
+    "status": "active",
+    "verified": true,
+    "labels": {},
+    "annotations": {
+      "boomerang#io/generation": "3",
+      "boomerang#io/kind": "Task"
+    },
+    "creationDate": {
+      "$date": "2020-01-09T00:01:00Z"
+    },
+    "type": "template"
+  },
+  "revisions": [
+    {
+      "displayName": "Send Slack Message with File Contents",
+      "description": "Send slack message with file contents via webhook\n",
+      "category": "Communication with Slack",
+      "icon": "Message",
+      "version": 3,
+      "changelog": {
+        "reason": "The task sends again (it failed on an undefined variable and still reported success), decodes Encoded content, and fails on any error from Slack",
+        "date": {
+          "$date": "2026-11-06T00:00:00Z"
+        }
+      },
+      "spec": {
+        "params": [
+          {
+            "description": "Found within your webhook integration settings",
+            "label": "Webhook URL",
+            "type": "password",
+            "required": true,
+            "placeholder": "https://hooks.slack.com/services/...",
+            "helpertext": "The incoming webhook URL. It is the credential, so it is never logged",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "url"
+          },
+          {
+            "description": "",
+            "label": "Channel",
+            "type": "text",
+            "required": false,
+            "placeholder": "#channel-name",
+            "helpertext": "A channel (#builds) or user to post to. Blank, or a webhook from a Slack app (which ignores it), posts to the webhook's own channel",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "channel"
+          },
+          {
+            "description": "If left blank, defaults to :boomerang:",
+            "label": "Icon",
+            "type": "text",
+            "required": false,
+            "placeholder": ":boomerang:",
+            "helpertext": "An emoji such as :rocket: shown as the sender's icon; only legacy custom-integration webhooks use it",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "icon"
+          },
+          {
+            "description": "",
+            "label": "Username",
+            "type": "text",
+            "required": false,
+            "placeholder": "Test-Bot",
+            "helpertext": "The name shown as the sender; only legacy custom-integration webhooks use it",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "username"
+          },
+          {
+            "description": "",
+            "label": "Message",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "Your message here.",
+            "helpertext": "A heading shown above the content",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "message"
+          },
+          {
+            "description": "File can be base64 encoded",
+            "label": "File Content",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "The text to post, split into blocks of up to 3000 characters; content past one message (50 blocks) is left out with a note",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "content"
+          },
+          {
+            "description": "Enable if File Content provided is base64 encoded ",
+            "label": "Decode File Content",
+            "type": "boolean",
+            "required": false,
+            "placeholder": "",
+            "helpertext": "Content is base64, e.g. a log passed from an earlier task",
+            "defaultValue": "false",
+            "readOnly": false,
+            "name": "encoded"
+          },
+          {
+            "description": "A helpful footer",
+            "label": "Context",
+            "type": "text",
+            "required": false,
+            "placeholder": "Context for use...",
+            "helpertext": "A footer line, in Slack's mrkdwn",
+            "defaultValue": "",
+            "readOnly": false,
+            "name": "context"
+          }
+        ],
+        "arguments": [
+          "slack",
+          "sendFileMessage"
+        ],
+        "command": [],
+        "envs": null,
+        "results": null,
+        "script": null,
+        "workingDir": null
+      },
+      "parentRef": "send-slack-message-with-file-contents"
+    }
+  ]
+}

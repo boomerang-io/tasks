@@ -1,299 +1,290 @@
-// import { log, params, result } from "@boomerang-io/task-core";
-// import HttpsProxyAgent from "https-proxy-agent";
-// import URL from "url";
-// import fs from "fs";
-// import HTTPRetryRequest from "../libs/HTTPRetryRequest.js";
-// import { checkIfEmpty, HEADERS, HEADERVALUES } from "../libs/utilities.js";
-// import CacheableLookup from "cacheable-lookup";
+import { log, params, results } from "@boomerang-io/task-core";
+import { HttpsProxyAgent } from "https-proxy-agent";
+import http from "http";
+import https from "https";
+import { checkIfEmpty } from "../libs/utilities.js";
+import { run, asBoolean, writeOutputFile, RESULT_BUDGET, TaskError } from "../libs/task.js";
 
-// /**
-//  * @todo implement a fetch that takes in;
-//  * URL [String]
-//  * method [Select - Options: get, post, put, patch, delete, options]
-//  * headers [Text Area - new line delimitered list?]
-//  * content type [Select - Options: any, text, xml, json, html]
-//  * body [Text Area - optional depending on method]
-//  * @param {string} successcodes Represents a list of HTTP Status Codes, used for success checks
-//  * @param {string} retrycodes Represents a list of HTTP Status Codes, used for retry checks
-//  * @param {string} errorcodes Represents a list of HTTP Status Codes, used for error checks
-//  * @param {int} retrynumber Represents the number of retries that will be perfomed until success is obtained or the number of retries is achived
-//  * @param {int} retrydelay Represents the number of miliseconds that will delay the next retry
-//  * @param {int} systemretrynumber @readonly Represents the number of retries that will be perfomed until success is obtained or the number of retries is achived, in case of special case of exceptions, defauls to 3
-//  * @param {int} systemretrydelay @readonly Represents the number of miliseconds that will delay the next retry, in case of special case of exceptions, defaults to 5 seconds
-//  * Allow untrusted SSL certs [Boolean Toggle]
-//  */
-// export function execute() {
-//   log.debug("Started HTTP Call Plugin");
+/**
+ * HTTP Call: one request, judged by its status code against the success, error and retry codes,
+ * with the response as the `response` result or written to `outputFilePath`, and the status as
+ * `statusCode`. Serves execute-basic-http-call and execute-advanced-http-call.
+ *
+ * Codes are comma-separated, each a status or a pattern with x for a digit (5xx, 40x). A response
+ * is judged in this order: it fails at once on an error code; it succeeds on any 2xx or a success
+ * code; it is retried on a retry code while retries remain; anything else fails. Redirects are
+ * not followed, so a 3xx is judged like any other status.
+ */
 
-//   //Destructure and get properties ready.
-//   const {
-//     url,
-//     method,
-//     header,
-//     contentType,
-//     body,
-//     allowUntrustedCerts,
-//     outputFilePath,
-//     successcodes = "1xx,2xx",
-//     retrycodes = "502,503",
-//     errorcodes = "",
-//     retrynumber = 0,
-//     retrydelay = 200,
-//     systemretrynumber = 3,
-//     systemretrydelay = 5000,
-//   } = params;
+const METHODS = ["GET", "HEAD", "PUT", "POST", "PATCH", "OPTIONS", "DELETE"];
+// Failures before any response, retried on their own schedule (systemretrynumber, systemretrydelay).
+const NETWORK_ERRORS = ["ECONNREFUSED", "ETIMEOUT", "ETIMEDOUT", "EAI_AGAIN"];
+// How much of a failed call's response the log shows.
+const ERROR_BODY_LOG = 500;
 
-//   // Input force defaults
-//   let newretrynumber = 0;
-//   let newretrydelay = 200;
-//   let newsystemretrynumber = 3;
-//   let newsystemretrydelay = 5000;
-//   let newbody = "";
-//   // Input not "empty", set value
-//   if (!checkIfEmpty(successcodes)) {
-//     newsuccesscodes = successcodes.toString().trim().toLowerCase(); // Input normalization
-//   }
-//   if (!checkIfEmpty(retrycodes)) {
-//     newretrycodes = retrycodes.toString().trim().toLowerCase(); // Input normalization
-//   }
-//   if (!checkIfEmpty(errorcodes)) {
-//     newerrorcodes = errorcodes.toString().trim().toLowerCase(); // Input normalization
-//   }
-//   if (!checkIfEmpty(retrynumber)) {
-//     newretrynumber = parseInt(retrynumber, 10);
-//     if (isNaN(newretrynumber)) {
-//       log.err("Invalid input for: retrynumber");
-//       process.exit(1);
-//     }
-//     if (newretrynumber < 1 || newretrynumber > 9) {
-//       log.err("Invalid input for: retrynumber [1,9]");
-//       process.exit(1);
-//     }
-//   }
-//   if (!checkIfEmpty(retrydelay)) {
-//     newretrydelay = parseInt(retrydelay, 10);
-//     // parse test
-//     if (isNaN(newretrydelay)) {
-//       log.err("Invalid input for: retrydelay");
-//       process.exit(1);
-//     }
-//     // bounds exceeded
-//     if (newretrydelay < 100 || newretrydelay > 300000) {
-//       log.err("Invalid input for: retrydelay [100,300000]");
-//       process.exit(1);
-//     }
-//   }
-//   if (!checkIfEmpty(systemretrynumber)) {
-//     newsystemretrynumber = parseInt(systemretrynumber, 10);
-//     if (isNaN(newsystemretrynumber)) {
-//       newsystemretrynumber = 3;
-//     }
-//     if (newsystemretrynumber < 1 || newsystemretrynumber > 9) {
-//       newsystemretrynumber = 3;
-//     }
-//   }
-//   if (!checkIfEmpty(systemretrydelay)) {
-//     newsystemretrydelay = parseInt(systemretrydelay, 10);
-//     // parse test
-//     if (isNaN(newsystemretrydelay)) {
-//       newsystemretrydelay = 5000;
-//     }
-//     // bounds exceeded
-//     if (newsystemretrydelay < 100 || newsystemretrydelay > 300000) {
-//       newsystemretrydelay = 5000;
-//     }
-//   }
-//   if (!checkIfEmpty(body)) {
-//     newbody = body.replace(/(\n|\r|\t)/gm, "");
-//   }
+/** A param, blank (or the literal "" a v3 property file carried) as undefined. */
+function value(input) {
+  return checkIfEmpty(input) || String(input).trim() === "" ? undefined : String(input).trim();
+}
 
-//   /**
-//    * turn header into object based upon new line delimeters
-//    */
+/** A bounded whole number; blank gives the fallback. `lenient` falls back on a bad value instead of failing. */
+function bounded(input, name, fallback, min, max, lenient = false) {
+  const text = value(input);
+  if (text === undefined) {
+    return fallback;
+  }
+  const number = Number(text);
+  if (Number.isInteger(number) && number >= min && number <= max) {
+    return number;
+  }
+  if (lenient) {
+    return fallback;
+  }
+  throw new TaskError(`${name} must be a whole number from ${min} to ${max}, got '${text}'`);
+}
 
-//   const headerObject = {};
-//   if (!checkIfEmpty(header)) {
-//     let headerSplitArr = header.split("\n");
-//     log.debug(headerSplitArr);
-//     headerSplitArr.forEach((line) => {
-//       let arrHearder = line.split(":");
-//       if (arrHearder && arrHearder.length) {
-//         let key = arrHearder.shift().trim().replace(/("|')/g, ""); //take first string, the header
-//         let value = arrHearder.join(":").trim().replace(/("|')/g, ""); //rejoin all strings
-//         if (key) {
-//           // as per RFC 2616 Sec4.2 - value is optional https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
-//           headerObject[key] = value;
-//         }
-//       }
-//     });
-//   }
+/** A comma-separated list of status codes and patterns (404, 5xx, 50x) as one anchored regex; blank is null. */
+function codePattern(input, name) {
+  const codes = (value(input) ?? "")
+    .split(",")
+    .map((code) => code.trim().toLowerCase())
+    .filter(Boolean);
+  for (const code of codes) {
+    if (!/^[1-5x][0-9x]{2}$/.test(code)) {
+      throw new TaskError(`${name} has '${code}', which is not a status code or a pattern such as 404 or 5xx`);
+    }
+  }
+  return codes.length ? new RegExp(`^(${codes.map((code) => code.replace(/x/g, "\\d")).join("|")})$`) : null;
+}
 
-//   if (contentType && contentType !== '""' && contentType !== '" "') {
-//     headerObject[HEADERS.CONTENTTYPE] = contentType;
-//   }
-//   if (headerObject[HEADERS.CONTENTTYPE] === HEADERVALUES.APPLICATIONJSON) {
-//     // force "body" to JSON parse and convert back to string, to avoid special characters.
-//     try {
-//       newbody = JSON.stringify(JSON.parse(newbody));
-//     } catch (e) {
-//       log.err(
-//         `Invalid input for: body, JSON parse failed for content type: ${contentType} \n ${e}`
-//       );
-//       process.exit(1);
-//     }
-//   }
+/** Strips one pair of matching quotes, for headers written as "Name": "value". */
+function unquote(text) {
+  const trimmed = text.trim();
+  return /^(["']).*\1$/.test(trimmed) && trimmed.length >= 2 ? trimmed.slice(1, -1) : trimmed;
+}
 
-//   if (!checkIfEmpty(newbody)) {
-//     headerObject[HEADERS.CONTENTLENGTH] =
-//       ~-encodeURI(newbody).split(/%..|./).length;
-//   }
+/**
+ * The Headers param: one "Name: value" per line. A line with no colon fails, by line number only,
+ * since a header line may hold a credential.
+ */
+function parseHeaders(text) {
+  const headers = {};
+  (value(text) ?? "").split(/\r?\n/).forEach((line, index) => {
+    if (!line.trim()) {
+      return;
+    }
+    const colon = line.indexOf(":");
+    if (colon < 1) {
+      throw new TaskError(`header line ${index + 1} is not "Name: value"`);
+    }
+    const name = unquote(line.slice(0, colon));
+    // The last of a repeated header wins, whatever its case.
+    for (const existing of Object.keys(headers)) {
+      if (existing.toLowerCase() === name.toLowerCase()) {
+        delete headers[existing];
+      }
+    }
+    headers[name] = unquote(line.slice(colon + 1));
+  });
+  return headers;
+}
 
-//   log.debug(headerObject);
+function headerValue(headers, name) {
+  const key = Object.keys(headers).find((k) => k.toLowerCase() === name.toLowerCase());
+  return key === undefined ? undefined : headers[key];
+}
 
-//   var agent = null;
-//   if (process.env.HTTP_PROXY) {
-//     if (!process.env.NO_PROXY) {
-//       log.debug("Using Proxy", process.env.HTTP_PROXY);
-//       log.debug("NO_PROXY list not provided by env");
-//       agent = new HttpsProxyAgent(process.env.HTTP_PROXY);
-//     } else {
-//       log.debug("NO_PROXY list detected", process.env.NO_PROXY);
-//       const noProxyList = process.env.NO_PROXY.split(",");
-//       let urltoUrl = new URL(url);
-//       let urlHost = urltoUrl.host.split(":")[0];
-//       log.debug("urlHost:", urlHost);
-//       const skipProxy = noProxyList.some((domain) => {
-//         log.debug("domain:", domain);
-//         log.debug(urlHost.endsWith(domain));
-//         return urlHost.endsWith(domain);
-//       });
-//       log.debug("skipProxy", skipProxy);
-//       if (!skipProxy) {
-//         log.debug("Using Proxy", process.env.HTTP_PROXY);
-//         agent = new HttpsProxyAgent(process.env.HTTP_PROXY);
-//       } else if (skipProxy) {
-//         log.debug("Not specifying proxy. Domain was found in no_proxy list");
-//       }
-//     }
-//   }
+function setHeader(headers, name, headerText) {
+  for (const existing of Object.keys(headers)) {
+    if (existing.toLowerCase() === name.toLowerCase()) {
+      delete headers[existing];
+    }
+  }
+  headers[name] = headerText;
+}
 
-//   let allowUntrustedFlag = false;
+/**
+ * The request body. For a JSON content type it must parse, and is sent as written (not
+ * re-serialised, which would round large numbers); text pasted with raw line breaks inside its
+ * strings parses once the breaks are removed, as the original command did. Any other body is sent
+ * exactly as given.
+ */
+function requestBody(body, contentType) {
+  if (body === undefined) {
+    return undefined;
+  }
+  if (!contentType || !/^application\/([\w.+-]+\+)?json\b/i.test(contentType)) {
+    return body;
+  }
+  for (const candidate of [body.trim(), body.replace(/[\n\r\t]/g, "").trim()]) {
+    try {
+      JSON.parse(candidate);
+      return candidate;
+    } catch {
+      // try the next form
+    }
+  }
+  throw new TaskError(`body is not valid JSON, and the Content-Type is ${contentType}`);
+}
 
-//   if (
-//     (typeof allowUntrustedCerts === "string" &&
-//       allowUntrustedCerts === "true") ||
-//     (typeof allowUntrustedCerts === "boolean" && allowUntrustedCerts)
-//   ) {
-//     log.sys(`Attempting HTTP request allowing untrusted certs`);
-//     allowUntrustedFlag = true;
-//   }
+/** The proxy agent for this URL: HTTP_PROXY, unless NO_PROXY lists the host (or a parent domain of it). */
+function agentFor(url) {
+  const proxy = process.env.HTTP_PROXY;
+  if (!proxy) {
+    return undefined;
+  }
+  const host = url.hostname.toLowerCase();
+  const bypass = (process.env.NO_PROXY ?? "")
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase().replace(/^\*?\./, ""))
+    .filter(Boolean)
+    .some((entry) => entry === "*" || host === entry || host.endsWith(`.${entry}`));
+  if (bypass) {
+    log.debug("NO_PROXY lists the host; no proxy");
+    return undefined;
+  }
+  log.debug("Using Proxy", proxy);
+  return new HttpsProxyAgent(proxy);
+}
 
-//   const reqURL = new URL.URL(url);
-//   let opts = {};
-//   opts.rejectUnauthorized = !allowUntrustedFlag;
-//   opts.agent = agent;
-//   opts.method = method;
-//   opts.headers = {
-//     ...headerObject,
-//   };
-//   const cacheable = new CacheableLookup();
-//   opts.lookup = cacheable.lookup;
+/** The URL for a log line: no credentials, no query string (either may hold a secret). */
+function logUrl(url) {
+  return `${url.origin}${url.pathname}${url.search ? "?…" : ""}`;
+}
 
-//   log.sys("Commencing to execute HTTP call with", reqURL, JSON.stringify(opts));
+/** Sends one request; resolves { status, statusMessage, body (Buffer) }, rejects on a network failure. */
+function send(url, options, body) {
+  return new Promise((resolve, reject) => {
+    const client = url.protocol === "https:" ? https : http;
+    const request = client.request(url, options, (response) => {
+      const chunks = [];
+      response.on("data", (chunk) => chunks.push(chunk));
+      response.on("error", reject);
+      response.on("end", () => resolve({ status: response.statusCode, statusMessage: response.statusMessage, body: Buffer.concat(chunks) }));
+    });
+    request.on("error", reject);
+    if (body !== undefined) {
+      request.write(body);
+    }
+    request.end();
+  });
+}
 
-//   let config = {
-//     SUCCESS_CODES: successcodes.toString(), // Force string
-//     RETRY_CODES: retrycodes.toString(), // Force string
-//     ERROR_CODES: errorcodes.toString(), // Force string
-//     MAX_RETRIES: newretrynumber,
-//     DELAY: newretrydelay,
-//     SYSTEM_MAX_RETRIES: newsystemretrynumber,
-//     SYSTEM_DELAY: newsystemretrydelay,
-//   };
-//   if (!checkIfEmpty(newbody)) {
-//     log.debug("writing request body: \n ", newbody);
-//     config.body = newbody;
-//   }
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-//   new HTTPRetryRequest(config, reqURL, opts)
-//     .then(async (res) => {
-//       log.debug(`statusCode: ${res.statusCode}`);
-//       if (headerObject[HEADERS.CONTENTTYPE]) {
-//         if (
-//           headerObject[HEADERS.CONTENTTYPE] === HEADERVALUES.APPLICATIONJSON
-//         ) {
-//           try {
-//             log.debug(`output: ${res.body.toString()}`);
-//             //make sure non-empty output is a valid JSON,
-//             //if not throw exception
-//             if (
-//               !(res.body === null || res.body.toString().match(/^ *$/) !== null)
-//             ) {
-//               JSON.parse(res.body.toString());
-//             }
-//           } catch (e) {
-//             log.err(e);
-//             process.exit(1);
-//           }
-//         }
-//         if (headerObject[HEADERS.CONTENTTYPE] === HEADERVALUES.APPLICATIONXML) {
-//           // TODO: implement JSDOM or DOMParser(i.e. not yet in nodejs)
-//         }
-//         if (headerObject[HEADERS.CONTENTTYPE] === HEADERVALUES.TEXTHTML) {
-//           // TODO: implement JSDOM or DOMParser(i.e. not yet in nodejs)
-//         }
-//       }
+export async function execute() {
+  await run("HTTP execute", async () => {
+    const {
+      url: urlParam,
+      method: methodParam,
+      header,
+      contentType: contentTypeParam,
+      body: bodyParam,
+      allowUntrustedCerts,
+      outputFilePath,
+      successcodes,
+      errorcodes,
+      retrycodes = "502,503",
+      retrydelay,
+      retrynumber,
+      systemretrynumber,
+      systemretrydelay,
+    } = params;
 
-//       try {
-//         resultstatusCode = parseInt(res.statusCode, 10);
-//       } catch (e) {
-//         resultstatusCode = res.statusCode;
-//       }
-//       await result("statusCode", resultstatusCode);
-//       if (!(res.body === null || res.body.toString().match(/^ *$/) !== null)) {
-//         log.sys("Response Received:", res.body.toString());
-//       }
-//       if (
-//         outputFilePath &&
-//         outputFilePath.length &&
-//         outputFilePath !== '""' &&
-//         outputFilePath !== '" "'
-//       ) {
-//         //https://nodejs.org/docs/latest-v14.x/api/fs.html#fs_fs_writefilesync_file_data_options
-//         fs.writeFileSync(outputFilePath, res.body, {
-//           encoding: "utf8",
-//           mode: 666,
-//           flag: "w",
-//         });
-//         log.debug(
-//           "The task output parameter successfully saved to provided file path."
-//         );
-//       } else {
-//         await result("response", res.body.toString());
-//         log.debug(
-//           "The task output parameter successfully saved to standard response file."
-//         );
-//       }
-//       log.good("Response successfully received!");
-//     })
-//     .catch((err) => {
-//       // log.err("HTTP Promise error:", err, "Cause: ", err.cause);
-//       if (err.statusCode || err.statusMessage || err.body) {
-//         log.err(`HTTP Promise error:`);
-//         log.err(` \n Status Code: ${err.statusCode}`);
-//         log.err(` \n Status Message: ${err.statusMessage}`);
-//         log.err(` \n Response: ${err.body?.toString()}`);
-//       } else {
-//         log.err(`HTTP Promise error:`, err);
-//       }
-//       (async () => {
-//         await (async function (msg) {
-//           await result("statusCode", msg?.statusCode ?? "");
-//           await result("response", msg?.body?.toString() ?? msg.message);
-//         })(err);
-//         process.exit(1);
-//       })();
-//     });
+    let url;
+    try {
+      url = new URL(value(urlParam) ?? "");
+    } catch {
+      throw new TaskError(value(urlParam) ? "url is not a valid URL" : "Missing required param: url");
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new TaskError(`url must be http or https, got ${url.protocol}`);
+    }
+    const method = (value(methodParam) ?? "GET").toUpperCase();
+    if (!METHODS.includes(method)) {
+      throw new TaskError(`method must be one of ${METHODS.join(", ")}, got '${methodParam}'`);
+    }
 
-//   log.debug("Finished HTTP Call File Plugin");
-// }
+    const success = codePattern(successcodes, "successcodes");
+    const error = codePattern(errorcodes, "errorcodes");
+    const retry = codePattern(retrycodes, "retrycodes");
+    const retries = bounded(retrynumber, "retrynumber", 0, 0, 9);
+    const retryDelay = bounded(retrydelay, "retrydelay", 200, 100, 300000);
+    const networkRetries = bounded(systemretrynumber, "systemretrynumber", 3, 1, 9, true);
+    const networkDelay = bounded(systemretrydelay, "systemretrydelay", 5000, 100, 300000, true);
+
+    const headers = parseHeaders(header);
+    const contentType = value(contentTypeParam);
+    if (contentType) {
+      setHeader(headers, "Content-Type", contentType);
+    }
+    const body = requestBody(value(bodyParam) === undefined ? undefined : bodyParam, headerValue(headers, "Content-Type"));
+    if (body !== undefined) {
+      setHeader(headers, "Content-Length", String(Buffer.byteLength(body)));
+    }
+
+    const untrusted = asBoolean(allowUntrustedCerts);
+    if (untrusted && url.protocol === "https:") {
+      log.warn("allowUntrustedCerts is set: the server's certificate is not verified");
+    }
+    const options = { method, headers, agent: agentFor(url), rejectUnauthorized: !untrusted };
+    // Header names only: a value may be a credential.
+    log.sys(`${method} ${logUrl(url)}`, Object.keys(headers).length ? `(headers: ${Object.keys(headers).join(", ")})` : "");
+
+    let response;
+    for (let attempt = 0, networkAttempt = 0; ; ) {
+      try {
+        response = await send(url, options, body);
+      } catch (e) {
+        if (NETWORK_ERRORS.includes(e.code) && networkAttempt < networkRetries) {
+          networkAttempt++;
+          log.warn(`${e.code}: retrying in ${networkDelay} ms (${networkAttempt} of ${networkRetries})`);
+          await sleep(networkDelay);
+          continue;
+        }
+        throw new TaskError(`The request to ${logUrl(url)} failed: ${e.code ? `${e.code} ` : ""}${e.message}`);
+      }
+      const code = String(response.status);
+      if (error?.test(code)) {
+        break;
+      }
+      if (/^2\d\d$/.test(code) || success?.test(code)) {
+        break;
+      }
+      if (retry?.test(code) && attempt < retries) {
+        attempt++;
+        log.warn(`HTTP ${code}: retrying in ${retryDelay} ms (${attempt} of ${retries})`);
+        await sleep(retryDelay);
+        continue;
+      }
+      break;
+    }
+
+    const code = String(response.status);
+    const succeeded = !error?.test(code) && (/^2\d\d$/.test(code) || Boolean(success?.test(code)));
+    const text = response.body.toString("utf8");
+    const callResults = { statusCode: response.status };
+    if (!succeeded) {
+      // The status and, when it fits, the body are still results, for a later task to read.
+      if (Buffer.byteLength(text) <= RESULT_BUDGET) {
+        callResults.response = text;
+      }
+      await results(callResults);
+      const why = error?.test(code) ? "an error code" : retry?.test(code) ? "a retry code, with no retries left" : "not a success code";
+      throw new TaskError(`HTTP ${code} ${response.statusMessage ?? ""} is ${why}${text ? `: ${text.slice(0, ERROR_BODY_LOG)}` : ""}`);
+    }
+
+    log.good(`HTTP ${code}, ${response.body.length} bytes`);
+    log.debug("Response:", text);
+    if (value(outputFilePath)) {
+      // The bytes as received; the response result is then left empty.
+      writeOutputFile(outputFilePath.trim(), response.body);
+    } else if (Buffer.byteLength(text) > RESULT_BUDGET) {
+      await results(callResults);
+      throw new TaskError(`The response is ${Buffer.byteLength(text)} bytes, more than a task result can carry (${RESULT_BUDGET}); set outputFilePath to write it to the workspace instead`);
+    } else {
+      callResults.response = text;
+    }
+    await results(callResults);
+  });
+}
