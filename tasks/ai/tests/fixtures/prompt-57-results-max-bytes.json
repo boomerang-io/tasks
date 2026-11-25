@@ -1,0 +1,51 @@
+{
+  "description": "RESULTS_MAX_BYTES cuts the output result to the room the other results leave, with a warning; outputFile keeps all of it",
+  "command": "prompt",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "Say a lot.",
+    "outputFile": "${WORKSPACE}/out.txt"
+  },
+  "env": {
+    "RESULTS_MAX_BYTES": "300"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word "
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "output": "$contains:word word"
+    },
+    "stdout": [
+      "RESULTS_MAX_BYTES=300",
+      "so the output result is cut there"
+    ],
+    "workspace": {
+      "out.txt": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word "
+    }
+  }
+}

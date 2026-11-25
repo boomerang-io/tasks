@@ -1,0 +1,89 @@
+{
+  "description": "a bash command over bashTimeoutSeconds is killed and the model is told; the run goes on",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "Bump the version and check it.",
+    "workspaceTools": "bash",
+    "workdir": "${WORKSPACE}/repo",
+    "bashTimeoutSeconds": "1"
+  },
+  "workspace": {
+    "repo/a.txt": "a"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_1_0",
+                  "type": "function",
+                  "function": {
+                    "name": "bash",
+                    "arguments": "{\"command\": \"sleep 5; echo too-$((40+2))-late\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-9",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "gave up on it"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "output": "gave up on it"
+    },
+    "requests": [
+      {
+        "index": 1,
+        "bodyContains": [
+          "timed out after 1s and was killed"
+        ],
+        "bodyNotContains": [
+          "too-42-late"
+        ]
+      }
+    ]
+  }
+}

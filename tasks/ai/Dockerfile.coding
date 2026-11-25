@@ -1,0 +1,62 @@
+# syntax=docker/dockerfile:1
+#
+# boomerangio/task-ai-coding: the task-ai commands on a toolchain image, for the ai-coding-agent
+# task, whose agent edits a checkout on the run workspace and runs its build or tests with the bash
+# workspace tool. Built from the repo root like tasks/ai/Dockerfile, from the same tag.
+#
+# A base to extend: a team whose project needs more adds it in its own image,
+#   FROM boomerangio/task-ai-coding:<version>
+#   USER root
+#   RUN apk add --no-cache <packages>
+#   USER 2000
+# and points its ai-coding-agent revision's image at it.
+
+# ---- deps: the same install as tasks/ai/Dockerfile ----
+FROM alpine:3.20.2 AS deps
+
+RUN apk add --no-cache bash coreutils nodejs npm
+
+WORKDIR /workspace
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN npm install -g pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")
+
+COPY packages/core ./packages/core
+COPY tasks/ai ./tasks/ai
+
+RUN pnpm install --prod --frozen-lockfile --filter @boomerang-io/task-ai...
+RUN pnpm --filter @boomerang-io/task-ai deploy --prod /out
+
+# ---- runtime: wolfi with the toolchains ----
+FROM cgr.dev/chainguard/wolfi-base:latest
+
+# Node (also the task's runtime), a JDK with Maven and Gradle, Python, Go, and the tools a build
+# script expects: bash, git, make and a C compiler, curl, and the usual file utilities.
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
+        nodejs npm \
+        openjdk-21 openjdk-21-default-jvm maven gradle \
+        python-3.12 py3.12-pip \
+        go \
+        bash git make gcc glibc-dev curl coreutils findutils grep sed gzip unzip \
+        ca-certificates-bundle
+
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
+    HOME=/home/flow \
+    GOPATH=/home/flow/go \
+    GOCACHE=/home/flow/.cache/go-build \
+    PATH=/home/flow/go/bin:$PATH
+
+WORKDIR /opt/boomerang
+COPY --from=deps /out ./
+
+RUN chmod +x /opt/boomerang/bin/prompt.js /opt/boomerang/bin/agent.js \
+    && ln -s /opt/boomerang/bin/prompt.js /usr/bin/prompt \
+    && ln -s /opt/boomerang/bin/agent.js /usr/bin/agent
+
+# A home the toolchains' caches (~/.m2, ~/.gradle, ~/.npm, the Go cache) can write to.
+RUN addgroup -g 2000 flow \
+    && adduser -D -u 2000 -G flow -h /home/flow flow
+USER 2000
+
+CMD ["agent"]

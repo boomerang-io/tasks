@@ -1,0 +1,189 @@
+{
+  "description": "paths outside workdir are refused, by .., by an absolute path and through a symlink, and the refusal goes back to the model",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "Bump the version and check it.",
+    "workspaceTools": "read,write,bash",
+    "workdir": "${WORKSPACE}/repo"
+  },
+  "workspace": {
+    "outside.txt": "top-secret",
+    "repo/a.txt": "a"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_1_0",
+                  "type": "function",
+                  "function": {
+                    "name": "read",
+                    "arguments": "{\"path\": \"../outside.txt\"}"
+                  }
+                },
+                {
+                  "id": "call_1_1",
+                  "type": "function",
+                  "function": {
+                    "name": "read",
+                    "arguments": "{\"path\": \"/etc/hosts\"}"
+                  }
+                },
+                {
+                  "id": "call_1_2",
+                  "type": "function",
+                  "function": {
+                    "name": "write",
+                    "arguments": "{\"path\": \"../escape.txt\", \"content\": \"x\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-2",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_2_0",
+                  "type": "function",
+                  "function": {
+                    "name": "bash",
+                    "arguments": "{\"command\": \"ln -s .. up\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-3",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_3_0",
+                  "type": "function",
+                  "function": {
+                    "name": "read",
+                    "arguments": "{\"path\": \"up/outside.txt\"}"
+                  }
+                },
+                {
+                  "id": "call_3_1",
+                  "type": "function",
+                  "function": {
+                    "name": "write",
+                    "arguments": "{\"path\": \"up/escape.txt\", \"content\": \"x\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-9",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "done"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "toolCalls": "6"
+    },
+    "requests": [
+      {
+        "index": 1,
+        "bodyContains": [
+          "ERROR: ../outside.txt is outside the working directory",
+          "ERROR: /etc/hosts is outside the working directory",
+          "ERROR: ../escape.txt is outside the working directory"
+        ],
+        "bodyNotContains": [
+          "top-secret"
+        ]
+      },
+      {
+        "index": 3,
+        "bodyContains": [
+          "ERROR: up/outside.txt is outside the working directory",
+          "ERROR: up/escape.txt is outside the working directory"
+        ],
+        "bodyNotContains": [
+          "top-secret"
+        ]
+      }
+    ]
+  }
+}

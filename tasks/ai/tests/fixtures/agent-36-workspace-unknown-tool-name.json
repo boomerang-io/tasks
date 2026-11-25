@@ -1,0 +1,47 @@
+{
+  "description": "workspaceTools naming something other than read, edit, write or bash is INVALID_PARAM",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "Bump the version and check it.",
+    "workspaceTools": "[\"read\",\"rm\"]",
+    "workdir": "${WORKSPACE}/repo"
+  },
+  "workspace": {
+    "repo/a.txt": "a"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-9",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "done"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": "nonzero",
+    "stderr": [
+      "INVALID_PARAM",
+      "workspaceTools names rm"
+    ],
+    "requestCount": 0
+  }
+}

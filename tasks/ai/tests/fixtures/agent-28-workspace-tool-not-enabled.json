@@ -1,0 +1,69 @@
+{
+  "description": "a workspace tool the node did not enable is not offered, and a call to it fails UNKNOWN_TOOL",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "Bump the version and check it.",
+    "workspaceTools": "read",
+    "workdir": "${WORKSPACE}/repo"
+  },
+  "workspace": {
+    "repo/a.txt": "a"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_1_0",
+                  "type": "function",
+                  "function": {
+                    "name": "write",
+                    "arguments": "{\"path\": \"x\", \"content\": \"y\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": "nonzero",
+    "stderr": [
+      "UNKNOWN_TOOL",
+      "'write'"
+    ],
+    "requests": [
+      {
+        "body": {
+          "tools": [
+            {
+              "function": {
+                "name": "read"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

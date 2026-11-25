@@ -1,4 +1,4 @@
-# `task-ai` — the image behind Boomerang Flow's `ai-prompt` and `ai-agent` tasks
+# `task-ai` — the image behind Boomerang Flow's `ai-prompt`, `ai-agent` and `ai-coding-agent` tasks
 
 One image, two commands:
 
@@ -131,7 +131,11 @@ prose is not hunted for; it fails `INVALID_RESPONSE`.
 
 | Param | Default | Meaning |
 | --- | --- | --- |
-| `tools` | none | A JSON array of `{name, description, inputSchema}` tools an executor implements natively. A container has none, so every declared name must be served by an MCP server below, or the task fails `UNKNOWN_TOOL` before the first request |
+| `tools` | none | A JSON array of `{name, description, inputSchema}` tools an executor implements natively. Here every declared name must be an enabled workspace tool or served by an MCP server below, or the task fails `UNKNOWN_TOOL` before the first request |
+| `workspaceTools` | none | Built-in tools to enable, comma-separated or a JSON array, from `read`, `edit`, `write` and `bash`. See [Workspace tools](#workspace-tools) |
+| `workdir` | — | The run-workspace directory the workspace tools are confined to; absolute or relative to `/workspace`. Required when `workspaceTools` is set |
+| `bashTimeoutSeconds` | `300` | Seconds one `bash` command may run (1 to 3600) before its process group is killed; the model is told and the loop goes on |
+| `timeoutSeconds` | `1800` | Seconds the whole loop may run, model calls and tools together (1 to 86400), before it fails `TIMEOUT_EXCEEDED` |
 | `mcpServers` | none | A JSON array of `{name, url}` MCP servers (streamable HTTP). Only those two keys: a credential inside this param is `INVALID_PARAM`, because Flow filters secrets by param type and this is a text param |
 | `mcpTokens` | none | A `password`-typed JSON object `{serverName: bearerToken}` for the servers above |
 | `allowedTools` | all | A JSON array of tool names the model may call |
@@ -151,8 +155,42 @@ and the loop continues; a tool the model names that is not available fails `UNKN
 name served by two servers is `INVALID_PARAM`.
 
 Every turn and every tool call is traced to the task log as one JSON line, `{"trace":"ai-agent",
-"event":"turn"|"tool", …}`, with the running token totals, the tool name and server, the first 500
-characters of the arguments and the result size — not the result itself. The results stay a summary.
+"event":"start"|"turn"|"tool", …}`, with the running token totals, the tool name and server, the
+first 500 characters of the arguments and the result size — not the result itself. The `start`
+line comes first and names the enabled `workspaceTools` and `workdir` and every tool offered, so a
+reviewer sees at once that a step can change files or run commands. The results stay a summary.
+
+### Workspace tools
+
+Built-in tools that act on the files of the run, enabled per node in `workspaceTools`. None is on
+by default; one the node does not list is never offered to the model, and a call to it fails
+`UNKNOWN_TOOL`. They sit beside the MCP tools: `allowedTools`, `maxTurns` and `maxToolCalls`
+apply to both, and a name that is both an enabled workspace tool and MCP-served is `INVALID_PARAM`.
+
+| Tool | Arguments | Does |
+| --- | --- | --- |
+| `read` | `path`, `offset?`, `limit?` | Returns the file's lines, 2000 by default, with a `[lines a-b of n]` note when paged |
+| `edit` | `path`, `old`, `new` | Replaces `old` with `new`; refused unless `old` occurs exactly once |
+| `write` | `path`, `content` | Creates or overwrites the file, creating parent directories |
+| `bash` | `command`, `timeoutSeconds?` | Runs `bash -c` in `workdir`; returns the exit code, stdout and stderr |
+
+- **Confinement:** every path resolves against `workdir` and is refused when its real location
+  (symlinks followed; for a file not yet written, its nearest existing directory) is outside
+  `workdir`. `bash` runs with `workdir` as its working directory.
+- **No credentials in commands:** `bash` gets the container's environment without `PARAM_*`,
+  `OPENAI_*`, the OTLP headers, `RESULTS_PATH` or `RESULTS_MAX_BYTES`, so a command cannot read
+  the endpoint token, the MCP tokens or any other param.
+- **Bounds:** a command over `bashTimeoutSeconds` (or the time left of `timeoutSeconds`) has its
+  process group killed. The loop fails `TIMEOUT_EXCEEDED` at `timeoutSeconds`, a model call
+  in flight included.
+- **What the model gets back:** a tool's failure (a refused path, an edit that does not match, a
+  non-zero exit, a timeout) is the tool's result, prefixed `ERROR:` where it is the tool's own
+  refusal, so the model can adapt; it does not fail the run. A result over 32 KiB keeps its head
+  and tail with the size left out between them.
+
+`ai-agent`'s image has `bash` and busybox's utilities and nothing else. `ai-coding-agent` runs the
+same command on `boomerangio/task-ai-coding`, which adds the toolchains a build needs: see
+[The coding image](#the-coding-image).
 
 ## Results out
 
@@ -169,6 +207,10 @@ characters of the arguments and the result size — not the result itself. The r
 | `cost` | `usage.cost` (OpenRouter), summed | not reported |
 | `turns` | `ai-agent` only: model calls made | — |
 | `toolCalls` | `ai-agent` only: tool calls made | — |
+
+When `RESULTS_MAX_BYTES` is set (Flow 5.0.2 and later set it to the values budget of the declared
+results), `output` is cut to the room the other results leave, at a character boundary, with a
+warning; `outputFile` still receives all of it.
 
 Every declared result is always written, the optional counters as an empty string when the endpoint
 does not report them, so a results parser that filters by declared name always finds them.
@@ -268,6 +310,28 @@ the real commands through their environment exactly as the platform does and sta
 endpoint, the MCP servers and an OTLP receiver in-process, so there is no network and no image build. The fixtures
 are the contract as data: an in-process implementation of `ai-prompt` and `ai-agent` replays the
 same files against itself. [`tests/README.md`](tests/README.md) describes the format.
+
+## The coding image
+
+`boomerangio/task-ai-coding` (`Dockerfile.coding`, built and published from the same `task-ai@`
+tag) is the task-ai commands on Wolfi with node and npm, a JDK 21 with Maven and Gradle, Python
+3.12 with pip, Go, and `bash`, `git`, `make`, `gcc` and the usual file utilities. It runs as uid
+2000 with `HOME=/home/flow`, so the toolchains' caches have somewhere to write. It is about
+1.5 GB, which is why it is its own catalogue entry: only `ai-coding-agent` pays for it.
+
+It is a base to extend. A team whose build needs something else adds it in its own image and
+points its `ai-coding-agent` revision at it:
+
+```dockerfile
+FROM boomerangio/task-ai-coding:2.2.0
+USER root
+RUN apk add --no-cache rust
+USER 2000
+```
+
+Flow dispatches an `ai` revision's image only when it starts with an allowed prefix
+(`flow.dispatcher.ai.image-prefixes`, by default `boomerangio/task-ai`, which covers this image);
+a team's own image needs its prefix added there.
 
 ## Build
 

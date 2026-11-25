@@ -49,8 +49,9 @@ FROM cgr.dev/chainguard/wolfi-base:latest
 
 # nodejs to run the command and ca-certificates-bundle so an HTTPS endpoint verifies - nothing
 # else. `apk upgrade` first: the base tag can lag the package repository.
+# bash runs the agent's bash workspace tool when a node enables it.
 RUN apk upgrade --no-cache \
-    && apk add --no-cache nodejs ca-certificates-bundle
+    && apk add --no-cache nodejs bash ca-certificates-bundle
 
 WORKDIR /opt/boomerang
 COPY --from=deps /out ./

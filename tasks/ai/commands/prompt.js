@@ -7,6 +7,7 @@ import {
   describeRequest,
   failSpan,
   finalizeOutput,
+  fitOutput,
   firstChoice,
   readSampling,
   recordCompletion,
@@ -72,7 +73,8 @@ export async function run() {
   // The model as served, which may be more specific than the one asked for.
   const servedModel = completion.model ?? "";
 
-  await results({ output, finishReason, model: servedModel, ...usage });
+  const others = { finishReason, model: servedModel, ...usage };
+  await results({ output: fitOutput(output, others), ...others });
 
   log.good(
     `completed: ${output.length} chars, ${usage.totalTokens} tokens, finishReason=${finishReason}, model=${servedModel}`,
