@@ -63,7 +63,7 @@ No network and no image build. Needs `node` with this package's dependencies ins
 | `stdout`, `stderr` | substrings that must appear |
 | `stdoutNot`, `stderrNot` | substrings that must not appear (a token, for one) |
 | `requestCount` | how many requests the endpoint received |
-| `requests` | per request (by position, or by `index`): `path`, `authorization`, `contentType` and a partial match on `body` |
+| `requests` | per request (by position, or by `index`): `path`, `authorization`, `contentType`, a partial match on `body`, and `bodyContains` / `bodyNotContains`, substrings the body's JSON text must or must not hold (what a tool handed back to the model, for one) |
 | `mcpCallCount`, `mcpCalls` | tool calls the MCP servers received: `{ server, tool, arguments }` |
 | `workspace` | files that must exist on the workspace afterwards, with their exact contents |
 | `spanCount` | how many spans the OTLP receiver got |

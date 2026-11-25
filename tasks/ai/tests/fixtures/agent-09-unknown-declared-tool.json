@@ -70,7 +70,7 @@
     "stderr": [
       "UNKNOWN_TOOL",
       "'archie.searchSections'",
-      "no MCP server serves"
+      "neither an enabled workspace tool nor served by an MCP server"
     ]
   }
 }

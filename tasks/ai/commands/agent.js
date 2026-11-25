@@ -19,6 +19,7 @@ import {
   describeRequest,
   failSpan,
   finalizeOutput,
+  fitOutput,
   firstChoice,
   readSampling,
   recordCompletion,
@@ -27,6 +28,7 @@ import {
 } from "../lib/completion.js";
 import { connectMcpServers, validateMcpServers, validateMcpTokens } from "../lib/mcp.js";
 import { KIND, captureContent, rootSpan } from "../lib/telemetry.js";
+import { callWorkspaceTool, readWorkspaceParams, workspaceDefinitions } from "../lib/workspace.js";
 
 /**
  * `ai-agent`: a tool-calling loop against an OpenAI-compatible endpoint.
@@ -36,9 +38,13 @@ import { KIND, captureContent, rootSpan } from "../lib/telemetry.js";
  * tool, and that answer is the output, shaped exactly as ai-prompt shapes its reply. Every turn and
  * every tool call is traced to the task log as one JSON line, while the results stay a summary.
  *
- * `tools` declares tools an executor implements natively. A container has no native tools, so each
- * declared name must be served by an MCP server here, or the task fails UNKNOWN_TOOL before the
+ * `tools` declares tools an executor implements natively. Here each declared name must be an
+ * enabled workspace tool or served by an MCP server, or the task fails UNKNOWN_TOOL before the
  * first call rather than when the model first reaches for it.
+ *
+ * `workspaceTools` enables the built-in read, edit, write and bash tools (lib/workspace.js), each
+ * confined to `workdir`. None is enabled by default. They sit beside the MCP tools: allowedTools,
+ * maxTurns and maxToolCalls apply to both, and `timeoutSeconds` bounds the whole loop.
  *
  * With an OTLP endpoint configured, the run is an `invoke_agent` span under the run's TRACEPARENT,
  * holding the MCP `initialize` and `tools/list` spans, a `chat` span per turn, and an
@@ -46,6 +52,8 @@ import { KIND, captureContent, rootSpan } from "../lib/telemetry.js";
  */
 
 const DEFAULT_MAX_TURNS = 10;
+const DEFAULT_TIMEOUT_SECONDS = 1800;
+const MAX_TIMEOUT_SECONDS = 86400;
 
 // How much of a tool call's arguments to put in the trace. They are model-written, not secrets,
 // but a whole document pasted into one would otherwise fill the log.
@@ -80,32 +88,57 @@ function readAgentParams(input) {
   const maxToolCalls = isSet(input.maxToolCalls) ? asInteger("maxToolCalls", input.maxToolCalls) : undefined;
   const parallelToolCalls = isSet(input.parallelToolCalls) ? asBoolean("parallelToolCalls", input.parallelToolCalls) : true;
   const reinforcement = isSet(input.toolResultReinforcement) ? input.toolResultReinforcement : undefined;
-  return { tools, servers, tokens, allowedTools, toolContext, maxTurns, maxToolCalls, parallelToolCalls, reinforcement };
+  const timeoutSeconds = isSet(input.timeoutSeconds) ? asInteger("timeoutSeconds", input.timeoutSeconds) : DEFAULT_TIMEOUT_SECONDS;
+  if (timeoutSeconds < 1 || timeoutSeconds > MAX_TIMEOUT_SECONDS) {
+    throw new TaskError("INVALID_PARAM", `timeoutSeconds must be from 1 to ${MAX_TIMEOUT_SECONDS}, got ${timeoutSeconds}`);
+  }
+  const workspace = readWorkspaceParams(input);
+  return { tools, servers, tokens, allowedTools, toolContext, maxTurns, maxToolCalls, parallelToolCalls, reinforcement, timeoutSeconds, workspace };
 }
 
-/** The tool names the model may call: served by MCP, declared names resolved, allowedTools applied. */
+/**
+ * The tool names the model may call: the enabled workspace tools and the MCP-served ones, declared
+ * names resolved, allowedTools applied to both.
+ */
 function selectTools(registry, agent) {
-  const served = [...registry.tools.keys()];
-  const unserved = agent.tools.map((t) => t.name).filter((name) => !registry.tools.has(name));
+  const builtIn = agent.workspace.tools;
+  const clash = builtIn.filter((name) => registry.tools.has(name));
+  if (clash.length) {
+    throw new TaskError(
+      "INVALID_PARAM",
+      `${clash.map((n) => `'${n}'`).join(", ")} is both an enabled workspace tool and served by MCP server '${registry.tools.get(clash[0]).server.name}'`,
+    );
+  }
+  const available = [...builtIn, ...registry.tools.keys()];
+  const unserved = agent.tools.map((t) => t.name).filter((name) => !available.includes(name));
   if (unserved.length) {
     throw new TaskError(
       "UNKNOWN_TOOL",
-      `tools declares ${unserved.map((n) => `'${n}'`).join(", ")}, which no MCP server serves; ` +
-        "a container run has no natively implemented tools",
+      `tools declares ${unserved.map((n) => `'${n}'`).join(", ")}, which is neither an enabled workspace tool nor served by an MCP server`,
     );
   }
   if (!agent.allowedTools) {
-    return served;
+    return available;
   }
-  const unknown = agent.allowedTools.filter((name) => !registry.tools.has(name));
+  const unknown = agent.allowedTools.filter((name) => !available.includes(name));
   if (unknown.length) {
-    throw new TaskError("UNKNOWN_TOOL", `allowedTools names ${unknown.map((n) => `'${n}'`).join(", ")}, which no MCP server serves`);
+    throw new TaskError(
+      "UNKNOWN_TOOL",
+      `allowedTools names ${unknown.map((n) => `'${n}'`).join(", ")}, which is neither an enabled workspace tool nor served by an MCP server`,
+    );
   }
-  return served.filter((name) => agent.allowedTools.includes(name));
+  return available.filter((name) => agent.allowedTools.includes(name));
+}
+
+/** The definitions the model is offered: workspace tools first, then the MCP ones. */
+function toolDefinitions(registry, agent, selected) {
+  const builtIn = selected.filter((name) => agent.workspace.tools.includes(name));
+  const served = selected.filter((name) => !agent.workspace.tools.includes(name));
+  return [...workspaceDefinitions(builtIn), ...registry.definitions(served)];
 }
 
 /** Executes one of the model's tool calls under an execute_tool span and returns its tool message. */
-async function executeToolCall(registry, selected, call, turn, parent) {
+async function executeToolCall(registry, agent, selected, call, turn, parent, deadline) {
   const name = call.function?.name ?? "";
   const span = parent.child(`execute_tool ${name}`, {
     kind: KIND.INTERNAL,
@@ -122,7 +155,7 @@ async function executeToolCall(registry, selected, call, turn, parent) {
     if (!selected.includes(name)) {
       throw new TaskError("UNKNOWN_TOOL", `the model called '${name}', which is not an available tool`);
     }
-    const message = await runToolCall(registry, call, name, turn, span);
+    const message = await runToolCall(registry, agent, call, name, turn, span, deadline);
     if (captureContent()) {
       span.set({ "gen_ai.tool.call.result": message.content });
     }
@@ -135,7 +168,7 @@ async function executeToolCall(registry, selected, call, turn, parent) {
   }
 }
 
-async function runToolCall(registry, call, name, turn, span) {
+async function runToolCall(registry, agent, call, name, turn, span, deadline) {
   let args;
   try {
     args = call.function.arguments ? JSON.parse(call.function.arguments) : {};
@@ -147,10 +180,15 @@ async function runToolCall(registry, call, name, turn, span) {
   }
   const started = Date.now();
   let outcome;
-  try {
-    outcome = await registry.call(name, args, span);
-  } catch (e) {
-    outcome = { server: registry.tools.get(name).server.name, text: `ERROR: ${e.message}`, isError: true };
+  if (agent.workspace.tools.includes(name)) {
+    const remaining = Math.ceil((deadline - Date.now()) / 1000);
+    outcome = { server: "workspace", ...(await callWorkspaceTool(agent.workspace, name, args, remaining)) };
+  } else {
+    try {
+      outcome = await registry.call(name, args, span);
+    } catch (e) {
+      outcome = { server: registry.tools.get(name).server.name, text: `ERROR: ${e.message}`, isError: true };
+    }
   }
   if (outcome.isError) {
     span.fail("tool_error", "the tool reported an error");
@@ -167,6 +205,25 @@ async function runToolCall(registry, call, name, turn, span) {
   });
   const content = outcome.isError && !outcome.text.startsWith("ERROR") ? `ERROR: ${outcome.text}` : outcome.text;
   return { role: "tool", tool_call_id: call.id, content };
+}
+
+function timeoutError(agent, turns) {
+  return new TaskError("TIMEOUT_EXCEEDED", `the agent was still working after timeoutSeconds=${agent.timeoutSeconds} (${turns} turn(s))`);
+}
+
+function overDeadline(deadline, agent, turns) {
+  if (Date.now() >= deadline) {
+    throw timeoutError(agent, turns);
+  }
+}
+
+/** The model call, or TIMEOUT_EXCEEDED when the loop's wall-clock limit falls first. */
+function beforeDeadline(promise, deadline, agent, turns) {
+  let timer;
+  const limit = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(timeoutError(agent, turns)), Math.max(0, deadline - Date.now()));
+  });
+  return Promise.race([promise, limit]).finally(() => clearTimeout(timer));
 }
 
 export async function run() {
@@ -198,11 +255,26 @@ export async function run() {
 }
 
 async function runAgent({ input, model, connection, sampling, agent, messages, agentSpan }) {
+  const started = Date.now();
   const registry = await connectMcpServers(agent.servers, agent.tokens, agentSpan);
   try {
     const selected = selectTools(registry, agent);
-    const tools = registry.definitions(selected);
+    const tools = toolDefinitions(registry, agent, selected);
     log.sys(`agent: ${selected.length} tool(s) available${selected.length ? `: ${selected.join(", ")}` : ""}, maxTurns=${agent.maxTurns}`);
+    // First on the trace, so a reviewer sees at once whether this step can change files or run commands.
+    const workspaceEnabled = agent.workspace.tools.filter((name) => selected.includes(name));
+    trace({
+      event: "start",
+      workspaceTools: workspaceEnabled,
+      ...(workspaceEnabled.length ? { workdir: agent.workspace.workdir } : {}),
+      tools: selected,
+      maxTurns: agent.maxTurns,
+      timeoutSeconds: agent.timeoutSeconds,
+    });
+    if (workspaceEnabled.includes("bash")) {
+      log.warn(`agent: bash is enabled: the model can run commands in ${agent.workspace.workdir}`);
+    }
+    const deadline = started + agent.timeoutSeconds * 1000;
 
     let usage = EMPTY_USAGE;
     let turns = 0;
@@ -212,6 +284,7 @@ async function runAgent({ input, model, connection, sampling, agent, messages, a
     let finalContent;
 
     while (turns < agent.maxTurns) {
+      overDeadline(deadline, agent, turns);
       const body = buildRequestBody({ model, messages, sampling, tools, parallelToolCalls: agent.parallelToolCalls });
       if (turns === 0) {
         log.sys(describeRequest(connection.url, body, sampling));
@@ -219,7 +292,7 @@ async function runAgent({ input, model, connection, sampling, agent, messages, a
       turns += 1;
       const turnSpan = agentSpan.child(...chatSpan(connection, body, sampling, { "flow.agent.turn": turns }));
       try {
-        completion = await createCompletion(connection, body);
+        completion = await beforeDeadline(createCompletion(connection, body), deadline, agent, turns);
         recordCompletion(turnSpan, completion);
         choice = firstChoice(completion);
       } catch (e) {
@@ -262,9 +335,9 @@ async function runAgent({ input, model, connection, sampling, agent, messages, a
       // message per call, in the order the model made them.
       messages.push(choice.message);
       const toolMessages = agent.parallelToolCalls
-        ? await Promise.all(calls.map((call) => executeToolCall(registry, selected, call, turns, agentSpan)))
+        ? await Promise.all(calls.map((call) => executeToolCall(registry, agent, selected, call, turns, agentSpan, deadline)))
         : await calls.reduce(
-            (chain, call) => chain.then(async (done) => [...done, await executeToolCall(registry, selected, call, turns, agentSpan)]),
+            (chain, call) => chain.then(async (done) => [...done, await executeToolCall(registry, agent, selected, call, turns, agentSpan, deadline)]),
             Promise.resolve([]),
           );
       messages.push(...toolMessages);
@@ -289,7 +362,8 @@ async function runAgent({ input, model, connection, sampling, agent, messages, a
     const finishReason = choice.finish_reason ?? "";
     const servedModel = completion.model ?? "";
     agentSpan.set({ "gen_ai.response.model": servedModel, "flow.agent.turns": turns, "flow.agent.tool_calls": toolCalls });
-    await results({ output, finishReason, model: servedModel, ...usage, turns, toolCalls });
+    const others = { finishReason, model: servedModel, ...usage, turns, toolCalls };
+    await results({ output: fitOutput(output, others), ...others });
 
     log.good(
       `completed: ${output.length} chars, ${turns} turn(s), ${toolCalls} tool call(s), ${usage.totalTokens} tokens, ` +

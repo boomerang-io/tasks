@@ -1,0 +1,129 @@
+{
+  "description": "workspace tools sit beside MCP-served tools, workspace tools first",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "Bump the version and check it.",
+    "workspaceTools": "read",
+    "workdir": "${WORKSPACE}/repo",
+    "mcpServers": "[{\"name\": \"tools\", \"url\": \"${MCP:tools}\"}]"
+  },
+  "workspace": {
+    "repo/a.txt": "a"
+  },
+  "mcp": {
+    "tools": {
+      "tools": [
+        {
+          "name": "weather",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              }
+            }
+          },
+          "result": "sunny"
+        }
+      ]
+    }
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_1_0",
+                  "type": "function",
+                  "function": {
+                    "name": "read",
+                    "arguments": "{\"path\": \"a.txt\"}"
+                  }
+                },
+                {
+                  "id": "call_1_1",
+                  "type": "function",
+                  "function": {
+                    "name": "weather",
+                    "arguments": "{\"city\": \"Sydney\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-9",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "done"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "toolCalls": "2"
+    },
+    "mcpCallCount": 1,
+    "requests": [
+      {
+        "body": {
+          "tools": [
+            {
+              "function": {
+                "name": "read"
+              }
+            },
+            {
+              "function": {
+                "name": "weather"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "bodyContains": [
+          "sunny"
+        ]
+      }
+    ]
+  }
+}

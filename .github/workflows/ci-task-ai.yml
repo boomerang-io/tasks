@@ -25,3 +25,16 @@ jobs:
     secrets:
       docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
       docker_password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  # The same commands on the toolchain image for ai-coding-agent, built from the same tag. Its
+  # toolchains (JDK, Maven, Gradle, Go, Python) bring their own advisories, so it gates on critical.
+  call-template-coding:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: 'task-ai-coding'
+      dockerfile_path: 'tasks/ai/Dockerfile.coding'
+      context_path: '.'
+      fail_on_severity: 'critical'
+    secrets:
+      docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_password: ${{ secrets.DOCKERHUB_TOKEN }}

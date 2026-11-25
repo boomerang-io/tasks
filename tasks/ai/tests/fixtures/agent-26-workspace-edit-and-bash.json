@@ -1,0 +1,199 @@
+{
+  "description": "read, edit and bash work on the files of workdir: the model reads a file, edits it, runs a check, and the change is left on the workspace",
+  "command": "agent",
+  "params": {
+    "endpoint": "${PROVIDER}",
+    "token": "sk-test-do-not-log-me",
+    "model": "gpt-4o-mini",
+    "prompt": "Bump the version and check it.",
+    "workspaceTools": "read, edit, bash",
+    "workdir": "${WORKSPACE}/repo"
+  },
+  "workspace": {
+    "repo/VERSION": "1.0.0\n"
+  },
+  "provider": [
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-1",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_1_0",
+                  "type": "function",
+                  "function": {
+                    "name": "read",
+                    "arguments": "{\"path\": \"VERSION\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-2",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_2_0",
+                  "type": "function",
+                  "function": {
+                    "name": "edit",
+                    "arguments": "{\"path\": \"VERSION\", \"old\": \"1.0.0\", \"new\": \"1.1.0\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-3",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_3_0",
+                  "type": "function",
+                  "function": {
+                    "name": "bash",
+                    "arguments": "{\"command\": \"test \\\"$(cat VERSION)\\\" = 1.1.0 && echo CHECK-PASSED\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "chatcmpl-9",
+        "model": "gpt-4o-mini-2024-07-18",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "bumped to 1.1.0"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15
+        }
+      }
+    }
+  ],
+  "expect": {
+    "exit": 0,
+    "results": {
+      "output": "bumped to 1.1.0",
+      "turns": "4",
+      "toolCalls": "3"
+    },
+    "workspace": {
+      "repo/VERSION": "1.1.0\n"
+    },
+    "stdout": [
+      "\"event\":\"start\",\"workspaceTools\":[\"read\",\"edit\",\"bash\"]",
+      "\"tool\":\"bash\",\"server\":\"workspace\"",
+      "bash is enabled"
+    ],
+    "stdoutNot": [
+      "sk-test-do-not-log-me"
+    ],
+    "requests": [
+      {
+        "body": {
+          "tools": [
+            {
+              "type": "function",
+              "function": {
+                "name": "read"
+              }
+            },
+            {
+              "type": "function",
+              "function": {
+                "name": "edit"
+              }
+            },
+            {
+              "type": "function",
+              "function": {
+                "name": "bash"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "bodyContains": [
+          "1.0.0\\n"
+        ]
+      },
+      {
+        "index": 2,
+        "bodyContains": [
+          "edited VERSION"
+        ]
+      },
+      {
+        "index": 3,
+        "bodyContains": [
+          "exit code 0",
+          "CHECK-PASSED"
+        ]
+      }
+    ]
+  }
+}

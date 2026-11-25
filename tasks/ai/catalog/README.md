@@ -13,6 +13,7 @@ written against and `spec.command` names the command in that image.
 | --- | --- | --- |
 | `ai-prompt.json` | `prompt` | one completion |
 | `ai-agent.json` | `agent` | a tool-calling loop to a final answer |
+| `ai-coding-agent.json` | `agent` | the same loop on the toolchain image `task-ai-coding`, for an agent that edits a checkout and runs its build |
 
 Each file carries every revision of its task. A revision is never edited once Flow has seeded it:
 a change to the contract is a new revision pinned to the image tag that serves it, and a workflow
@@ -22,6 +23,7 @@ pinned to an older revision keeps running against that revision's image.
 | --- | --- | --- |
 | 1 | `task-ai@2.0.0` | the family's first contract |
 | 2 | `task-ai@2.1.0` | `images`, `imageDetail`, `maxImageBytes`; content parts in `messages` documented; OpenTelemetry spans when the executor configures an OTLP endpoint (environment only, no param) |
+| 3 | `task-ai@2.2.0` | `ai-agent`: `workspaceTools`, `workdir`, `bashTimeoutSeconds`, `timeoutSeconds`; `output` fits `RESULTS_MAX_BYTES`. `ai-coding-agent` revision 1 is the same contract on `boomerangio/task-ai-coding:2.2.0` |
 
 These two replace the original seeded `ai` task. `task-ai@2.0.0` is a major release because the
 `prompt` command drops the 1.x contract rather than extending it: `endpoint` and `token` are

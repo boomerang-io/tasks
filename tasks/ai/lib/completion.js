@@ -227,6 +227,30 @@ export function stripThink(text) {
  * code fence are stripped, the rest must parse as JSON and, with jsonSchema, match it; the bare
  * JSON is what goes downstream. Under text the content goes through as it came.
  */
+/**
+ * The output as a result: whole, unless RESULTS_MAX_BYTES (the values budget Flow sets, from 5.0.2)
+ * leaves it less room than it needs beside the other results. Then it is cut at a character
+ * boundary with a warning; outputFile, when set, still holds all of it.
+ */
+export function fitOutput(output, others, budget = process.env.RESULTS_MAX_BYTES) {
+  const max = Number.parseInt(budget ?? "", 10);
+  if (!Number.isInteger(max) || max <= 0) {
+    return output;
+  }
+  const used = Object.values(others).reduce((sum, v) => sum + Buffer.byteLength(String(v ?? "")), 0);
+  const room = Math.max(0, max - used);
+  if (Buffer.byteLength(output) <= room) {
+    return output;
+  }
+  // toString drops a multi-byte character the byte cut splits.
+  const cut = Buffer.from(output).subarray(0, room).toString("utf8").replace(/\uFFFD$/, "");
+  log.warn(
+    `output is ${Buffer.byteLength(output)} bytes; RESULTS_MAX_BYTES=${max} leaves it ${room}, so the output result is cut there. ` +
+      "Set outputFile to keep all of it.",
+  );
+  return cut;
+}
+
 export function finalizeOutput(content, sampling) {
   if (sampling.responseFormat !== "json") {
     return content;

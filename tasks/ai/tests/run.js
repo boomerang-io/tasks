@@ -190,8 +190,12 @@ async function runCase(file) {
     problems.push(`requests: expected ${expect.requestCount}, got ${provider.requests.length}`);
   }
   (expect.requests ?? []).forEach((e, i) => {
-    const { index = i, ...expected } = e;
+    const { index = i, bodyContains = [], bodyNotContains = [], ...expected } = e;
     matches(expected, provider.requests[index], `requests[${index}]`, problems);
+    // Substrings of the request body as JSON text: what a tool handed back to the model, for one.
+    const text = JSON.stringify(provider.requests[index]?.body ?? null);
+    for (const s of bodyContains) if (!text.includes(s)) problems.push(`requests[${index}]: body expected to contain ${JSON.stringify(s)}`);
+    for (const s of bodyNotContains) if (text.includes(s)) problems.push(`requests[${index}]: body expected NOT to contain ${JSON.stringify(s)}`);
   });
   const mcpCalls = Object.values(mcp).flatMap((m) => m.calls);
   if (expect.mcpCallCount !== undefined && mcpCalls.length !== expect.mcpCallCount) {
