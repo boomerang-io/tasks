@@ -276,13 +276,31 @@
             "name": "outputFile"
           },
           {
-            "description": "Any of: read, edit, write, bash (comma-separated, any case)",
-            "label": "Workspace tools",
-            "type": "text",
+            "description": "",
+            "label": "Workspace Tools",
+            "type": "multiselect",
+            "options": [
+              {
+                "key": "read",
+                "value": "Read"
+              },
+              {
+                "key": "edit",
+                "value": "Edit"
+              },
+              {
+                "key": "write",
+                "value": "Write"
+              },
+              {
+                "key": "bash",
+                "value": "Bash"
+              }
+            ],
             "required": false,
-            "placeholder": "read, edit, write, bash",
-            "helpertext": "Built-in tools to give the model, comma-separated, from read, edit, write and bash. Blank gives none. Each acts only inside Working directory; bash runs commands there, without the run's credentials in its environment. A tool not listed is never offered, and a call to it fails UNKNOWN_TOOL.",
-            "defaultValue": "",
+            "placeholder": "",
+            "helpertext": "Built-in tools to give the model. None by default. Each acts only inside Working directory; Bash runs commands there, without the run's credentials in its environment. A tool not chosen is never offered, and a call to it fails UNKNOWN_TOOL.",
+            "defaultValue": [],
             "readOnly": false,
             "name": "workspaceTools"
           },

@@ -132,7 +132,7 @@ prose is not hunted for; it fails `INVALID_RESPONSE`.
 | Param | Default | Meaning |
 | --- | --- | --- |
 | `tools` | none | A JSON array of `{name, description, inputSchema}` tools an executor implements natively. Here every declared name must be an enabled workspace tool or served by an MCP server below, or the task fails `UNKNOWN_TOOL` before the first request |
-| `workspaceTools` | none | Built-in tools to enable, comma-separated or a JSON array, from `read`, `edit`, `write` and `bash`. See [Workspace tools](#workspace-tools) |
+| `workspaceTools` | none | Built-in tools to enable, from `read`, `edit`, `write` and `bash`: a `multiselect` in the catalogue, which reaches the container as a JSON array (`["read","edit"]`, `[]` for none); comma-separated text is accepted too. See [Workspace tools](#workspace-tools) |
 | `workdir` | — | The run-workspace directory the workspace tools are confined to; absolute or relative to `/workspace`. Required when `workspaceTools` is set |
 | `bashTimeoutSeconds` | `300` | Seconds one `bash` command may run (1 to 3600) before its process group is killed; the model is told and the loop goes on |
 | `timeoutSeconds` | `1800` | Seconds the whole loop may run, model calls and tools together (1 to 86400), before it fails `TIMEOUT_EXCEEDED` |
